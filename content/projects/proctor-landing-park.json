@@ -47,7 +47,7 @@
    "file": "proctor-landing-park/master-plan.webp",
    "caption": "Master plan, full corridor with Paddy Creek ecological core",
    "drawing_type": "Master plan",
-   "scale": "[confirm scale]",
+   "scale": "1\" = 300'-0\"",
    "software": "AutoCAD + Illustrator"
   },
   {
@@ -59,22 +59,22 @@
   },
   {
    "file": "proctor-landing-park/circulation.webp",
-   "caption": "Circulation and program systems diagram",
+   "caption": "Diagram evolution — bridge, creek, loop, and anchors",
    "drawing_type": "Diagram",
    "scale": "NTS",
    "software": "Illustrator"
   },
   {
-   "file": "proctor-landing-park/axon-1.webp",
-   "caption": "Axonometric view 1, ecological core and boardwalk sequence",
-   "drawing_type": "Axonometric",
+   "file": "proctor-landing-park/eco-core.webp",
+   "caption": "Ecological core — restoration and gravitational draw",
+   "drawing_type": "Plan + perspective",
    "scale": "NTS",
    "software": "Rhino + Illustrator"
   },
   {
-   "file": "proctor-landing-park/axon-2.webp",
-   "caption": "Axonometric view 2, recreation fields and arrival",
-   "drawing_type": "Axonometric",
+   "file": "proctor-landing-park/civic-details.webp",
+   "caption": "Civic and active design details — entry, splash pad, courts",
+   "drawing_type": "Design details",
    "scale": "NTS",
    "software": "Rhino + Illustrator"
   },
@@ -93,8 +93,8 @@
    "software": "Rhino + AutoCAD"
   },
   {
-   "file": "proctor-landing-park/render.webp",
-   "caption": "Wetland basin at the boardwalk, seasonal high water",
+   "file": "proctor-landing-park/central-planting.webp",
+   "caption": "Central planting — contemplative core, perspective sequence",
    "drawing_type": "Rendering",
    "scale": "NTS",
    "software": "Author-edited; AI-assisted imagery"

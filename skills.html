@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skills — Understory Designs</title>
+<meta name="description" content="Software and skills: AutoCAD, Rhino, ArcGIS Pro, Adobe suite, 3D printing and laser cutting, planting design, GIS analysis, and estimating.">
+<link rel="canonical" href="https://www.understorydesignstudio.com/skills.html">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-name">Understory Designs</span>
+      <span class="brand-sub">Landscape Architecture</span>
+    </a>
+    <div class="navlinks">
+      <a href="work.html">Work</a>
+      <a href="skills.html" class="active">Skills</a>
+      <a href="about.html">About</a>
+      <a href="resume.html">Résumé</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap" style="padding-top:56px; padding-bottom:88px">
+  <div class="kicker" style="margin-bottom:14px">Toolkit</div>
+  <h1 class="h-serif" style="font-weight:400; font-size:clamp(38px,5.5vw,60px); line-height:1.05; margin:0 0 10px">Skills</h1>
+  <p class="mono-note" style="margin:0 0 40px">From site analysis to fabrication — the tools behind the drawings.</p>
+
+  <div id="skills" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:40px 48px"></div>
+</div>
+
+<footer class="foot-slim">
+  <div class="foot-slim-inner">
+    <span class="foot-brand">Understory Designs</span>
+    <div style="display:flex; gap:24px; flex-wrap:wrap; font-size:14px">
+      <a href="mailto:mreindl118@gmail.com">mreindl118@gmail.com</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  var LABELS = {
+    drafting: 'Drafting + Production',
+    modeling: 'Modeling',
+    fabrication: 'Fabrication + Models',
+    visualization: 'Visualization',
+    analysis: 'Analysis + Estimating'
+  };
+  US.loadSite().then(function (site) {
+    var skills = site.skills || {};
+    document.getElementById('skills').innerHTML = Object.keys(skills).map(function (cat) {
+      var rows = skills[cat].map(function (s) {
+        var parts = US.clean(s.level).split('—');
+        var grade = parts[0].trim();
+        var detail = (parts[1] || '').trim();
+        return '<div style="border-bottom:1px solid var(--line-soft); padding:10px 0">' +
+          '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:16px">' +
+          '<span class="skill-tool">' + US.esc(s.tool) + '</span>' +
+          '<span style="font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:' + (grade.toLowerCase() === 'fluent' ? 'var(--pine)' : 'var(--faint)') + '; flex-shrink:0">' + US.esc(grade) + '</span></div>' +
+          (detail ? '<div class="skill-level" style="margin-top:3px">' + US.esc(detail) + '</div>' : '') +
+          '</div>';
+      }).join('');
+      return '<div class="rule-section"><div class="rule-label">' + US.esc(LABELS[cat] || cat) + '</div>' + rows + '</div>';
+    }).join('');
+  }).catch(function (e) { console.warn('skills failed', e); });
+})();
+</script>
+</body>
+</html>

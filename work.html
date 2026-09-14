@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work — Understory Designs</title>
+<meta name="description" content="Landscape architecture projects by Matthew Reindl: civic and ecological parks, campus landscapes, water infrastructure, and public-realm design.">
+<link rel="canonical" href="https://www.understorydesignstudio.com/work.html">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-name">Understory Designs</span>
+      <span class="brand-sub">Landscape Architecture</span>
+    </a>
+    <div class="navlinks">
+      <a href="work.html" class="active">Work</a>
+      <a href="skills.html">Skills</a>
+      <a href="about.html">About</a>
+      <a href="resume.html">Résumé</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap" style="padding-top:56px; padding-bottom:88px">
+  <div class="kicker" style="margin-bottom:14px">All Projects</div>
+  <h1 class="h-serif" style="font-weight:400; font-size:clamp(38px,5.5vw,60px); line-height:1.05; margin:0 0 10px">Work</h1>
+  <p class="mono-note" id="count" style="margin:0 0 30px"></p>
+
+  <div class="chips" id="chips"></div>
+
+  <div id="grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:36px 28px"></div>
+</div>
+
+<footer class="foot-slim">
+  <div class="foot-slim-inner">
+    <span class="foot-brand">Understory Designs</span>
+    <div style="display:flex; gap:24px; flex-wrap:wrap; font-size:14px">
+      <a href="mailto:mreindl118@gmail.com">mreindl118@gmail.com</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  var all = [], active = 'All';
+
+  function render() {
+    var types = [];
+    all.forEach(function (p) { if (types.indexOf(p.type) < 0) types.push(p.type); });
+    document.getElementById('chips').innerHTML = ['All'].concat(types).map(function (t) {
+      return '<button class="chip' + (t === active ? ' active' : '') + '" data-type="' + US.esc(t) + '">' + US.esc(t) + '</button>';
+    }).join('');
+    var filtered = active === 'All' ? all : all.filter(function (p) { return p.type === active; });
+    document.getElementById('grid').innerHTML = filtered.map(function (p) { return US.projectCard(p, true); }).join('');
+    document.getElementById('count').textContent = all.length + ' projects, newest first.';
+  }
+
+  document.getElementById('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    active = b.getAttribute('data-type');
+    render();
+  });
+
+  US.loadProjects().then(function (projects) {
+    all = projects;
+    render();
+  }).catch(function (e) { console.warn('projects failed', e); });
+})();
+</script>
+</body>
+</html>

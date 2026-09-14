@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /*.dc.html$
+Disallow: /support.js
+Disallow: /doc-page.js
+Sitemap: https://www.understorydesignstudio.com/sitemap.xml

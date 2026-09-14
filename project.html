@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project — Understory Designs</title>
+<meta name="description" content="Landscape architecture project detail — drawings, analysis, and design development by Matthew Reindl.">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-name">Understory Designs</span>
+      <span class="brand-sub">Landscape Architecture</span>
+    </a>
+    <div class="navlinks">
+      <a href="work.html" class="active">Work</a>
+      <a href="skills.html">Skills</a>
+      <a href="about.html">About</a>
+      <a href="resume.html">Résumé</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap" style="padding-top:36px; padding-bottom:88px">
+  <a href="work.html" style="font-family:var(--mono); font-size:12px; text-decoration:none">← All work</a>
+
+  <div style="margin-top:28px">
+    <div class="kicker">Project</div>
+    <h1 id="p-title" class="h-serif" style="font-weight:400; font-size:clamp(32px,5vw,50px); margin:12px 0 0; line-height:1.08; max-width:24ch; text-wrap:pretty"></h1>
+  </div>
+  <div class="meta-grid" id="p-meta"></div>
+
+  <!-- Master plan full spread (Proctor only) -->
+  <div id="mp-section" hidden>
+    <div class="rule-section" style="margin-top:40px">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap">
+        <div>
+          <div class="kicker" style="font-size:11px; letter-spacing:.12em">Drawing 01 · Full spread</div>
+          <div class="h-serif" style="font-size:24px; margin-top:4px">Master plan</div>
+          <div style="font-size:14px; color:var(--muted); margin-top:4px">Seamless composite of booklet pp. 24–25 — no page fold.</div>
+        </div>
+        <button id="mp-open" class="vbtn vbtn-wide" style="min-height:44px; border-color:var(--pine); color:var(--pine)">Fullscreen ⤢</button>
+      </div>
+      <div id="mp-inline" style="margin-top:16px; cursor:zoom-in" title="Click for fullscreen zoom">
+        <img src="content/projects/proctor-landing-park/master-plan.webp" alt="Proctor Landing Park master plan — seamless composite of booklet pages 24–25" style="width:100%; height:auto; display:block; border:1px solid var(--line); background:#FFF" loading="lazy">
+      </div>
+    </div>
+
+    <h2 id="booklet" class="h-serif" style="font-size:26px; margin:48px 0 14px">Capstone Booklet</h2>
+    <div class="viewer">
+      <div class="vbar">
+        <div class="vgroup">
+          <button class="vbtn" id="bk-prev" title="Previous spread">←</button>
+          <button class="vbtn" id="bk-next" title="Next spread">→</button>
+          <span class="vcount">PP. <span id="bk-num">··</span> / <span id="bk-count">··</span></span>
+        </div>
+        <div class="vgroup">
+          <span class="vstatus" id="bk-status"></span>
+          <button class="vbtn" id="bk-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
+          <button class="vbtn" id="bk-zin" title="Zoom in"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
+          <button class="vbtn vbtn-wide" id="bk-fit">FIT</button>
+        </div>
+      </div>
+      <div class="vstage tall" id="bk-stage">
+        <div class="vsurface" id="bk-surface"></div>
+        <div class="voverlay" id="bk-intro">
+          <span style="font-size:15px; max-width:46ch">The full capstone booklet — 45 pages, presented as two-page spreads.</span>
+          <button class="btn" id="bk-start">Open booklet</button>
+        </div>
+        <div class="voverlay" id="bk-loading" hidden style="pointer-events:none">
+          <span class="note">Rendering…</span>
+        </div>
+        <div class="voverlay" id="bk-failedbox" hidden>
+          <span class="note" id="bk-failmsg">Could not render this spread</span>
+          <button class="btn" id="bk-retry" style="min-height:44px">Retry</button>
+        </div>
+        <div class="vbadge" id="bk-badge">100% · drag to pan</div>
+      </div>
+      <div class="vscrub">
+        <span class="end">01</span>
+        <input type="range" id="bk-scrub" min="0" max="0" value="0">
+        <span class="end">45</span>
+      </div>
+      <div class="vfoot">
+        <span>Proctor Landing Park — MLA capstone booklet</span>
+        <span class="vmeta">LAND 7007 · MLA Capstone</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawing set -->
+  <h2 class="h-serif" style="font-size:26px; margin:48px 0 14px">Drawing set</h2>
+  <div class="viewer">
+    <div class="vbar">
+      <div class="vgroup">
+        <button class="vbtn" id="dw-prev" title="Previous drawing">←</button>
+        <button class="vbtn" id="dw-next" title="Next drawing">→</button>
+        <span class="vcount">DWG <span id="dw-num">01</span> / <span id="dw-count">··</span></span>
+      </div>
+      <div class="vgroup">
+        <button class="vbtn" id="dw-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
+        <button class="vbtn" id="dw-zin" title="Zoom in"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
+        <button class="vbtn vbtn-wide" id="dw-fit">FIT</button>
+      </div>
+    </div>
+    <div class="vstage" id="dw-stage">
+      <div class="vsurface" id="dw-surface"></div>
+      <div class="vbadge" id="dw-badge">100% · drag to pan</div>
+    </div>
+    <div class="vfoot">
+      <span id="dw-caption"></span>
+      <span class="vmeta" id="dw-meta"></span>
+    </div>
+  </div>
+  <div class="thumbs" id="dw-thumbs"></div>
+
+  <p id="p-summary" style="font-size:18px; line-height:1.65; max-width:66ch; margin:48px 0 0; text-wrap:pretty"></p>
+  <div id="p-sections"></div>
+
+  <div style="display:flex; justify-content:space-between; gap:16px; margin-top:56px; border-top:1px solid var(--line); padding-top:20px; flex-wrap:wrap">
+    <a id="p-prev" href="#" style="text-decoration:none; font-size:14px"><span style="font-family:var(--mono); font-size:11px; color:var(--faint); display:block">← Previous</span><span id="p-prev-title"></span></a>
+    <a id="p-next" href="#" style="text-decoration:none; font-size:14px; text-align:right"><span style="font-family:var(--mono); font-size:11px; color:var(--faint); display:block">Next →</span><span id="p-next-title"></span></a>
+  </div>
+</div>
+
+<!-- Master plan lightbox -->
+<div class="lightbox" id="mp-box" hidden>
+  <div class="lightbox-panel">
+    <div class="vbar">
+      <span class="lightbox-title">Master plan — Proctor Landing Park</span>
+      <div class="vgroup">
+        <button class="vbtn" id="mp-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
+        <button class="vbtn" id="mp-zin" title="Zoom in"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
+        <button class="vbtn vbtn-wide" id="mp-fit">FIT</button>
+        <button class="vbtn vbtn-close" id="mp-close" title="Close">✕</button>
+      </div>
+    </div>
+    <div class="vstage" id="mp-stage">
+      <div class="vsurface" style="inset:18px" id="mp-surface">
+        <img src="content/projects/proctor-landing-park/master-plan.webp" alt="Proctor Landing Park master plan">
+      </div>
+      <div class="vbadge" id="mp-badge">100% · drag to pan</div>
+    </div>
+    <div class="vfoot" style="padding:10px 14px">
+      <span style="font-size:13.5px">Stitched from booklet pp. 24–25 · overlap aligned automatically</span>
+      <span class="vmeta">Composite · 1&quot; = 300'-0&quot;</span>
+    </div>
+  </div>
+</div>
+
+<footer class="foot-slim">
+  <div class="foot-slim-inner">
+    <span class="foot-brand">Understory Designs</span>
+    <div style="display:flex; gap:24px; flex-wrap:wrap; font-size:14px">
+      <a href="mailto:mreindl118@gmail.com">mreindl118@gmail.com</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js"></script>
+<script src="assets/js/project.js"></script>
+</body>
+</html>
