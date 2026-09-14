@@ -1,0 +1,48 @@
+{
+ "slug": "ulsan-hhi-campus",
+ "title": "Hyundai Heavy Industries Campus Addition",
+ "location": "Ulsan, South Korea",
+ "year": 2025,
+ "yearLabel": "MLA studio [CONFIRM year]",
+ "sortKey": 90,
+ "type": "Campus",
+ "scale": "Industrial campus addition",
+ "role": "MLA studio — circular economies [CONFIRM role/team]",
+ "collaborators": "[CONFIRM team]",
+ "software": [
+  "Rhino",
+  "Illustrator",
+  "Photoshop"
+ ],
+ "cover": "ulsan-hhi-campus/cover.webp",
+ "summary": "A circular-economies studio project: a campus addition for Hyundai Heavy Industries in Ulsan that treats material flows, reuse, and landscape systems as one design problem at industrial scale. [CONFIRM project description]",
+ "sections": [
+  {
+   "heading": "Brief",
+   "body": "[CONFIRM] Campus-scale systems thinking in an international industrial context — a different design problem from the civic floodplain work."
+  }
+ ],
+ "images": [
+  {
+   "file": "ulsan-hhi-campus/plan.webp",
+   "caption": "Campus plan with material-flow systems",
+   "drawing_type": "Site plan",
+   "scale": "[confirm scale]",
+   "software": "Rhino + Illustrator"
+  },
+  {
+   "file": "ulsan-hhi-campus/systems.webp",
+   "caption": "Circular-economy systems diagram",
+   "drawing_type": "Diagram",
+   "scale": "NTS",
+   "software": "Illustrator"
+  },
+  {
+   "file": "ulsan-hhi-campus/section.webp",
+   "caption": "Campus edge section",
+   "drawing_type": "Section",
+   "scale": "[confirm scale]",
+   "software": "Rhino + Illustrator"
+  }
+ ]
+}

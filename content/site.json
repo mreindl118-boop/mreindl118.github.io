@@ -1,0 +1,86 @@
+{
+ "name": "Matthew Reindl",
+ "practice": "Understory Designs",
+ "discipline": "Landscape Architecture",
+ "positioning": "Emerging landscape architect · MLA, University of Cincinnati DAAP, 2026",
+ "tagline": "Ecological public landscapes where flood resilience, recreation, planting systems, and clear visual storytelling work together.",
+ "location": "Cincinnati, OH",
+ "email": "mreindl118@gmail.com",
+ "phone": "513-375-1042",
+ "linkedin": "https://www.linkedin.com/in/matthew-reindl-95b80425a/",
+ "bio": "Matthew Reindl is a Cincinnati-based emerging landscape architect and 2026 Master of Landscape Architecture graduate of the University of Cincinnati DAAP. His work centers on public and civic landscapes where public health, ecology, water, recreation, and community use operate as connected systems. Alongside graduate work, he has supported the Cincinnati Recreation Commission with GIS park inventory, site assessment, planting design and procurement, and implementation support. Understory Designs is named for the vegetation layer beneath the canopy: the quiet stratum that does most of the ecological work.",
+ "recognition": [
+  "DAAPWorks 2026 Director's Choice Gallery — Proctor Landing Park",
+  "SEGD Honor Award recognition — Proctor Landing Park [CONFIRM exact award wording]",
+  "Selected for Design Museum of Chicago DAAPworks exhibition"
+ ],
+ "experience": [
+  {
+   "org": "Cincinnati Recreation Commission",
+   "role": "Public-space design support",
+   "detail": "GIS-ready park and property inventory; playground and site assessments across CRC parks; planting design, nursery sourcing, and procurement for Lincoln and Ryan Sports Complex; public-facing recreation graphics."
+  },
+  {
+   "org": "University of Cincinnati DAAP",
+   "role": "Master of Landscape Architecture, 2026",
+   "detail": "Capstone: Proctor Landing Park (LAND 7007). Studios spanning civic, campus, stormwater, and transit work."
+  }
+ ],
+ "lastUpdated": "August 2026",
+ "skills": {
+  "drafting": [
+   {
+    "tool": "AutoCAD",
+    "level": "Fluent — plan production, planting plans, schedules, DWG/DXF workflows"
+   },
+   {
+    "tool": "Illustrator / InDesign",
+    "level": "Fluent — diagrams, boards, booklet and portfolio production"
+   }
+  ],
+  "modeling": [
+   {
+    "tool": "Rhino",
+    "level": "Fluent — 3D site and terrain modeling, contours, grading studies"
+   },
+   {
+    "tool": "SketchUp",
+    "level": "Working — massing and design development"
+   },
+   {
+    "tool": "Blender",
+    "level": "Working — scene assembly"
+   }
+  ],
+  "fabrication": [
+   {
+    "tool": "3D printing + laser cutting",
+    "level": "Fluent — preparing digital models for fabrication"
+   },
+   {
+    "tool": "Physical models",
+    "level": "Fluent — hand-built and digitally fabricated site models"
+   }
+  ],
+  "visualization": [
+   {
+    "tool": "Photoshop",
+    "level": "Fluent — plan rendering, post-production, transparent linework exports"
+   },
+   {
+    "tool": "Lumion / Enscape / Twinmotion",
+    "level": "Working — real-time visualization"
+   }
+  ],
+  "analysis": [
+   {
+    "tool": "ArcGIS Pro / QGIS",
+    "level": "Fluent — inventory, floodplain and soils analysis, GeoPackage delivery, source reconciliation"
+   },
+   {
+    "tool": "Spreadsheet estimating",
+    "level": "Fluent — planting schedules, quantities, nursery pricing, takeoffs"
+   }
+  ]
+ }
+}

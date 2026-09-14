@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#F3F0E8; color:#26292B; font-family:'IBM Plex Sans',sans-serif; -webkit-font-smoothing:antialiased; }
+a { color:#2E4A3B; text-decoration-thickness:1px; text-underline-offset:3px; }
+a:hover { color:#B4603A; }
+</style>
+</helmet>
+<div data-screen-label="Work">
+  <nav style="position:sticky; top:0; z-index:5; background:rgba(243,240,232,.96); backdrop-filter:blur(6px); border-bottom:1px solid #D9D3C2">
+    <div style="max-width:1240px; margin:0 auto; padding:12px 32px; display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap">
+      <a href="Home.dc.html" style="text-decoration:none; color:#26292B; display:flex; flex-direction:column; gap:2px">
+        <span style="font-family:'Source Serif 4',serif; font-weight:700; font-size:19px; letter-spacing:-.01em">Understory Designs</span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:#5A5F58">Landscape Architecture</span>
+      </a>
+      <div style="display:flex; gap:26px; flex-wrap:wrap; align-items:center">
+        <a href="Work.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid #B4603A">Work</a>
+        <a href="Process.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid transparent" style-hover="color:#B4603A">Process</a>
+        <a href="Models and Drawings.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid transparent" style-hover="color:#B4603A">Models</a>
+        <a href="Skills.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid transparent" style-hover="color:#B4603A">Skills</a>
+        <a href="About.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid transparent" style-hover="color:#B4603A">About</a>
+        <a href="Contact.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid transparent" style-hover="color:#B4603A">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <div style="max-width:1240px; margin:0 auto; padding:56px 32px 88px">
+    <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#2E4A3B; margin-bottom:14px">All Projects</div>
+    <h1 style="font-family:'Source Serif 4',serif; font-weight:400; font-size:clamp(38px,5.5vw,60px); letter-spacing:-.015em; line-height:1.05; margin:0 0 10px">Work</h1>
+    <p style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#5A5F58; margin:0 0 30px">{{ count }} projects, newest first. Generated from content files.</p>
+
+    <div style="display:flex; gap:22px; flex-wrap:wrap; margin-bottom:34px; border-bottom:1px solid #D9D3C2">
+      <sc-for list="{{ chips }}" as="c" hint-placeholder-count="4">
+        <button onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</button>
+      </sc-for>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:36px 28px">
+      <sc-for list="{{ filtered }}" as="p" hint-placeholder-count="3">
+        <a href="{{ p.href }}" style="text-decoration:none; color:#26292B; display:block; border-top:1px solid #26292B; padding-top:16px" style-hover="color:#B4603A">
+          <div style="aspect-ratio:4/3; background:repeating-linear-gradient(45deg,#E9E4D6 0 8px,#F0ECDF 8px 16px); border:1px solid #D9D3C2; box-sizing:border-box; display:flex; align-items:center; justify-content:center"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5A5F58; text-align:center; padding:0 12px">{{ p.coverLabel }}</span></div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#2E4A3B; margin-top:14px">{{ p.type }} · {{ p.scale }}</div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-top:6px"><span style="font-family:'Source Serif 4',serif; font-weight:600; font-size:21px">{{ p.title }}</span><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58">{{ p.year }}</span></div>
+          <div style="font-size:14px; color:#5A5F58; margin-top:4px">{{ p.location }} · {{ p.role }}</div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8A8676; margin-top:8px">{{ p.softwareLine }}</div>
+        </a>
+      </sc-for>
+    </div>
+  </div>
+
+  <footer style="background:#26292B; color:#F3F0E8; padding:32px 24px 24px">
+    <div style="max-width:1120px; margin:0 auto; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:baseline">
+      <span style="font-family:'Source Serif 4',serif; font-weight:600; font-size:18px">Understory Designs</span>
+      <div style="display:flex; gap:24px; flex-wrap:wrap; font-size:14px">
+        <a href="mailto:mreindl118@gmail.com" style="color:#F3F0E8" style-hover="color:#B7C95A">mreindl118@gmail.com</a>
+        <a href="Contact.dc.html" style="color:#F3F0E8" style-hover="color:#B7C95A">Contact</a>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { all: [], active: "All" };
+  async componentDidMount() {
+    try {
+      const slugs = await fetch('content/projects/index.json').then(r => r.json());
+      const projects = await Promise.all(slugs.map(s => fetch('content/projects/' + s + '.json').then(r => r.json())));
+      projects.sort((a, b) => (b.sortKey || b.year) - (a.sortKey || a.year));
+      this.setState({ all: projects });
+    } catch (e) { console.warn('content load failed', e); }
+  }
+  renderVals() {
+    const { all, active } = this.state;
+    const types = [...new Set(all.map(p => p.type))];
+    const chipBase = { display:'inline-flex', alignItems:'center', minHeight:'40px', padding:'0 2px', fontSize:'12px', fontFamily:"'IBM Plex Mono',monospace", letterSpacing:'.1em', textTransform:'uppercase', cursor:'pointer', background:'transparent', border:'none', borderBottom:'2px solid transparent' };
+    const chips = ["All", ...types].map(label => ({
+      label,
+      style: label === active
+        ? { ...chipBase, color:'#26292B', borderBottom:'2px solid #B4603A' }
+        : { ...chipBase, color:'#5A5F58' },
+      pick: () => this.setState({ active: label })
+    }));
+    const filtered = (active === "All" ? all : all.filter(p => p.type === active)).map(p => ({
+      title: p.title, year: (p.yearLabel || String(p.year)).split(' [')[0], location: p.location, role: p.role.split('—')[0].trim(),
+      type: p.type, scale: p.scale, href: 'Project.dc.html?slug=' + p.slug,
+      softwareLine: p.software.join(' · '),
+      coverLabel: 'cover — ' + (p.images[0] ? p.images[0].drawing_type.toLowerCase() : 'drawing')
+    }));
+    return { chips, filtered, count: all.length };
+  }
+}
+</script>
+</body>
+</html>

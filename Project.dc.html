@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#F3F0E8; color:#26292B; font-family:'IBM Plex Sans',sans-serif; -webkit-font-smoothing:antialiased; }
+a { color:#2E4A3B; text-decoration-thickness:1px; text-underline-offset:3px; }
+a:hover { color:#B4603A; }
+</style>
+</helmet>
+<div data-screen-label="Project detail">
+  <nav style="position:sticky; top:0; z-index:5; background:rgba(243,240,232,.96); backdrop-filter:blur(6px); border-bottom:1px solid #D9D3C2">
+    <div style="max-width:1240px; margin:0 auto; padding:12px 32px; display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap">
+      <a href="Home.dc.html" style="text-decoration:none; color:#26292B; display:flex; flex-direction:column; gap:2px">
+        <span style="font-family:'Source Serif 4',serif; font-weight:700; font-size:19px; letter-spacing:-.01em">Understory Designs</span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:#5A5F58">Landscape Architecture</span>
+      </a>
+      <div style="display:flex; gap:26px; flex-wrap:wrap; align-items:center">
+        <a href="Work.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid #B4603A">Work</a>
+        <a href="Process.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid transparent" style-hover="color:#B4603A">Process</a>
+        <a href="Models and Drawings.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid transparent" style-hover="color:#B4603A">Models</a>
+        <a href="Skills.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid transparent" style-hover="color:#B4603A">Skills</a>
+        <a href="About.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid transparent" style-hover="color:#B4603A">About</a>
+        <a href="Contact.dc.html" style="text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#26292B; padding:10px 1px; border-bottom:2px solid transparent" style-hover="color:#B4603A">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <div style="max-width:1240px; margin:0 auto; padding:36px 32px 88px">
+    <a href="Work.dc.html" style="font-family:'IBM Plex Mono',monospace; font-size:12px; text-decoration:none">← All work</a>
+
+    <div style="margin-top:28px">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#2E4A3B">Project</div>
+      <h1 style="font-family:'Source Serif 4',serif; font-weight:400; font-size:clamp(32px,5vw,50px); margin:12px 0 0; letter-spacing:-.015em; line-height:1.08; max-width:24ch; text-wrap:pretty">{{ title }}</h1>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(165px,1fr)); gap:16px 28px; margin-top:30px; border-top:1px solid #26292B; padding-top:16px">
+      <div><div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8A8676">Location</div><div style="font-size:14px; margin-top:5px">{{ location }}</div></div>
+      <div><div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8A8676">Year</div><div style="font-size:14px; margin-top:5px">{{ year }}</div></div>
+      <div><div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8A8676">Role</div><div style="font-size:14px; margin-top:5px">{{ role }}</div></div>
+      <div><div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8A8676">Scope / scale</div><div style="font-size:14px; margin-top:5px">{{ scale }}</div></div>
+      <div><div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8A8676">Collaborators</div><div style="font-size:14px; margin-top:5px">{{ collaborators }}</div></div>
+      <div><div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8A8676">Software</div><div style="font-family:'IBM Plex Mono',monospace; font-size:12px; margin-top:5px">{{ softwareLine }}</div></div>
+    </div>
+
+    <sc-if value="{{ hasBooklet }}" hint-placeholder-val="{{ false }}">
+      <div style="border-top:1px solid #26292B; margin-top:40px; padding-top:16px">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#2E4A3B">Drawing 01 · Full spread</div>
+            <div style="font-family:'Source Serif 4',serif; font-weight:600; font-size:24px; margin-top:4px">Master plan</div>
+            <div style="font-size:14px; color:#5A5F58; margin-top:4px">Seamless composite of booklet pp. 24–25 — no page fold.</div>
+          </div>
+          <button onClick="{{ mpOpenFn }}" style="min-height:44px; padding:0 20px; border:1px solid #2E4A3B; color:#2E4A3B; background:transparent; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase">Fullscreen ⤢</button>
+        </div>
+        <div onClick="{{ mpOpenFn }}" style="margin-top:16px; cursor:zoom-in; margin-left:calc(50% - 50vw + 20px); margin-right:calc(50% - 50vw + 20px)" title="Click for fullscreen zoom">
+          <sc-if value="{{ mpHasImg }}" hint-placeholder-val="{{ false }}">{{ mpInline }}</sc-if>
+          <sc-if value="{{ mpPending }}" hint-placeholder-val="{{ true }}">
+            <div style="aspect-ratio:21/8; background:repeating-linear-gradient(45deg,#E9E4D6 0 8px,#F0ECDF 8px 16px); border:1px solid #D9D3C2; box-sizing:border-box; display:flex; align-items:center; justify-content:center">
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; background:rgba(250,248,242,.9); padding:6px 10px">{{ mpStatusText }}</span>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ hasBooklet }}" hint-placeholder-val="{{ false }}">
+      <h2 id="booklet" style="font-family:'Source Serif 4',serif; font-weight:600; font-size:26px; margin:48px 0 14px">Capstone Booklet</h2>
+      <div style="border:1px solid #26292B; background:#FAF8F2">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid #D9D3C2; flex-wrap:wrap">
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+            <button onClick="{{ bkPrev }}" style="width:40px; height:40px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; font-size:15px; font-family:inherit">←</button>
+            <button onClick="{{ bkNext }}" style="width:40px; height:40px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; font-size:15px; font-family:inherit">→</button>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; margin-left:6px">PP. {{ bkNum }} / {{ bkCount }}</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8A8676">{{ bkStatus }}</span>
+            <button onClick="{{ bkZoomOut }}" title="Zoom out" style="width:40px; height:40px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
+            <button onClick="{{ bkZoomIn }}" title="Zoom in" style="width:40px; height:40px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
+            <button onClick="{{ bkZoomFit }}" style="height:40px; padding:0 14px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px">FIT</button>
+          </div>
+        </div>
+        <div onPointerDown="{{ bkDragStart }}" onPointerMove="{{ bkDragMove }}" onPointerUp="{{ bkDragEnd }}" onPointerLeave="{{ bkDragEnd }}" style="height:min(68vh,640px); overflow:hidden; position:relative; cursor:grab; touch-action:none; background:#F3F0E8">
+          <div style="{{ bkSurfStyle }}">
+            <sc-if value="{{ bkHasPage }}" hint-placeholder-val="{{ false }}">{{ bkImg }}</sc-if>
+          </div>
+          <sc-if value="{{ bkNotStarted }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; padding:28px 16px">
+              <span style="font-size:15px; max-width:46ch">The full capstone booklet — 45 pages, presented as two-page spreads.</span>
+              <button onClick="{{ bkStart }}" style="min-height:46px; padding:0 26px; background:#2E4A3B; color:#F3F0E8; border:none; cursor:pointer; font-family:'IBM Plex Sans',sans-serif; font-weight:500; font-size:15px">Open booklet</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ bkLoading }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; background:rgba(250,248,242,.85); padding:6px 10px">Rendering…</span></div>
+          </sc-if>
+          <sc-if value="{{ bkFailed }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px">
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; background:rgba(250,248,242,.9); padding:6px 10px">{{ bkStatus }}</span>
+              <button onClick="{{ bkRetry }}" style="min-height:44px; padding:0 22px; background:#2E4A3B; color:#F3F0E8; border:none; cursor:pointer; font-family:'IBM Plex Sans',sans-serif; font-weight:500; font-size:14px">Retry</button>
+            </div>
+          </sc-if>
+          <div style="position:absolute; right:12px; bottom:10px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8A8676; background:rgba(250,248,242,.85); padding:3px 8px">{{ bkZoomPct }} · drag to pan</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px; padding:10px 14px; border-top:1px solid #D9D3C2">
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8A8676; flex-shrink:0">01</span>
+          <input type="range" min="0" max="{{ bkMaxUnit }}" value="{{ bkIdx }}" onInput="{{ bkScrub }}" style="flex:1; accent-color:#2E4A3B; cursor:pointer; margin:0; min-width:120px">
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8A8676; flex-shrink:0">45</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; gap:16px; padding:12px 14px; border-top:1px solid #26292B; flex-wrap:wrap">
+          <span style="font-size:14px">Proctor Landing Park — MLA capstone booklet</span>
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#5A5F58">LAND 7007 · MLA Capstone</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <h2 style="font-family:'Source Serif 4',serif; font-weight:600; font-size:26px; margin:48px 0 14px">Drawing set</h2>
+    <div style="border:1px solid #26292B; background:#FAF8F2">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid #D9D3C2; flex-wrap:wrap">
+        <div style="display:flex; gap:8px; align-items:center">
+          <button onClick="{{ prevImg }}" style="width:40px; height:40px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; font-size:15px; font-family:inherit">←</button>
+          <button onClick="{{ nextImg }}" style="width:40px; height:40px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; font-size:15px; font-family:inherit">→</button>
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; margin-left:6px">DWG {{ imgNum }} / {{ imgCount }}</span>
+        </div>
+        <div style="display:flex; gap:8px">
+          <button onClick="{{ zoomOut }}" title="Zoom out" style="width:40px; height:40px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
+          <button onClick="{{ zoomIn }}" title="Zoom in" style="width:40px; height:40px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
+          <button onClick="{{ zoomFit }}" style="height:40px; padding:0 14px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px">FIT</button>
+        </div>
+      </div>
+      <div onPointerDown="{{ dragStart }}" onPointerMove="{{ dragMove }}" onPointerUp="{{ dragEnd }}" onPointerLeave="{{ dragEnd }}" style="height:min(62vh,560px); overflow:hidden; position:relative; cursor:grab; touch-action:none; background:#F3F0E8">
+        <div style="{{ surfStyle }}">
+          <div style="width:900px; max-width:86vw; aspect-ratio:16/10; background:repeating-linear-gradient(45deg,#EDE9DB 0 8px,#F3F0E8 8px 16px); border:1px solid #C7C1AE; display:flex; align-items:center; justify-content:center">
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; text-align:center; padding:0 20px">{{ imgLabel }}</span>
+          </div>
+        </div>
+        <div style="position:absolute; right:12px; bottom:10px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8A8676; background:rgba(250,248,242,.85); padding:3px 8px">{{ zoomPct }} · drag to pan</div>
+      </div>
+      <div style="display:flex; justify-content:space-between; gap:16px; padding:12px 14px; border-top:1px solid #26292B; flex-wrap:wrap">
+        <span style="font-size:14px">{{ imgCaption }}</span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#5A5F58">{{ imgMeta }}</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px">
+      <sc-for list="{{ thumbs }}" as="t" hint-placeholder-count="4">
+        <button onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button>
+      </sc-for>
+    </div>
+
+    <p style="font-size:18px; line-height:1.65; max-width:66ch; margin:48px 0 0; text-wrap:pretty">{{ summary }}</p>
+
+    <sc-for list="{{ sections }}" as="s" hint-placeholder-count="3">
+      <div style="margin-top:32px; max-width:68ch">
+        <h2 style="font-family:'Source Serif 4',serif; font-weight:600; font-size:24px; margin:0 0 8px">{{ s.heading }}</h2>
+        <p style="font-size:16px; line-height:1.65; margin:0; text-wrap:pretty">{{ s.body }}</p>
+        <sc-if value="{{ s.isRecog }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; gap:34px; align-items:center; flex-wrap:wrap; margin-top:20px; border-top:1px solid #D9D3C2; padding-top:18px">
+            {{ recogLogosEl }}
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+
+    <div style="display:flex; justify-content:space-between; gap:16px; margin-top:56px; border-top:1px solid #D9D3C2; padding-top:20px; flex-wrap:wrap">
+      <a href="{{ prevHref }}" style="text-decoration:none; font-size:14px"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8A8676; display:block">← Previous</span>{{ prevTitle }}</a>
+      <a href="{{ nextHref }}" style="text-decoration:none; font-size:14px; text-align:right"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8A8676; display:block">Next →</span>{{ nextTitle }}</a>
+    </div>
+  </div>
+
+  <sc-if value="{{ mpOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; inset:0; z-index:60; background:rgba(38,41,43,.6); display:flex; align-items:center; justify-content:center; padding:18px">
+      <div style="position:relative; background:#F3F0E8; border:1px solid #26292B; width:min(1560px,97vw); height:93vh; display:flex; flex-direction:column">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid #D9D3C2; flex-wrap:wrap">
+          <span style="font-family:'Source Serif 4',serif; font-weight:600; font-size:18px">Master plan — Proctor Landing Park</span>
+          <div style="display:flex; gap:8px; align-items:center">
+            <button onClick="{{ mpZoomOut }}" title="Zoom out" style="width:40px; height:40px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
+            <button onClick="{{ mpZoomIn }}" title="Zoom in" style="width:40px; height:40px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
+            <button onClick="{{ mpZoomFit }}" style="height:40px; padding:0 14px; border:1px solid #C7C1AE; background:transparent; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px">FIT</button>
+            <button onClick="{{ mpClose }}" title="Close" style="width:40px; height:40px; border:1px solid #26292B; background:#26292B; color:#F3F0E8; cursor:pointer; font-size:16px; font-family:inherit">✕</button>
+          </div>
+        </div>
+        <div ref="{{ mpStageRef }}" onPointerDown="{{ mpDragStart }}" onPointerMove="{{ mpDragMove }}" onPointerUp="{{ mpDragEnd }}" onPointerLeave="{{ mpDragEnd }}" style="flex:1; overflow:hidden; position:relative; cursor:grab; touch-action:none; background:#F3F0E8">
+          <div style="{{ mpSurfStyle }}">
+            <sc-if value="{{ mpHasImg }}" hint-placeholder-val="{{ false }}">{{ mpImg }}</sc-if>
+          </div>
+          <sc-if value="{{ mpStatus }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; background:rgba(250,248,242,.9); padding:6px 10px">{{ mpStatus }}</span></div>
+          </sc-if>
+          <div style="position:absolute; right:12px; bottom:10px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8A8676; background:rgba(250,248,242,.85); padding:3px 8px">{{ mpZoomPct }} · drag to pan</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; gap:16px; padding:10px 14px; border-top:1px solid #26292B; flex-wrap:wrap">
+          <span style="font-size:13.5px">Stitched from booklet pp. 24–25 · overlap aligned automatically</span>
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#5A5F58">Composite · rendered in browser</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <footer style="background:#26292B; color:#F3F0E8; padding:32px 24px 24px">
+    <div style="max-width:1120px; margin:0 auto; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:baseline">
+      <span style="font-family:'Source Serif 4',serif; font-weight:600; font-size:18px">Understory Designs</span>
+      <div style="display:flex; gap:24px; flex-wrap:wrap; font-size:14px">
+        <a href="mailto:mreindl118@gmail.com" style="color:#F3F0E8" style-hover="color:#B7C95A">mreindl118@gmail.com</a>
+        <a href="Contact.dc.html" style="color:#F3F0E8" style-hover="color:#B7C95A">Contact</a>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { p: null, order: [], idx: 0, zoom: 1, tx: 0, ty: 0, drag: null, bk: { started: false, pages: [], total: 0, idx: 0, status: '', zoom: 1, tx: 0, ty: 0, drag: null, stitched: null, stitching: false }, mp: { open: false, src: null, status: '', zoom: 1, tx: 0, ty: 0, drag: null } };
+  // bk.failed drives the Retry UI; recovery attempts capped at 2 per session
+  setBk(patch) { this.setState(s => ({ bk: { ...s.bk, ...patch } })); }
+  bkFiles() { return Array.from({ length: 11 }, (_, i) => 'assets/booklet/Part_' + String(i + 1).padStart(2, '0') + '.pdf'); }
+  bkUnits() {
+    const t = this.state.bk.total || 0;
+    const u = [];
+    if (t) { u.push([0]); for (let i = 1; i < t; i += 2) u.push(i + 1 < t ? [i, i + 1] : [i]); }
+    return u;
+  }
+  async bkLib() {
+    if (this._pdfjs) return this._pdfjs;
+    const lib = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.min.mjs');
+    try {
+      const ws = await fetch('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.worker.min.mjs').then(r => r.text());
+      lib.GlobalWorkerOptions.workerPort = new Worker(URL.createObjectURL(new Blob([ws], { type: 'text/javascript' })), { type: 'module' });
+    } catch (e) { lib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.worker.min.mjs'; }
+    this._pdfjs = lib;
+    return lib;
+  }
+  bkStart() {
+    if (!this._bkAll) this._bkAll = this.bkLoadAll();
+    return this._bkAll;
+  }
+  async bkLoadAll() {
+    this.setBk({ started: true, status: 'Loading part 1 / 11' });
+    try {
+      const lib = await this.bkLib();
+      this._bkDocs = [];
+      for (let i = 0; i < 11; i++) {
+        this.bkEnqueue(async () => {
+          this.setBk({ status: 'Loading part ' + (i + 1) + ' / 11' });
+          const buf = await fetch(this.bkFiles()[i]).then(r => { if (!r.ok) throw new Error('missing part ' + (i + 1)); return r.arrayBuffer(); });
+          const doc = await lib.getDocument({ data: buf }).promise;
+          this._bkDocs.push(doc);
+          this.setBk({ total: this._bkDocs.reduce((s, d) => s + d.numPages, 0) });
+          if (i === 10) { this._bkLoadDone = true; this.setBk({ status: '' }); }
+          this.bkEnsureCurrent();
+        });
+      }
+    } catch (e) { console.warn('booklet load failed', e && (e.message || e.name || e)); this.setBk({ status: 'Could not load booklet' }); }
+  }
+  mkAwards() {
+    const h = React.createElement;
+    const mono = "'IBM Plex Mono',monospace";
+    const row = (src, name, desc, lh) => h('div', { key: name, style: { display: 'flex', alignItems: 'center', gap: '16px' } },
+      h('div', { style: { width: '150px', display: 'flex', justifyContent: 'center', flexShrink: 0 } },
+        h('img', { src, alt: name, style: { height: lh, width: 'auto', maxWidth: '150px', objectFit: 'contain', mixBlendMode: 'multiply', display: 'block' } })),
+      h('div', null,
+        h('div', { style: { fontWeight: 600, fontSize: '14.5px' } }, name),
+        h('div', { style: { fontSize: '12.5px', color: '#5A5F58', marginTop: '2px', lineHeight: 1.45 } }, desc)));
+    return h('div', { key: 'awards', style: { height: '100%', maxWidth: '50%', aspectRatio: '612 / 792', background: '#FFFFFF', boxSizing: 'border-box', padding: '5.5% 5%', display: 'flex', flexDirection: 'column', fontFamily: "'IBM Plex Sans',sans-serif", color: '#26292B', overflow: 'hidden' } },
+      h('div', { style: { fontFamily: mono, fontSize: '10px', letterSpacing: '.16em', textTransform: 'uppercase', color: '#2E4A3B' } }, 'Proctor Landing Park · MLA Capstone'),
+      h('div', { style: { fontFamily: "'Source Serif 4',serif", fontWeight: 400, fontSize: '30px', letterSpacing: '-.01em', marginTop: '10px' } }, 'Recognition'),
+      h('div', { style: { borderTop: '1px solid #26292B', marginTop: '14px' } }),
+      h('div', { style: { display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '24px' } },
+        row('assets/logos/daapworks.jpg', 'DAAPWorks 2026', "Director's Choice Gallery selection", '100px'),
+        row('assets/logos/segd.png', 'SEGD', 'Experiential design honorable mention', '68px'),
+        row('assets/logos/design-museum-chicago.png', 'Design Museum of Chicago', 'Selected for DAAPworks exhibition', '100px')));
+  }
+  mpSet(patch) { this.setState(s => ({ mp: { ...s.mp, ...patch } })); }
+  mpOpen() {
+    this._mpFitDone = false;
+    this.mpSet({ open: true, zoom: 1, tx: 0, ty: 0 });
+    this.mpEnsure();
+    setTimeout(() => this.mpFitFill(), 60);
+  }
+  mpFitFill() {
+    if (this._mpFitDone) return;
+    const st = this._mpStage, im = this._mpImg;
+    if (!st || !im || !im.complete || !st.clientHeight) return;
+    const z = this.state.mp.zoom || 1;
+    const r = im.getBoundingClientRect();
+    if (!r.height) return;
+    const fill = (st.clientHeight - 36) / (r.height / z);
+    this._mpFitDone = true;
+    this.mpSet({ zoom: Math.max(1, Math.min(3, fill)), tx: 0, ty: 0 });
+  }
+  mpEnsure() {
+    if (this.state.mp.src || this._mpBuilding) return;
+    let cached = null;
+    try { cached = localStorage.getItem('understory-mp-v2'); } catch (_) {}
+    if (cached) { this.mpSet({ src: cached }); return; }
+    this._mpBuilding = true;
+    this.mpSet({ status: 'Composing master plan — a few seconds…' });
+    this.bkStart();
+    this.mpBuild()
+      .catch(e => { console.warn('mp build failed', e && (e.message || e)); this.mpSet({ status: 'Could not compose the master plan' }); })
+      .finally(() => { this._mpBuilding = false; });
+  }
+  async mpBuild() {
+    {
+      const covered = () => (this._bkDocs || []).reduce((s, d) => s + d.numPages, 0);
+      while (covered() < 25) await new Promise(r => setTimeout(r, 500));
+      const mpPage = (i, w) => new Promise((res, rej) => this.bkEnqueue(async () => { try { res(await this.bkPageCanvas(i, w)); } catch (e) { rej(e); } }, true));
+      const A = await mpPage(23, 2000), B = await mpPage(24, 2000);
+      const cutB = c => { const h = Math.round(c.height * 0.895); const o = document.createElement('canvas'); o.width = c.width; o.height = h; o.getContext('2d').drawImage(c, 0, 0); return o; };
+      const trimSide = (c, side) => {
+        const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+        const colHas = x => { for (let y = 0; y < c.height; y += 3) { const q = (y * c.width + x) * 4; if (d[q] < 246 || d[q + 1] < 246 || d[q + 2] < 246) return true; } return false; };
+        const o = document.createElement('canvas');
+        if (side === 'r') { let x = c.width - 1; while (x > 0 && !colHas(x)) x--; o.width = x + 1; o.height = c.height; o.getContext('2d').drawImage(c, 0, 0); return o; }
+        let x = 0; while (x < c.width - 1 && !colHas(x)) x++; o.width = c.width - x; o.height = c.height; o.getContext('2d').drawImage(c, -x, 0); return o;
+      };
+      const a = trimSide(cutB(A), 'r'), b = trimSide(cutB(B), 'l');
+      const H = 360;
+      const small = c => { const s = document.createElement('canvas'); s.width = Math.max(2, Math.round(c.width * H / c.height)); s.height = H; s.getContext('2d').drawImage(c, 0, 0, s.width, s.height); return s; };
+      const sa = small(a), sb = small(b);
+      const da = sa.getContext('2d').getImageData(0, 0, sa.width, sa.height).data;
+      const db = sb.getContext('2d').getImageData(0, 0, sb.width, sb.height).data;
+      const lum = (d, w, x, y) => { const q = (y * w + x) * 4; return d[q] * .3 + d[q + 1] * .59 + d[q + 2] * .11; };
+      let best = { s: Infinity, o: 4 };
+      for (let o = 4; o <= Math.floor(sa.width * .5); o++) {
+        let sum = 0, n = 0;
+        for (let y = 0; y < H; y += 2) {
+          for (let j = 0; j < o; j += 2) {
+            const va = lum(da, sa.width, sa.width - o + j, y), vb = lum(db, sb.width, j, y);
+            if (va > 248 && vb > 248) continue;
+            sum += Math.abs(va - vb); n++;
+          }
+        }
+        if (n > 60) { const s = sum / n; if (s < best.s) best = { s, o }; }
+      }
+      const O = best.s < 26 ? Math.round(best.o * (a.width / sa.width)) : 0;
+      const out = document.createElement('canvas');
+      out.width = a.width + b.width - O; out.height = Math.max(a.height, b.height);
+      const ctx = out.getContext('2d');
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, out.width, out.height);
+      ctx.drawImage(a, 0, 0); ctx.drawImage(b, a.width - O, 0);
+      const td = ctx.getImageData(0, 0, out.width, out.height);
+      const solid = q => td.data[q] < 246 || td.data[q + 1] < 246 || td.data[q + 2] < 246;
+      const rowHas = y => { for (let x = 0; x < out.width; x += 4) if (solid((y * out.width + x) * 4)) return true; return false; };
+      const colHas = x => { for (let y = 0; y < out.height; y += 4) if (solid((y * out.width + x) * 4)) return true; return false; };
+      let top = 0, bot = out.height - 1, left = 0, right = out.width - 1;
+      while (top < bot && !rowHas(top)) top++;
+      while (bot > top && !rowHas(bot)) bot--;
+      while (left < right && !colHas(left)) left++;
+      while (right > left && !colHas(right)) right--;
+      const pad = 24;
+      top = Math.max(0, top - pad); left = Math.max(0, left - pad); bot = Math.min(out.height - 1, bot + pad); right = Math.min(out.width - 1, right + pad);
+      const fin = document.createElement('canvas');
+      fin.width = right - left + 1; fin.height = bot - top + 1;
+      fin.getContext('2d').drawImage(out, left, top, fin.width, fin.height, 0, 0, fin.width, fin.height);
+      const url = fin.toDataURL('image/jpeg', 0.88);
+      try { localStorage.setItem('understory-mp-v2', url); } catch (_) {}
+      this.mpSet({ src: url, status: '' });
+    }
+  }
+  bkEnqueue(fn, isRender) {
+    (isRender ? (this._bkRQ = this._bkRQ || []) : (this._bkLQ = this._bkLQ || [])).push(fn);
+    this.bkPump();
+  }
+  async bkPump() {
+    if (this._bkBusy) return;
+    this._bkBusy = true;
+    while (((this._bkRQ || []).length + (this._bkLQ || []).length) > 0) {
+      const rq = this._bkRQ || [], lq = this._bkLQ || [];
+      let fn;
+      if (rq.length && lq.length) { fn = this._bkFlip ? lq.shift() : rq.shift(); this._bkFlip = !this._bkFlip; }
+      else fn = (rq.length ? rq : lq).shift();
+      try { await fn(); } catch (e) { console.warn('booklet task failed', e && (e.message || e.name || e)); }
+    }
+    this._bkBusy = false;
+  }
+  async bkRecover() {
+    if (this._bkRecovering) return;
+    this._bkRecovering = true;
+    try {
+      console.warn('booklet: resetting pdf worker');
+      this.setBk({ status: 'Recovering viewer…' });
+      this._bkRQ = []; this._bkLQ = [];
+      (this._bkDocs || []).forEach(d => { try { d.destroy(); } catch (_) {} });
+      this._bkDocs = null;
+      this._bkRendering = new Set();
+      this._bkTiers = {};
+      this._bkRetried = new Set();
+      try {
+        const lib = this._pdfjs;
+        if (lib && lib.GlobalWorkerOptions.workerPort) { lib.GlobalWorkerOptions.workerPort.terminate(); lib.GlobalWorkerOptions.workerPort = null; }
+      } catch (_) {}
+      if (this._pdfjs) {
+        const ws = await fetch('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.worker.min.mjs').then(r => r.text());
+        this._pdfjs.GlobalWorkerOptions.workerPort = new Worker(URL.createObjectURL(new Blob([ws], { type: 'text/javascript' })), { type: 'module' });
+      }
+      this._bkLoadDone = false;
+      this._bkAll = null;
+      this.bkStart();
+    } catch (e) { console.warn('booklet recover failed', e && (e.message || e)); }
+    finally { this._bkRecovering = false; }
+  }
+  bkEnsureCurrent() {
+    const units = this.bkUnits();
+    const idx = this.state.bk.idx;
+    (units[idx] || []).concat(units[idx + 1] || []).forEach(o => { if (!this.state.bk.pages[o]) this.bkRender(o); });
+  }
+  bkRender(i, targetW) {
+    const key = i + ':' + (targetW || 'base');
+    this._bkRendering = this._bkRendering || new Set();
+    if (this._bkRendering.has(key)) return;
+    this._bkRendering.add(key);
+    this.bkEnqueue(async () => {
+      try {
+        const covered = (this._bkDocs || []).reduce((s, d) => s + d.numPages, 0);
+        if (covered <= i) return;
+        if (!targetW) {
+          const u = this.bkUnits(), ci = this.state.bk.idx;
+          const near = (u[ci] || []).concat(u[ci + 1] || [], u[ci - 1] || []);
+          if (near.indexOf(i) < 0) return;
+        }
+        const put = (c, q, w) => {
+          (this._bkTiers = this._bkTiers || {})[i] = w;
+          const url = c.toDataURL('image/jpeg', q);
+          this.setState(s => { const pages = s.bk.pages.slice(); pages[i] = url; return { bk: { ...s.bk, pages, failed: false } }; });
+        };
+        put(await this.bkPageCanvas(i, targetW || 1500), 0.85, targetW || 1500);
+      } catch (e) {
+        const msg = (e && (e.message || e.name)) || String(e);
+        console.warn('booklet render failed', msg);
+        this.setBk({ status: 'Could not render page ' + (i + 1) });
+        this._bkRetried = this._bkRetried || new Set();
+        if (!this._bkRetried.has(key)) {
+          this._bkRetried.add(key);
+          setTimeout(() => { if (!this.state.bk.pages[i]) this.bkRender(i, targetW); }, 3000);
+        } else { this.setBk({ failed: true }); }
+      } finally { this._bkRendering.delete(key); }
+    }, true);
+  }
+  async bkPageCanvas(i, w) {
+    let k = i;
+    for (const doc of (this._bkDocs || [])) {
+      if (k < doc.numPages) {
+        const page = await doc.getPage(k + 1);
+        const vp0 = page.getViewport({ scale: 1 });
+        const vp = page.getViewport({ scale: w / vp0.width });
+        const c = document.createElement('canvas');
+        c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+        const task = page.render({ canvasContext: c.getContext('2d'), viewport: vp });
+        const slow = setTimeout(() => this.setBk({ status: 'Still rendering — large drawing…' }), 20000);
+        try { await task.promise; } finally { clearTimeout(slow); }
+        return c;
+      }
+      k -= doc.numPages;
+    }
+    throw new Error('page ' + (i + 1) + ' not loaded yet');
+  }
+  bkEnsureTier(zoom) {
+    const bk = this.state.bk;
+    if (bk.idx < 0 || !this._bkDocs) return;
+    const need = zoom > 2.2 ? 3200 : 1500;
+    (this.bkUnits()[bk.idx] || []).forEach(o => { if (((this._bkTiers || {})[o] || 0) < need) this.bkRender(o, need); });
+  }
+  bkGo(n) {
+    const bk = this.state.bk;
+    const units = this.bkUnits();
+    const idx = Math.min(Math.max(n, 0), Math.max(units.length - 1, 0));
+    this.setBk({ idx, zoom: 1, tx: 0, ty: 0, failed: false });
+    setTimeout(() => this.bkEnsureCurrent(), 0);
+    clearTimeout(this._bkStuckT);
+    this._bkStuckT = setTimeout(() => {
+      const u = this.bkUnits()[this.state.bk.idx] || [];
+      if (u.length && !u.some(o => this.state.bk.pages[o])) this.setBk({ failed: true });
+    }, 45000);
+  }
+  async componentDidMount() {
+    const slug = new URLSearchParams(location.search).get('slug') || 'proctor-landing-park';
+    try {
+      const slugs = await fetch('content/projects/index.json').then(r => r.json());
+      const projects = await Promise.all(slugs.map(s => fetch('content/projects/' + s + '.json').then(r => r.json())));
+      projects.sort((a, b) => (b.sortKey || b.year) - (a.sortKey || a.year));
+      const chosen = projects.find(x => x.slug === slug) || projects[0];
+      this.setState({ p: chosen, order: projects });
+      if (chosen.slug === 'proctor-landing-park') { this.bkStart(); this.mpEnsure(); }
+    } catch (e) { console.warn('content load failed', e); }
+  }
+  renderVals() {
+    const { p, order, idx, zoom, tx, ty } = this.state;
+    if (!p) return { sections: [], thumbs: [] };
+    const i = order.findIndex(x => x.slug === p.slug);
+    const prev = order[(i - 1 + order.length) % order.length], next = order[(i + 1) % order.length];
+    const img = p.images[idx];
+    const clamp = n => Math.min(Math.max(n, 0), p.images.length - 1);
+    const bk = this.state.bk;
+    const bkAllUnits = this.bkUnits();
+    const bkUnit = bk.idx >= 0 ? (bkAllUnits[bk.idx] || []) : [];
+    const bkShown = bkUnit.filter(o => bk.pages[o]);
+    const bkCur = bkShown.length ? 'y' : null;
+    const thumbBase = { minHeight:'40px', padding:'0 14px', fontFamily:"'IBM Plex Mono',monospace", fontSize:'11px', letterSpacing:'.06em', textTransform:'uppercase', cursor:'pointer', background:'transparent' };
+    return {
+      title: p.title, location: p.location, year: (p.yearLabel || String(p.year)), role: p.role, scale: p.scale,
+      collaborators: p.collaborators, softwareLine: p.software.join(' · '), summary: p.summary,
+      sections: p.sections.map(s => ({ ...s, isRecog: /recognition/i.test(s.heading) })),
+      recogLogosEl: [['assets/logos/daapworks.jpg', 'DAAPWorks'], ['assets/logos/segd.png', 'SEGD'], ['assets/logos/design-museum-chicago.png', 'Design Museum of Chicago']].map(([src, alt]) => React.createElement('img', { key: alt, src, alt, title: alt, style: { height: '150px', width: 'auto', display: 'block', mixBlendMode: 'multiply' } })),
+      imgNum: String(idx + 1).padStart(2, '0'), imgCount: String(p.images.length).padStart(2, '0'),
+      imgLabel: img.drawing_type + ' placeholder — ' + img.caption,
+      imgCaption: img.caption,
+      imgMeta: img.drawing_type + ' · ' + img.scale + ' · ' + img.software,
+      zoomPct: Math.round(zoom * 100) + '%',
+      surfStyle: { position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', transform:'translate(' + tx + 'px,' + ty + 'px) scale(' + zoom + ')', transformOrigin:'center', transition: this.state.drag ? 'none' : 'transform .15s ease' },
+      thumbs: p.images.map((im, k) => ({
+        label: p.images.filter(x => x.drawing_type === im.drawing_type).length > 1
+          ? im.drawing_type + ' ' + (p.images.slice(0, k + 1).filter(x => x.drawing_type === im.drawing_type).length)
+          : im.drawing_type,
+        style: k === idx ? { ...thumbBase, border:'1px solid #26292B', background:'#26292B', color:'#F3F0E8', boxShadow:'inset 0 -3px 0 #B7C95A' } : { ...thumbBase, border:'1px solid #C7C1AE', color:'#26292B' },
+        pick: () => this.setState({ idx: k, zoom: 1, tx: 0, ty: 0 })
+      })),
+      hasBooklet: p.slug === 'proctor-landing-park',
+      bkNotStarted: !bk.started,
+      bkHasPage: !!bkCur,
+      bkLoading: bk.started && !bkCur && !bk.failed,
+      bkFailed: bk.started && !bkCur && !!bk.failed,
+      bkRetry: () => { this._bkRetried = new Set(); this.setBk({ failed: false, status: 'Recovering viewer…' }); this.bkRecover(); },
+      bkImg: bkShown.length ? React.createElement('div', { style: { width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' } }, (bk.idx === 0 ? [this.mkAwards()] : []).concat(bkShown.map((o, ix) => React.createElement('img', { key: o, src: bk.pages[o], alt: 'Booklet page ' + (o + 1), draggable: false, style: { maxWidth: (bkUnit.length === 2 || bk.idx === 0) ? '50%' : '100%', maxHeight: '100%', width: 'auto', height: 'auto', display: 'block', border: 'none', background: '#FFFFFF', userSelect: 'none' } })))) : null,
+      bkSurfStyle: { position: 'absolute', inset: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'translate(' + bk.tx + 'px,' + bk.ty + 'px) scale(' + bk.zoom + ')', transformOrigin: 'center', transition: bk.drag ? 'none' : 'transform .15s ease' },
+      bkNum: bkUnit.map(o => String(o + 1).padStart(2, '0')).join('–'),
+      bkCount: bk.total ? String(bk.total).padStart(2, '0') : '··',
+      bkStatus: bk.status,
+      bkZoomPct: Math.round(bk.zoom * 100) + '%',
+      mpOpen: this.state.mp.open,
+      mpStatus: this.state.mp.status,
+      mpHasImg: !!this.state.mp.src,
+      mpImg: this.state.mp.src ? React.createElement('img', { src: this.state.mp.src, alt: 'Proctor Landing Park master plan', draggable: false, ref: el => { this._mpImg = el; }, onLoad: () => this.mpFitFill(), style: { maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', display: 'block', userSelect: 'none' } }) : null,
+      mpStageRef: el => { this._mpStage = el; },
+      mpSurfStyle: { position: 'absolute', inset: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'translate(' + this.state.mp.tx + 'px,' + this.state.mp.ty + 'px) scale(' + this.state.mp.zoom + ')', transformOrigin: 'center', transition: this.state.mp.drag ? 'none' : 'transform .15s ease' },
+      mpZoomPct: Math.round(this.state.mp.zoom * 100) + '%',
+      mpPending: !this.state.mp.src,
+      mpInline: this.state.mp.src ? React.createElement('img', { src: this.state.mp.src, alt: 'Proctor Landing Park master plan — seamless composite', style: { width: '100%', height: 'auto', display: 'block', border: '1px solid #D9D3C2', boxSizing: 'border-box', background: '#FFFFFF' } }) : null,
+      mpStatusText: this.state.mp.status || 'Composing master plan…',
+      mpOpenFn: () => this.mpOpen(),
+      mpClose: () => this.mpSet({ open: false }),
+      mpZoomIn: () => this.mpSet({ zoom: Math.min(this.state.mp.zoom * 1.4, 8) }),
+      mpZoomOut: () => this.mpSet({ zoom: Math.max(this.state.mp.zoom / 1.4, 0.4) }),
+      mpZoomFit: () => this.mpSet({ zoom: 1, tx: 0, ty: 0 }),
+      mpDragStart: e => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); this.mpSet({ drag: { x: e.clientX, y: e.clientY, tx: this.state.mp.tx, ty: this.state.mp.ty } }); },
+      mpDragMove: e => { const d = this.state.mp.drag; if (d) this.mpSet({ tx: d.tx + e.clientX - d.x, ty: d.ty + e.clientY - d.y }); },
+      mpDragEnd: () => this.mpSet({ drag: null }),
+      bkIdx: Math.max(bk.idx, 0),
+      bkMaxUnit: Math.max(bkAllUnits.length - 1, 0),
+      bkScrub: e => this.bkGo(parseInt(e.target.value, 10) || 0),
+      bkStart: () => this.bkStart(),
+      bkPrev: () => this.bkGo(this.state.bk.idx - 1),
+      bkNext: () => this.bkGo(this.state.bk.idx + 1),
+      bkZoomIn: () => { const z = Math.min(this.state.bk.zoom * 1.4, 8); this.setBk({ zoom: z }); this.bkEnsureTier(z); },
+      bkZoomOut: () => this.setBk({ zoom: Math.max(this.state.bk.zoom / 1.4, 0.4) }),
+      bkZoomFit: () => this.setBk({ zoom: 1, tx: 0, ty: 0 }),
+      bkDragStart: e => { if (!this.state.bk.started) return; e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); this.setBk({ drag: { x: e.clientX, y: e.clientY, tx: this.state.bk.tx, ty: this.state.bk.ty } }); },
+      bkDragMove: e => { const d = this.state.bk.drag; if (d) this.setBk({ tx: d.tx + e.clientX - d.x, ty: d.ty + e.clientY - d.y }); },
+      bkDragEnd: () => this.setBk({ drag: null }),
+      prevImg: () => this.setState(s => ({ idx: clamp(s.idx - 1), zoom: 1, tx: 0, ty: 0 })),
+      nextImg: () => this.setState(s => ({ idx: clamp(s.idx + 1), zoom: 1, tx: 0, ty: 0 })),
+      zoomIn: () => this.setState(s => ({ zoom: Math.min(s.zoom * 1.4, 6) })),
+      zoomOut: () => this.setState(s => ({ zoom: Math.max(s.zoom / 1.4, 0.4) })),
+      zoomFit: () => this.setState({ zoom: 1, tx: 0, ty: 0 }),
+      dragStart: e => { e.currentTarget.setPointerCapture(e.pointerId); this.setState({ drag: { x: e.clientX, y: e.clientY, tx, ty } }); },
+      dragMove: e => { const d = this.state.drag; if (d) this.setState({ tx: d.tx + e.clientX - d.x, ty: d.ty + e.clientY - d.y }); },
+      dragEnd: () => this.setState({ drag: null }),
+      prevHref: 'Project.dc.html?slug=' + prev.slug, prevTitle: prev.title,
+      nextHref: 'Project.dc.html?slug=' + next.slug, nextTitle: next.title
+    };
+  }
+}
+</script>
+</body>
+</html>

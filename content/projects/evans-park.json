@@ -1,0 +1,49 @@
+{
+ "slug": "evans-park",
+ "title": "Evans Park",
+ "subtitle": "Mill Creek Dam Replacement",
+ "location": "Cincinnati, OH",
+ "year": 2024,
+ "yearLabel": "MLA studio [CONFIRM year]",
+ "sortKey": 70,
+ "type": "Water infrastructure",
+ "scale": "Dam replacement + park",
+ "role": "MLA stormwater studio [CONFIRM role/team]",
+ "collaborators": "[CONFIRM team]",
+ "software": [
+  "Rhino",
+  "ArcGIS Pro",
+  "AutoCAD"
+ ],
+ "cover": "evans-park/cover.webp",
+ "summary": "A stormwater-management studio project replacing a Mill Creek dam and integrating the water infrastructure into public open space — terrain, ecological performance, and park experience designed together. [CONFIRM details]",
+ "sections": [
+  {
+   "heading": "Brief",
+   "body": "[CONFIRM] Water infrastructure as public space: dam replacement, terrain work, and ecological performance integrated with park use along Mill Creek."
+  }
+ ],
+ "images": [
+  {
+   "file": "evans-park/terrain.webp",
+   "caption": "Terrain and grading study at the dam",
+   "drawing_type": "Grading plan",
+   "scale": "[confirm scale]",
+   "software": "Rhino + AutoCAD"
+  },
+  {
+   "file": "evans-park/hydrology.webp",
+   "caption": "Watershed and flow analysis",
+   "drawing_type": "Analysis map",
+   "scale": "[confirm scale]",
+   "software": "ArcGIS Pro"
+  },
+  {
+   "file": "evans-park/section.webp",
+   "caption": "Section through spillway and terraces",
+   "drawing_type": "Section",
+   "scale": "[confirm scale]",
+   "software": "AutoCAD + Illustrator"
+  }
+ ]
+}

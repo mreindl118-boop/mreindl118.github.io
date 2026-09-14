@@ -1,0 +1,103 @@
+{
+ "slug": "proctor-landing-park",
+ "title": "Proctor Landing Park",
+ "subtitle": "Bridging Community & Ecology to Support Public Health",
+ "location": "Lawrence County, OH",
+ "year": 2026,
+ "yearLabel": "2026",
+ "sortKey": 100,
+ "type": "Civic / ecological",
+ "scale": "Flood-prone Ohio River corridor",
+ "role": "Sole author — MLA capstone (LAND 7007)",
+ "collaborators": "Academic capstone; no client or firm of record",
+ "software": [
+  "ArcGIS Pro",
+  "AutoCAD",
+  "Rhino",
+  "Illustrator",
+  "Photoshop",
+  "InDesign"
+ ],
+ "cover": "proctor-landing-park/cover.webp",
+ "summary": "A flood-prone civic landscape on the Ohio River, near Paddy and Symmes Creeks, redesigned to preserve and improve ecological function while providing flood-resilient recreation that measurably supports public health. The attitude throughout: design with water, not against it.",
+ "sections": [
+  {
+   "heading": "Brief",
+   "body": "How can a flood-prone civic landscape keep its ecological function and still give a community diverse, durable recreation? The design integrates circulation, hydrology, habitat, recreation, and community use into a single public framework organized around a Paddy Creek ecological core."
+  },
+  {
+   "heading": "Site analysis",
+   "body": "Floodplain, hydrology, soils, topography, and circulation analysis built on FEMA National Flood Hazard Layer data, USDA NRCS and Ohio soils, Region 7 watershed planning, Census demographics, and public-health research. The evidence set the program: flood-prone land becomes working landscape, not fenced-off risk."
+  },
+  {
+   "heading": "Design",
+   "body": "Wetland creation, riparian restoration, and flood-adaptive planting anchor the ecological core. A connected exercise loop links boardwalk sequences, timber bridges, overlooks, and contemplative paths with active recreation: sports fields and courts, play areas, a splash pad, a dog park, and a multimodal bus-and-bike arrival. Recreation coexists with periodic flooding rather than pretending the floodplain is dry upland."
+  },
+  {
+   "heading": "Production",
+   "body": "Master plan, CAD plans, sections, two axonometric views, system diagrams, planting matrices for woodland, upland, wetland, and riparian zones, bridge and culvert design development, phasing, takeoffs, and a stewardship framework."
+  },
+  {
+   "heading": "Recognition",
+   "body": "DAAPWorks 2026 Director's Choice Gallery. SEGD Experiential Design Honorable Mention. Selected for Design Museum of Chicago DAAPworks exhibition."
+  }
+ ],
+ "images": [
+  {
+   "file": "proctor-landing-park/master-plan.webp",
+   "caption": "Master plan, full corridor with Paddy Creek ecological core",
+   "drawing_type": "Master plan",
+   "scale": "[confirm scale]",
+   "software": "AutoCAD + Illustrator"
+  },
+  {
+   "file": "proctor-landing-park/hydrology.webp",
+   "caption": "Floodplain and hydrology analysis, FEMA NFHL overlay",
+   "drawing_type": "Analysis map",
+   "scale": "[confirm scale]",
+   "software": "ArcGIS Pro"
+  },
+  {
+   "file": "proctor-landing-park/circulation.webp",
+   "caption": "Circulation and program systems diagram",
+   "drawing_type": "Diagram",
+   "scale": "NTS",
+   "software": "Illustrator"
+  },
+  {
+   "file": "proctor-landing-park/axon-1.webp",
+   "caption": "Axonometric view 1, ecological core and boardwalk sequence",
+   "drawing_type": "Axonometric",
+   "scale": "NTS",
+   "software": "Rhino + Illustrator"
+  },
+  {
+   "file": "proctor-landing-park/axon-2.webp",
+   "caption": "Axonometric view 2, recreation fields and arrival",
+   "drawing_type": "Axonometric",
+   "scale": "NTS",
+   "software": "Rhino + Illustrator"
+  },
+  {
+   "file": "proctor-landing-park/planting-matrix.webp",
+   "caption": "Planting matrices, woodland / upland / wetland / riparian",
+   "drawing_type": "Planting plan",
+   "scale": "[confirm scale]",
+   "software": "AutoCAD + InDesign"
+  },
+  {
+   "file": "proctor-landing-park/bridge-dd.webp",
+   "caption": "Timber bridge and culvert design development",
+   "drawing_type": "Design development",
+   "scale": "[confirm scale]",
+   "software": "Rhino + AutoCAD"
+  },
+  {
+   "file": "proctor-landing-park/render.webp",
+   "caption": "Wetland basin at the boardwalk, seasonal high water",
+   "drawing_type": "Rendering",
+   "scale": "NTS",
+   "software": "Author-edited; AI-assisted imagery"
+  }
+ ]
+}

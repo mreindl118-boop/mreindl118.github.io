@@ -1,0 +1,49 @@
+{
+ "slug": "weaver-recreation",
+ "title": "Weaver Recreation Redesign",
+ "subtitle": "Public Amphitheater",
+ "location": "Cincinnati, OH — West End",
+ "year": 2025,
+ "yearLabel": "MLA studio [CONFIRM year]",
+ "sortKey": 80,
+ "type": "Public realm",
+ "scale": "Neighborhood recreation site",
+ "role": "MLA studio — CRC / West End [CONFIRM role/team]",
+ "collaborators": "Cincinnati Recreation Commission studio context",
+ "software": [
+  "AutoCAD",
+  "Rhino",
+  "Photoshop"
+ ],
+ "cover": "weaver-recreation/cover.webp",
+ "summary": "A recreation-site redesign with a public amphitheater as the resolved civic gathering move, grounded in West End stakeholder work: heat island, low canopy, unsafe crossings, and underused open fields identified with community partners. [CONFIRM details]",
+ "sections": [
+  {
+   "heading": "Brief",
+   "body": "[CONFIRM] Civic programming and community gathering space for a West End recreation site, from stakeholder and SWOT analysis to a resolved amphitheater intervention."
+  }
+ ],
+ "images": [
+  {
+   "file": "weaver-recreation/site-plan.webp",
+   "caption": "Site plan, amphitheater and field reorganization",
+   "drawing_type": "Site plan",
+   "scale": "[confirm scale]",
+   "software": "AutoCAD + Photoshop"
+  },
+  {
+   "file": "weaver-recreation/section.webp",
+   "caption": "Section through amphitheater seating",
+   "drawing_type": "Section",
+   "scale": "[confirm scale]",
+   "software": "AutoCAD + Illustrator"
+  },
+  {
+   "file": "weaver-recreation/render.webp",
+   "caption": "Amphitheater in evening use",
+   "drawing_type": "Rendering",
+   "scale": "NTS",
+   "software": "Rhino + Photoshop"
+  }
+ ]
+}

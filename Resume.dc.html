@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#F3F0E8; color:#26292B; font-family:'IBM Plex Sans',sans-serif; -webkit-font-smoothing:antialiased; }
+a { color:#2E4A3B; text-decoration-thickness:1px; text-underline-offset:3px; }
+a:hover { color:#B4603A; }
+doc-page:not(:defined) { visibility:hidden; }
+@media print { .no-print { display:none !important; } }
+</style>
+<script src="./doc-page.js"></script>
+</helmet>
+<div class="no-print" style="position:fixed; top:16px; right:16px; z-index:50; display:flex; gap:10px">
+  <a href="Home.dc.html" style="display:inline-flex; align-items:center; min-height:44px; padding:0 18px; border:1px solid #26292B; color:#26292B; background:#F3F0E8; text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase" style-hover="border-color:#B4603A; color:#B4603A">← Site</a>
+  <button onClick="{{ downloadFile }}" style="display:inline-flex; align-items:center; min-height:44px; padding:0 20px; background:#2E4A3B; color:#F3F0E8; border:none; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase" style-hover="background:#26292B">Download PDF ↓</button>
+  <button onClick="{{ downloadPdf }}" title="Print" style="display:inline-flex; align-items:center; min-height:44px; padding:0 16px; border:1px solid #26292B; color:#26292B; background:#F3F0E8; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase" style-hover="border-color:#B4603A; color:#B4603A">Print</button>
+</div>
+<doc-page size="letter">
+<section class="page" id="p1" data-screen-label="Résumé" style="padding:42px 52px; box-sizing:border-box; display:flex; flex-direction:column; font-family:'IBM Plex Sans',sans-serif; color:#26292B">
+  <header style="display:flex; justify-content:space-between; gap:24px; border-bottom:2px solid #26292B; padding-bottom:14px">
+    <div>
+      <h1 style="font-family:'Source Serif 4',serif; font-weight:600; font-size:31px; letter-spacing:-.01em; margin:0; line-height:1.1">Matthew Reindl</h1>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:#2E4A3B; margin-top:8px; white-space:nowrap">Landscape Designer · Health &amp; Safety Specialist · Musician</div>
+      <div style="font-size:13.5px; color:#5A5F58; margin-top:5px">MLA, University of Cincinnati DAAP — Class of 2026 · Cincinnati, OH</div>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.7; text-align:right; flex-shrink:0; padding-top:4px">
+      <sc-if value="{{ showAddress }}" hint-placeholder-val="{{ true }}"><div>3418 Cardiff Avenue</div></sc-if>
+      <div>Cincinnati, OH 45209</div>
+      <div>(513) 375-1042</div>
+      <div><a href="mailto:mreindl118@gmail.com" style="color:#26292B; text-decoration:none">mreindl118@gmail.com</a></div>
+      <div><a href="mailto:reindlmj@mail.uc.edu" style="color:#26292B; text-decoration:none">reindlmj@mail.uc.edu</a></div>
+      <div><a href="https://www.linkedin.com/in/matthew-reindl-95b80425a/" target="_blank" rel="noopener" style="color:#26292B; text-decoration:none">linkedin.com/in/matthew-reindl</a></div>
+    </div>
+  </header>
+
+  <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:0 32px; margin-top:18px; flex:1; align-content:start">
+    <div style="display:flex; flex-direction:column; gap:14px">
+      <section>
+        <h2 style="font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#2E4A3B; margin:0 0 10px; border-bottom:1px solid #D9D3C2; padding-bottom:6px">Experience</h2>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <article>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px">
+              <span style="font-weight:600; font-size:15.5px">Admin Specialist</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; flex-shrink:0">May 2025 – Present</span>
+            </div>
+            <div style="font-size:13.5px; color:#5A5F58; margin-top:2px">Cincinnati Recreation Commission · Cincinnati, OH</div>
+            <div style="display:flex; flex-direction:column; gap:5px; margin-top:8px">
+              <div style="display:flex; gap:9px"><span style="width:5px; height:5px; background:#2E4A3B; flex-shrink:0; margin-top:8px"></span><span style="font-size:14.5px; line-height:1.4">Developed planting designs, plant schedules, and maintenance recommendations for parks and recreation sites.</span></div>
+              <div style="display:flex; gap:9px"><span style="width:5px; height:5px; background:#2E4A3B; flex-shrink:0; margin-top:8px"></span><span style="font-size:14.5px; line-height:1.4">Created park layout concepts, GIS maps, and AutoCAD drawings to support planning, design, and field documentation.</span></div>
+              <div style="display:flex; gap:9px"><span style="width:5px; height:5px; background:#2E4A3B; flex-shrink:0; margin-top:8px"></span><span style="font-size:14.5px; line-height:1.4">Conducted field work, site review, and data collection to inform design updates and facility improvements.</span></div>
+            </div>
+          </article>
+          <article>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px">
+              <span style="font-weight:600; font-size:15.5px">Director of Health &amp; Safety</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; flex-shrink:0">Apr 2021 – Present</span>
+            </div>
+            <div style="font-size:13.5px; color:#5A5F58; margin-top:2px">Oasis Turf &amp; Tree · Loveland, OH</div>
+            <div style="display:flex; flex-direction:column; gap:5px; margin-top:8px">
+              <div style="display:flex; gap:9px"><span style="width:5px; height:5px; background:#2E4A3B; flex-shrink:0; margin-top:8px"></span><span style="font-size:14.5px; line-height:1.4">Built Health &amp; Safety systems and educational resources; taught First Aid, CPR, workplace safety, and agronomy.</span></div>
+              <div style="display:flex; gap:9px"><span style="width:5px; height:5px; background:#2E4A3B; flex-shrink:0; margin-top:8px"></span><span style="font-size:14.5px; line-height:1.4">Created a wellness program for employee health and well-being.</span></div>
+              <div style="display:flex; gap:9px"><span style="width:5px; height:5px; background:#2E4A3B; flex-shrink:0; margin-top:8px"></span><span style="font-size:14.5px; line-height:1.4">Developed 3 acres of landscapes, hardscapes, and walking trails under the supervision of a landscape architect.</span></div>
+            </div>
+          </article>
+          <article>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px">
+              <span style="font-weight:600; font-size:15.5px">Firefighter / Paramedic</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; flex-shrink:0">Apr 2020 – Apr 2021</span>
+            </div>
+            <div style="font-size:13.5px; color:#5A5F58; margin-top:2px">Paramedic Services of Illinois · Itasca, IL</div>
+            <div style="display:flex; flex-direction:column; gap:5px; margin-top:8px">
+              <div style="display:flex; gap:9px"><span style="width:5px; height:5px; background:#2E4A3B; flex-shrink:0; margin-top:8px"></span><span style="font-size:14.5px; line-height:1.4">Fire service and paramedic skills; completed Fire Academy.</span></div>
+              <div style="display:flex; gap:9px"><span style="width:5px; height:5px; background:#2E4A3B; flex-shrink:0; margin-top:8px"></span><span style="font-size:14.5px; line-height:1.4">911 emergency response and incident-stabilization experience.</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section>
+        <h2 style="font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#2E4A3B; margin:0 0 10px; border-bottom:1px solid #D9D3C2; padding-bottom:6px">Education</h2>
+        <div style="display:flex; flex-direction:column; gap:8px">
+          <article>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px">
+              <span style="font-weight:600; font-size:15px">Master of Landscape Architecture</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; flex-shrink:0">Class of 2026</span>
+            </div>
+            <div style="font-size:13.5px; color:#5A5F58; margin-top:2px">University of Cincinnati, DAAP · Cincinnati, OH</div>
+          </article>
+          <article>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px">
+              <span style="font-weight:600; font-size:15px">Basic Operations Firefighter I &amp; II</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; flex-shrink:0">Jul – Sep 2020</span>
+            </div>
+            <div style="font-size:13.5px; color:#5A5F58; margin-top:2px">Romeoville Fire Academy · Romeoville, IL</div>
+          </article>
+          <article>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px">
+              <span style="font-weight:600; font-size:15px">Paramedic — Illinois State License</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; flex-shrink:0">Jan – Oct 2019</span>
+            </div>
+            <div style="font-size:13.5px; color:#5A5F58; margin-top:2px">St. Francis Paramedic Program · Evanston, IL</div>
+          </article>
+          <article>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px">
+              <span style="font-weight:600; font-size:15px">B.A., Criminology</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; flex-shrink:0">Class of 2017</span>
+            </div>
+            <div style="font-size:13.5px; color:#5A5F58; margin-top:2px">Loyola University Chicago · Chicago, IL</div>
+          </article>
+          <article>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px">
+              <span style="font-weight:600; font-size:15px">High School Diploma</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5A5F58; flex-shrink:0">Class of 2013</span>
+            </div>
+            <div style="font-size:13.5px; color:#5A5F58; margin-top:2px">St. Xavier High School · Cincinnati, OH</div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:14px; border-left:1px solid #D9D3C2; padding-left:24px">
+      <section>
+        <h2 style="font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#2E4A3B; margin:0 0 10px; border-bottom:1px solid #D9D3C2; padding-bottom:6px">Skills</h2>
+        <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.4">
+          <div>Planting design &amp; plant selection</div>
+          <div>Grading &amp; stormwater concepts</div>
+          <div>GIS mapping &amp; site analysis</div>
+          <div>Site inventory &amp; assessment</div>
+          <div>Landscaping machinery</div>
+          <div>Agronomy &amp; horticulture</div>
+          <div>Guitar &amp; stage music technology</div>
+          <div>Set design, carpentry &amp; construction</div>
+          <div>Theatrical lighting, sound &amp; electrical systems; costuming</div>
+          <div>Multimedia drawing</div>
+        </div>
+      </section>
+      <section>
+        <h2 style="font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#2E4A3B; margin:0 0 10px; border-bottom:1px solid #D9D3C2; padding-bottom:6px">Certifications</h2>
+        <div style="display:flex; flex-direction:column; gap:9px">
+          <div>
+            <div style="font-size:13.5px; font-weight:500; white-space:nowrap">Ohio Pesticide Applicator License</div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5A5F58; margin-top:1px; white-space:nowrap">ODA · CORE · 10A · 10D · 6A · 8</div>
+          </div>
+          <div style="font-size:13.5px; font-weight:500; white-space:nowrap">NALP Certified Landscape Technician</div>
+          <div>
+            <div style="font-size:13.5px; font-weight:500; white-space:nowrap">Basic Operations Firefighter I &amp; II</div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5A5F58; margin-top:1px; white-space:nowrap">Illinois · FSVO · HAZMAT OPS</div>
+          </div>
+          <div style="font-size:13.5px; font-weight:500; white-space:nowrap">American Red Cross CPR Instructor</div>
+        </div>
+      </section>
+      <section>
+        <h2 style="font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#2E4A3B; margin:0 0 10px; border-bottom:1px solid #D9D3C2; padding-bottom:6px">Software</h2>
+        <div style="display:flex; flex-direction:column; gap:7px; font-size:14.5px; line-height:1.4">
+          <div>AutoCAD · SketchUp · Rhino · ArcGIS Pro</div>
+          <div>Adobe Photoshop · Illustrator · Procreate</div>
+          <div>Microsoft Office</div>
+          <sc-if value="{{ showAiTools }}" hint-placeholder-val="{{ true }}"><div>ChatGPT · Firefly AI · Claude · Gemini</div></sc-if>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+</doc-page>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showAddress&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Privacy&quot;},&quot;showAiTools&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Content&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showAddress: this.props.showAddress ?? true,
+      showAiTools: this.props.showAiTools ?? true,
+      downloadPdf: () => window.print(),
+      downloadFile: async () => {
+        try {
+          const blob = await fetch('assets/Matthew_Reindl_Resume.pdf').then(r => { if (!r.ok) throw new Error('fetch failed'); return r.blob(); });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'Matthew_Reindl_Resume.pdf';
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
+        } catch (e) { console.warn('download failed, falling back to print', e); window.print(); }
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
