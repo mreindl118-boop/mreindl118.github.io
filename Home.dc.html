@@ -146,7 +146,7 @@ class Component extends DCLogic {
         type: p.type, scale: p.scale, href: 'Project.dc.html?slug=' + p.slug,
         coverLabel: 'cover — ' + (p.images[0] ? p.images[0].drawing_type.toLowerCase() : 'drawing')
       }));
-      const vcard = 'BEGIN:VCARD\nVERSION:3.0\nFN:' + site.name + '\nORG:' + site.practice + '\nTITLE:' + site.discipline + '\nTEL;TYPE=CELL:' + site.phone + '\nEMAIL:' + site.email + '\nURL:' + site.linkedin + '\nADR;TYPE=WORK:;;;Cincinnati;OH;;USA\nEND:VCARD';
+      const vcard = 'BEGIN:VCARD\nVERSION:3.0\nFN:' + site.name + '\nORG:' + site.practice + '\nTITLE:' + site.discipline + (site.phone ? '\nTEL;TYPE=CELL:' + site.phone : '') + '\nEMAIL:' + site.email + '\nURL:' + site.linkedin + '\nADR;TYPE=WORK:;;;Cincinnati;OH;;USA\nEND:VCARD';
       this.setState({ recent, lastUpdated: site.lastUpdated, vcardHref: 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcard) });
     } catch (e) { console.warn('content load failed', e); }
   }

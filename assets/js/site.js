@@ -34,7 +34,9 @@
 
   function vcardHref(site) {
     var vcard = 'BEGIN:VCARD\nVERSION:3.0\nFN:' + site.name + '\nORG:' + site.practice +
-      '\nTITLE:' + site.discipline + '\nTEL;TYPE=CELL:' + site.phone + '\nEMAIL:' + site.email +
+      '\nTITLE:' + site.discipline +
+      (site.phone ? '\nTEL;TYPE=CELL:' + site.phone : '') +
+      '\nEMAIL:' + site.email +
       '\nURL:' + site.linkedin + '\nADR;TYPE=WORK:;;;Cincinnati;OH;;USA\nEND:VCARD';
     return 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcard);
   }
