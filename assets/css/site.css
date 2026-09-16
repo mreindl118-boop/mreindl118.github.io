@@ -323,6 +323,15 @@ img { max-width: 100%; }
 .rb { display: flex; gap: 9px; }
 .rb::before { content: ""; width: 5px; height: 5px; background: var(--pine); flex-shrink: 0; margin-top: 8px; }
 .rb span { font-size: 14.5px; line-height: 1.4; }
+.resume-brand { display: none; }
+@media (max-width: 780px) {
+  /* Header wraps on narrow screens: name gets its own row, then the
+     Understory wordmark fills the space beside the contact block. */
+  .resume-head-main { flex-basis: 100%; }
+  .resume-brand { display: flex; flex-direction: column; gap: 2px; align-self: center; }
+  .resume-contact { flex: 1; }
+}
+@media print { .resume-brand { display: none !important; } }
 .resume-actions {
   position: sticky; top: 76px; z-index: 4; display: flex; gap: 10px; justify-content: flex-end;
   max-width: 850px; margin: 0 auto 18px;
