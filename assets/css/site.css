@@ -64,7 +64,7 @@ img { max-width: 100%; }
   font-family: var(--mono); font-size: 9px; letter-spacing: .24em;
   text-transform: uppercase; color: var(--pine); line-height: 1;
 }
-.navlinks { display: flex; gap: 26px; flex-wrap: wrap; align-items: center; }
+.navlinks { display: flex; gap: 26px; flex-wrap: wrap; align-items: center; position: relative; }
 @media (max-width: 640px) { .navlinks { gap: 18px; } }
 .navlinks a {
   text-decoration: none; font-family: var(--mono); font-size: 12px;
@@ -77,6 +77,22 @@ img { max-width: 100%; }
 .navlinks .ind .sq { display: block; width: 4px; height: 4px; background: var(--clay); flex-shrink: 0; }
 .navlinks .ind .ln { display: block; flex: 1; height: 1.5px; background: var(--clay); }
 .navlinks .ind .ci { display: block; width: 5px; height: 5px; border: 1.5px solid var(--clay); border-radius: 50%; box-sizing: border-box; flex-shrink: 0; }
+
+/* Gliding indicator: a floating copy that slides between tabs on click */
+.navlinks .ind-fly {
+  position: absolute; opacity: 1; pointer-events: none; margin: 0;
+  transition: left .3s cubic-bezier(.4, 0, .2, 1), top .3s cubic-bezier(.4, 0, .2, 1), width .3s cubic-bezier(.4, 0, .2, 1);
+}
+.navlinks a.arriving { color: var(--clay); transition: color .2s ease; }
+/* Arrival settle on the destination page */
+.navlinks a.active.arrived > span:first-child { animation: tabSettle .7s ease; }
+.navlinks a.active.arrived .ind { animation: indSettle .5s ease; }
+@keyframes tabSettle { 0% { color: var(--clay); } 100% { color: var(--ink); } }
+@keyframes indSettle { 0% { opacity: .2; } 100% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .navlinks .ind-fly { transition: none; }
+  .navlinks a.active.arrived > span:first-child, .navlinks a.active.arrived .ind { animation: none; }
+}
 
 /* Square—line—circle divider motif (from the design board) */
 .rule-motif { display: flex; align-items: center; width: 100%; color: var(--ink); }

@@ -108,4 +108,70 @@
     yearOf: yearOf, roleShort: roleShort,
     projectCard: projectCard, panZoom: panZoom
   };
+
+  /* Nav indicator glide: on click, the square-line-circle indicator slides
+     from the active tab to the clicked one, then the page navigates. The
+     destination page plays a subtle settle highlight on arrival. */
+  function initNavGlide() {
+    var nav = document.querySelector('.navlinks');
+    if (!nav) return;
+
+    try {
+      if (sessionStorage.getItem('us-nav-glide')) {
+        sessionStorage.removeItem('us-nav-glide');
+        var act = nav.querySelector('a.active');
+        if (act) act.classList.add('arrived');
+      }
+    } catch (e) { /* storage unavailable — skip the settle effect */ }
+
+    var gliding = false;
+    nav.addEventListener('click', function (e) {
+      var link = e.target.closest('a');
+      if (!link || !nav.contains(link)) return;
+      if (link.classList.contains('active')) return;
+      if (e.defaultPrevented || e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (gliding) { e.preventDefault(); return; }
+      gliding = true;
+      e.preventDefault();
+      try { sessionStorage.setItem('us-nav-glide', '1'); } catch (err) {}
+
+      var cur = nav.querySelector('a.active');
+      var fromInd = cur ? cur.querySelector('.ind') : null;
+      var toInd = link.querySelector('.ind');
+      var navRect = nav.getBoundingClientRect();
+      var from = (fromInd || toInd).getBoundingClientRect();
+      var to = toInd.getBoundingClientRect();
+
+      var fly = document.createElement('span');
+      fly.className = 'ind ind-fly';
+      fly.innerHTML = '<i class="sq"></i><i class="ln"></i><i class="ci"></i>';
+      fly.style.left = (from.left - navRect.left) + 'px';
+      fly.style.top = (from.top - navRect.top) + 'px';
+      fly.style.width = from.width + 'px';
+      nav.appendChild(fly);
+      if (fromInd) fromInd.style.opacity = '0';
+      link.classList.add('arriving');
+
+      var go = function () { window.location.href = link.href; };
+      var reduced = false;
+      try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (err) {}
+      if (reduced) { go(); return; }
+
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          fly.style.left = (to.left - navRect.left) + 'px';
+          fly.style.top = (to.top - navRect.top) + 'px';
+          fly.style.width = to.width + 'px';
+        });
+      });
+      setTimeout(go, 330);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNavGlide);
+  } else {
+    initNavGlide();
+  }
 })();
