@@ -298,7 +298,7 @@
   }
 
   function renderProject(p, order) {
-    document.title = p.title + ' — Understory Designs';
+    document.title = p.title + ' — Understory Design Studio';
     $('p-title').textContent = p.title;
     $('p-meta').innerHTML =
       metaCell('Location', clean(p.location)) +

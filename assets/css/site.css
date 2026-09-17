@@ -50,27 +50,41 @@ img { max-width: 100%; }
   border-bottom: 1px solid var(--line);
 }
 .nav-inner {
-  max-width: 1240px; margin: 0 auto; padding: 12px 32px;
-  display: flex; align-items: flex-end; justify-content: space-between;
+  max-width: 1240px; margin: 0 auto; padding: 10px 32px;
+  display: flex; align-items: center; justify-content: space-between;
   gap: 16px; flex-wrap: wrap;
 }
-@media (max-width: 640px) { .nav-inner { padding: 12px 18px; } }
-.brand { text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 2px; }
+@media (max-width: 640px) { .nav-inner { padding: 10px 18px; } }
+.brand { text-decoration: none; color: var(--ink); display: flex; align-items: center; gap: 12px; }
 .brand:hover { color: var(--ink); }
-.brand-name { font-family: var(--serif); font-weight: 700; font-size: 19px; letter-spacing: -.01em; }
+.brand-mark { flex-shrink: 0; display: block; }
+.brand-lockup { display: flex; flex-direction: column; gap: 4px; }
+.brand-name { font-family: var(--sans); font-weight: 700; font-size: 18px; letter-spacing: -.02em; line-height: 1; }
 .brand-sub {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--muted);
+  font-family: var(--mono); font-size: 9px; letter-spacing: .24em;
+  text-transform: uppercase; color: var(--pine); line-height: 1;
 }
 .navlinks { display: flex; gap: 26px; flex-wrap: wrap; align-items: center; }
 @media (max-width: 640px) { .navlinks { gap: 18px; } }
 .navlinks a {
   text-decoration: none; font-family: var(--mono); font-size: 12px;
   letter-spacing: .1em; text-transform: uppercase; color: var(--ink);
-  padding: 10px 1px; border-bottom: 2px solid transparent;
+  display: flex; flex-direction: column; gap: 6px; padding: 12px 0 10px; line-height: 1;
 }
 .navlinks a:hover { color: var(--clay); }
-.navlinks a.active { border-bottom-color: var(--clay); }
+.navlinks a .ind { display: flex; align-items: center; width: 100%; opacity: 0; }
+.navlinks a.active .ind { opacity: 1; }
+.navlinks .ind .sq { display: block; width: 4px; height: 4px; background: var(--clay); flex-shrink: 0; }
+.navlinks .ind .ln { display: block; flex: 1; height: 1.5px; background: var(--clay); }
+.navlinks .ind .ci { display: block; width: 5px; height: 5px; border: 1.5px solid var(--clay); border-radius: 50%; box-sizing: border-box; flex-shrink: 0; }
+
+/* Square—line—circle divider motif (from the design board) */
+.rule-motif { display: flex; align-items: center; width: 100%; color: var(--ink); }
+.rule-motif .sq { display: block; width: 5px; height: 5px; background: currentColor; flex-shrink: 0; }
+.rule-motif .ln { display: block; flex: 1; height: 1px; background: currentColor; }
+.rule-motif .ci { display: block; width: 7px; height: 7px; border: 1px solid currentColor; border-radius: 50%; box-sizing: border-box; flex-shrink: 0; }
+.rule-motif.thick .ln { height: 1.5px; }
+.rule-motif.thick .ci { border-width: 1.5px; }
 
 /* ---------- Buttons ---------- */
 .btn {
@@ -326,9 +340,9 @@ img { max-width: 100%; }
 .resume-brand { display: none; }
 @media (max-width: 780px) {
   /* Header wraps on narrow screens: name gets its own row, then the
-     Understory wordmark fills the space beside the contact block. */
+     Understory logo lockup fills the space beside the contact block. */
   .resume-head-main { flex-basis: 100%; }
-  .resume-brand { display: flex; flex-direction: column; gap: 2px; align-self: center; }
+  .resume-brand { display: flex; align-items: center; gap: 10px; align-self: center; }
   .resume-contact { flex: 1; }
 }
 @media print { .resume-brand { display: none !important; } }
