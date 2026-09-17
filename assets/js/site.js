@@ -32,21 +32,42 @@
     });
   }
 
-  function vcardHref(site) {
+  function foldB64(b64) {
+    // vCard continuation lines: fold long base64 onto space-prefixed lines
+    return b64.replace(/(.{72})/g, '$1\n ');
+  }
+
+  function vcardHref(site, photoB64) {
     var vcard = 'BEGIN:VCARD\nVERSION:3.0\nFN:' + site.name + '\nORG:' + site.practice +
       '\nTITLE:' + site.discipline +
       (site.phone ? '\nTEL;TYPE=CELL:' + site.phone : '') +
       '\nEMAIL:' + site.email +
-      '\nURL:' + site.linkedin + '\nADR;TYPE=WORK:;;;Cincinnati;OH;;USA\nEND:VCARD';
+      '\nURL:' + site.linkedin +
+      (photoB64 ? '\nPHOTO;ENCODING=b;TYPE=JPEG:' + foldB64(photoB64) : '') +
+      '\nADR;TYPE=WORK:;;;Cincinnati;OH;;USA\nEND:VCARD';
     return 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcard);
   }
 
   function bindVcard(site) {
-    var href = vcardHref(site);
-    Array.prototype.forEach.call(document.querySelectorAll('[data-vcard]'), function (a) {
-      a.href = href;
-      a.setAttribute('download', 'matthew-reindl.vcf');
-    });
+    var apply = function (photoB64) {
+      var href = vcardHref(site, photoB64);
+      Array.prototype.forEach.call(document.querySelectorAll('[data-vcard]'), function (a) {
+        a.href = href;
+        a.setAttribute('download', 'matthew-reindl.vcf');
+      });
+    };
+    apply(null); // usable immediately; upgraded with the photo once it loads
+    fetch('assets/img/contact-photo.jpg').then(function (r) {
+      if (!r.ok) throw new Error('photo missing');
+      return r.blob();
+    }).then(function (blob) {
+      return new Promise(function (res, rej) {
+        var fr = new FileReader();
+        fr.onload = function () { res(String(fr.result).split(',')[1]); };
+        fr.onerror = rej;
+        fr.readAsDataURL(blob);
+      });
+    }).then(apply).catch(function () { /* keep the photo-less vCard */ });
   }
 
   function yearOf(p) { return clean(p.yearLabel || String(p.year)); }
