@@ -324,13 +324,21 @@
         '</div>';
     }).join('');
 
-    var i = order.findIndex(function (x) { return x.slug === p.slug; });
-    var prev = order[(i - 1 + order.length) % order.length];
-    var next = order[(i + 1) % order.length];
-    $('p-prev').href = 'project.html?slug=' + encodeURIComponent(prev.slug);
-    $('p-prev-title').textContent = prev.title;
-    $('p-next').href = 'project.html?slug=' + encodeURIComponent(next.slug);
-    $('p-next-title').textContent = next.title;
+    // Hidden projects stay reachable by direct URL but are marked unlisted;
+    // prev/next only cycles the visible set and disappears when it can't.
+    $('p-unlisted').hidden = !p.hidden;
+    var visible = order.filter(function (x) { return !x.hidden; });
+    var i = visible.findIndex(function (x) { return x.slug === p.slug; });
+    if (i < 0 || visible.length < 2) {
+      $('p-nav').hidden = true;
+    } else {
+      var prev = visible[(i - 1 + visible.length) % visible.length];
+      var next = visible[(i + 1) % visible.length];
+      $('p-prev').href = 'project.html?slug=' + encodeURIComponent(prev.slug);
+      $('p-prev-title').textContent = prev.title;
+      $('p-next').href = 'project.html?slug=' + encodeURIComponent(next.slug);
+      $('p-next-title').textContent = next.title;
+    }
 
     dwInit(p);
 

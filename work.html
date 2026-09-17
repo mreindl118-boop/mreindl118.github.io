@@ -59,14 +59,26 @@
   var all = [], active = 'All';
 
   function render() {
-    var types = [];
-    all.forEach(function (p) { if (types.indexOf(p.type) < 0) types.push(p.type); });
-    document.getElementById('chips').innerHTML = ['All'].concat(types).map(function (t) {
-      return '<button class="chip' + (t === active ? ' active' : '') + '" data-type="' + US.esc(t) + '">' + US.esc(t) + '</button>';
-    }).join('');
-    var filtered = active === 'All' ? all : all.filter(function (p) { return p.type === active; });
+    // Projects flagged "hidden" in their content JSON are unlisted here
+    // (their direct project.html URLs still work). The filter chips come
+    // back automatically once two or more projects are visible.
+    var visible = all.filter(function (p) { return !p.hidden; });
+    var chips = document.getElementById('chips');
+    if (visible.length >= 2) {
+      var types = [];
+      visible.forEach(function (p) { if (types.indexOf(p.type) < 0) types.push(p.type); });
+      chips.innerHTML = ['All'].concat(types).map(function (t) {
+        return '<button class="chip' + (t === active ? ' active' : '') + '" data-type="' + US.esc(t) + '">' + US.esc(t) + '</button>';
+      }).join('');
+      chips.hidden = false;
+    } else {
+      chips.hidden = true;
+    }
+    var filtered = active === 'All' ? visible : visible.filter(function (p) { return p.type === active; });
     document.getElementById('grid').innerHTML = filtered.map(function (p) { return US.projectCard(p, true); }).join('');
-    document.getElementById('count').textContent = all.length + ' projects, newest first.';
+    document.getElementById('count').textContent = visible.length === 1
+      ? '1 project.'
+      : visible.length + ' projects, newest first.';
   }
 
   document.getElementById('chips').addEventListener('click', function (e) {

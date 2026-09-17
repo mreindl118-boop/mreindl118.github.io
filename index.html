@@ -67,7 +67,7 @@
   </div>
 </header>
 
-<section class="wrap" style="padding-top:48px; padding-bottom:8px">
+<section class="wrap" style="padding-top:48px; padding-bottom:64px">
   <a class="feature-link" href="project.html?slug=proctor-landing-park">
     <div class="feature-cover"><img src="content/projects/proctor-landing-park/cover.webp" alt="Proctor Landing Park master plan"></div>
     <div class="feature-row">
@@ -77,7 +77,10 @@
   </a>
 </section>
 
-<section class="wrap" style="padding-top:56px; padding-bottom:72px">
+<!-- Recent Work grid: hidden while fewer than two projects are visible;
+     unhide happens automatically in the script below once more projects
+     in content/projects/ lose their "hidden" flag. -->
+<section class="wrap" id="recent-section" hidden style="padding-top:0; padding-bottom:72px">
   <div class="rule-motif" style="margin-bottom:18px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
   <div class="rowhead">
     <h2 class="h-serif" style="font-size:30px">Recent Work</h2>
@@ -134,8 +137,12 @@
   }).catch(function (e) { console.warn('site content failed', e); });
 
   US.loadProjects().then(function (projects) {
-    document.getElementById('recent').innerHTML =
-      projects.slice(0, 3).map(function (p) { return US.projectCard(p, false); }).join('');
+    var visible = projects.filter(function (p) { return !p.hidden; });
+    if (visible.length >= 2) {
+      document.getElementById('recent').innerHTML =
+        visible.slice(0, 3).map(function (p) { return US.projectCard(p, false); }).join('');
+      document.getElementById('recent-section').hidden = false;
+    }
   }).catch(function (e) { console.warn('projects failed', e); });
 })();
 </script>
