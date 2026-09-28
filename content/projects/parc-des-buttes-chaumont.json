@@ -1,0 +1,29 @@
+{
+ "slug": "parc-des-buttes-chaumont",
+ "hidden": true,
+ "title": "Parc des Buttes-Chaumont",
+ "subtitle": "Modeling studies",
+ "location": "Paris, France",
+ "year": 2025,
+ "yearLabel": "Modeling study [CONFIRM year]",
+ "sortKey": 60,
+ "type": "Modeling study",
+ "scale": "Park terrain studies",
+ "role": "Modeling study [CONFIRM course/context]",
+ "collaborators": "",
+ "software": [
+  "Rhino",
+  "3D printing",
+  "Laser cutting"
+ ],
+ "cover": "parc-des-buttes-chaumont/cover.webp",
+ "summary": "Terrain-modeling studies of Adolphe Alphand's 1867 Paris park — its cliffs, lake, and belvedere island rebuilt as contour models in chipboard and resin alongside digital contour mapping. [CONFIRM details]",
+ "sections": [
+  {
+   "heading": "Study",
+   "body": "[CONFIRM] Reading dramatic constructed topography through physical modeling: stacked-contour studies, a fold-out chipboard model, and a 3D resin print of the quarry landform around the lake and island."
+  }
+ ],
+ "images": [],
+ "models": []
+}

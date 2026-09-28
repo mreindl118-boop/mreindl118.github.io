@@ -101,7 +101,8 @@
     </div>
   </div>
 
-  <!-- Drawing set -->
+  <!-- Drawing set (hidden for projects that only have models) -->
+  <div id="dw-section">
   <h2 class="h-serif" style="font-size:26px; margin:48px 0 14px">Drawing set</h2>
   <div class="viewer">
     <div class="vbar">
@@ -126,9 +127,18 @@
     </div>
   </div>
   <div class="thumbs" id="dw-thumbs"></div>
+  </div>
 
   <p id="p-summary" style="font-size:18px; line-height:1.65; max-width:66ch; margin:48px 0 0; text-wrap:pretty"></p>
   <div id="p-sections"></div>
+
+  <!-- Physical + digital models; shown when the project declares any -->
+  <div id="p-models" hidden>
+    <div class="rule-motif" style="margin:56px 0 18px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
+    <h2 class="h-serif" style="font-size:26px; margin:0 0 4px">Models</h2>
+    <p class="mono-note" style="margin:0 0 18px">Physical and digital models — terrain, fabrication, and study pieces.</p>
+    <div id="p-models-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:28px 24px"></div>
+  </div>
 
   <div id="p-nav" style="display:flex; justify-content:space-between; gap:16px; margin-top:56px; border-top:1px solid var(--line); padding-top:20px; flex-wrap:wrap">
     <a id="p-prev" href="#" style="text-decoration:none; font-size:14px"><span style="font-family:var(--mono); font-size:11px; color:var(--faint); display:block">← Previous</span><span id="p-prev-title"></span></a>

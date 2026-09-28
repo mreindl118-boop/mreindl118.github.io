@@ -340,7 +340,24 @@
       $('p-next-title').textContent = next.title;
     }
 
-    dwInit(p);
+    if (p.images && p.images.length) {
+      dwInit(p);
+    } else {
+      $('dw-section').hidden = true;
+    }
+
+    // Models gallery: physical + digital models declared in the project JSON
+    var models = p.models || [];
+    if (models.length) {
+      $('p-models').hidden = false;
+      $('p-models-grid').innerHTML = models.map(function (m) {
+        var cap = clean(m.caption);
+        return '<figure style="margin:0">' +
+          '<img src="content/projects/' + m.file + '" alt="' + esc(cap) + '" loading="lazy" style="width:100%; display:block; border:1px solid var(--line); background:#FFF">' +
+          '<figcaption style="font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:8px; line-height:1.5">' + esc(cap) +
+          (m.medium ? ' · ' + esc(clean(m.medium)) : '') + '</figcaption></figure>';
+      }).join('');
+    }
 
     if (p.slug === 'proctor-landing-park') {
       $('mp-section').hidden = false;
