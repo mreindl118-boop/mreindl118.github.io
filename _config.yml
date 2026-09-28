@@ -1,0 +1,4 @@
+# Keep repo meta-files out of the served site.
+exclude:
+  - CLAUDE.md
+  - README.md
