@@ -346,6 +346,7 @@
       $('mp-section').hidden = false;
       mpInit();
       bkInit();
+      bkStart(); // booklet opens automatically; the intro gate becomes a loading state
     }
   }
 
