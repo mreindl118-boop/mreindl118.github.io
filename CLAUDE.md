@@ -60,7 +60,12 @@ clipped at the page edge; the full spreads were recovered by stitching the
 left/right half pages of the 31-page A4 export (2k, 2k+1 -> spread k at
 200 dpi). A corrected re-export replaces this pipeline: privacy pass, then
 re-render spreads and rebuild the download PDF. Portfolio spreads also
-feed the project pages (`content/projects/<slug>/pf-NN.webp`).
+feed the project pages (`content/projects/<slug>/pf-NN.webp`), and the
+Projects-page blowouts use individual figures cut from the boards
+(`content/projects/<slug>/g-*.webp`, `gallery` + `focus` in each JSON).
+The final colophon page carries a composited closer (small b&w headshot +
+about block above the name) added by Claude on both spread-15.webp and the
+download PDF's last page — re-apply it after any portfolio re-export.
 
 Pages are static HTML + `content/site.json` and `content/projects/*.json`
 (`index.json` lists slugs). `hidden: true` unlists a project everywhere while
