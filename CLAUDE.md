@@ -48,6 +48,11 @@ Procedure when asked to "check the drop box" (or when the trigger fires):
 
 ## Content architecture
 
+`portfolio.html` shows the portfolio PDF as pre-rendered webps
+(`assets/portfolio/page-NN.webp`) with a download of
+`assets/Matthew_Reindl_Portfolio.pdf`; a replacement PDF goes through the
+privacy pass, then re-render the webps (PyMuPDF at 170 dpi, quality 80).
+
 Pages are static HTML + `content/site.json` and `content/projects/*.json`
 (`index.json` lists slugs). `hidden: true` unlists a project everywhere while
 its direct project.html URL keeps working. `[CONFIRM ...]` markers in JSON are
