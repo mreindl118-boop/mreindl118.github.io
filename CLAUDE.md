@@ -48,6 +48,10 @@ Procedure when asked to "check the drop box" (or when the trigger fires):
 
 ## Content architecture
 
+Nav is four tabs: Home, Projects (work.html, links to the portfolio),
+About (carries contact at `#contact`; contact.html redirects), Experience
+(resume.html, carries skills at `#skills`; skills.html redirects).
+
 `portfolio.html` shows the portfolio PDF as pre-rendered webps
 (`assets/portfolio/page-NN.webp`) with a download of
 `assets/Matthew_Reindl_Portfolio.pdf`; a replacement PDF goes through the

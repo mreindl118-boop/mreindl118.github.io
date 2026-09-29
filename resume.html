@@ -24,11 +24,9 @@
     </a>
     <div class="navlinks">
       <a href="index.html"><span>Home</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
-      <a href="work.html"><span>Work</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
-      <a href="skills.html"><span>Skills</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
+      <a href="work.html"><span>Projects</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
       <a href="about.html"><span>About</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
-      <a href="resume.html" class="active"><span>Résumé</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
-      <a href="portfolio.html"><span>Portfolio</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
+      <a href="resume.html" class="active"><span>Experience</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
     </div>
   </div>
 </nav>
@@ -177,6 +175,15 @@
   </div>
 </div>
 
+
+<div class="wrap no-print" id="skills" style="scroll-margin-top:90px; padding-top:12px; padding-bottom:72px">
+  <div class="rule-motif" style="margin-bottom:22px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
+  <div class="kicker" style="margin-bottom:12px">Toolkit</div>
+  <h2 class="h-serif" style="font-weight:400; font-size:32px; margin:0 0 8px">Skills</h2>
+  <p class="mono-note" style="margin:0 0 34px">From site analysis to fabrication — the tools behind the drawings.</p>
+  <div id="skills-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:40px 48px"></div>
+</div>
+
 <footer class="foot-slim no-print">
   <div class="rule-motif" style="color:#454A4D; max-width:1240px; margin:0 auto 16px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
   <div class="foot-slim-inner">
@@ -189,5 +196,33 @@
 </footer>
 
 <script src="assets/js/site.js"></script>
+<script>
+(function () {
+  var LABELS = {
+    drafting: 'Drafting + Production',
+    modeling: 'Modeling',
+    fabrication: 'Fabrication + Models',
+    visualization: 'Visualization',
+    analysis: 'Analysis + Estimating'
+  };
+  US.loadSite().then(function (site) {
+    var skills = site.skills || {};
+    document.getElementById('skills-grid').innerHTML = Object.keys(skills).map(function (cat) {
+      var rows = skills[cat].map(function (s) {
+        var parts = US.clean(s.level).split('\u2014');
+        var grade = parts[0].trim();
+        var detail = (parts[1] || '').trim();
+        return '<div style="border-bottom:1px solid var(--line-soft); padding:10px 0">' +
+          '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:16px">' +
+          '<span class="skill-tool">' + US.esc(s.tool) + '</span>' +
+          '<span style="font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:' + (grade.toLowerCase() === 'fluent' ? 'var(--pine)' : 'var(--faint)') + '; flex-shrink:0">' + US.esc(grade) + '</span></div>' +
+          (detail ? '<div class="skill-level" style="margin-top:3px">' + US.esc(detail) + '</div>' : '') +
+          '</div>';
+      }).join('');
+      return '<div class="rule-section"><div class="rule-label">' + US.esc(LABELS[cat] || cat) + '</div>' + rows + '</div>';
+    }).join('');
+  }).catch(function (e) { console.warn('skills failed', e); });
+})();
+</script>
 </body>
 </html>
