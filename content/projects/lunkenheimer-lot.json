@@ -1,12 +1,12 @@
 {
  "slug": "lunkenheimer-lot",
- "hidden": true,
+ "hidden": false,
  "title": "Lunkenheimer Lot Skatepark",
  "subtitle": "Redevelopment suggestion",
  "location": "Cincinnati, OH",
  "year": 2025,
  "yearLabel": "Concept study [CONFIRM year]",
- "sortKey": 65,
+ "sortKey": 75,
  "type": "Public realm",
  "scale": "Vacant-lot redevelopment",
  "role": "Concept design [CONFIRM course/context]",
@@ -24,6 +24,13 @@
    "body": "[CONFIRM] An underused industrial lot reimagined as a neighborhood skatepark: bowl, ledges, and banks set in a planted plaza, tested through a stylized plan and laser-cut-style digital terrain models."
   }
  ],
- "images": [],
- "models": []
+ "images": [
+  {
+   "file": "lunkenheimer-lot/pf-10.webp",
+   "caption": "Redevelopment plan — bowl, street course, stage, and planted edges, with terrain models",
+   "drawing_type": "Portfolio spread",
+   "scale": "",
+   "software": ""
+  }
+ ]
 }

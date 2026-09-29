@@ -1,0 +1,30 @@
+{
+ "slug": "west-end-transit-plaza",
+ "title": "West End Transit Plaza",
+ "subtitle": "Studio — transit and public realm",
+ "location": "Cincinnati, OH",
+ "year": 2025,
+ "yearLabel": "MLA studio [CONFIRM year]",
+ "type": "Transit / public realm",
+ "scale": "Plaza + streetscape",
+ "role": "MLA studio [CONFIRM role/team]",
+ "collaborators": "",
+ "software": [
+  "Rhino",
+  "SketchUp",
+  "Illustrator"
+ ],
+ "summary": "A studio design for a West End transit plaza — canopy, planted plaza, and bus-bay public realm that makes waiting a comfortable civic moment. [CONFIRM details]",
+ "hidden": false,
+ "sortKey": 90,
+ "cover": "west-end-transit-plaza/cover.webp",
+ "images": [
+  {
+   "file": "west-end-transit-plaza/pf-07.webp",
+   "caption": "Transit plaza site plan, canopy, and street views along the bus bays",
+   "drawing_type": "Portfolio spread",
+   "scale": "",
+   "software": ""
+  }
+ ]
+}

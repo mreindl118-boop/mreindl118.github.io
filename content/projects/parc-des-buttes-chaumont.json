@@ -1,12 +1,12 @@
 {
  "slug": "parc-des-buttes-chaumont",
- "hidden": true,
+ "hidden": false,
  "title": "Parc des Buttes-Chaumont",
  "subtitle": "Modeling studies",
  "location": "Paris, France",
  "year": 2025,
  "yearLabel": "Modeling study [CONFIRM year]",
- "sortKey": 60,
+ "sortKey": 95,
  "type": "Modeling study",
  "scale": "Park terrain studies",
  "role": "Modeling study [CONFIRM course/context]",
@@ -24,6 +24,13 @@
    "body": "[CONFIRM] Reading dramatic constructed topography through physical modeling: stacked-contour studies, a fold-out chipboard model, and a 3D resin print of the quarry landform around the lake and island."
   }
  ],
- "images": [],
- "models": []
+ "images": [
+  {
+   "file": "parc-des-buttes-chaumont/pf-06.webp",
+   "caption": "Precedent study opener — terrain and contour models of the lake and belvedere island",
+   "drawing_type": "Portfolio spread",
+   "scale": "",
+   "software": ""
+  }
+ ]
 }

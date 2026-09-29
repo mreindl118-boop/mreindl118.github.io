@@ -1,11 +1,11 @@
 {
  "slug": "ulsan-hhi-campus",
- "hidden": true,
+ "hidden": false,
  "title": "Hyundai Heavy Industries Campus Addition",
  "location": "Ulsan, South Korea",
  "year": 2025,
  "yearLabel": "MLA studio [CONFIRM year]",
- "sortKey": 90,
+ "sortKey": 70,
  "type": "Campus",
  "scale": "Industrial campus addition",
  "role": "MLA studio — circular economies [CONFIRM role/team]",
@@ -25,25 +25,18 @@
  ],
  "images": [
   {
-   "file": "ulsan-hhi-campus/plan.webp",
-   "caption": "Campus plan with material-flow systems",
-   "drawing_type": "Site plan",
-   "scale": "[confirm scale]",
-   "software": "Rhino + Illustrator"
+   "file": "ulsan-hhi-campus/pf-11.webp",
+   "caption": "Circular economies — closing the loop: material and energy flows",
+   "drawing_type": "Portfolio spread",
+   "scale": "",
+   "software": ""
   },
   {
-   "file": "ulsan-hhi-campus/systems.webp",
-   "caption": "Circular-economy systems diagram",
-   "drawing_type": "Diagram",
-   "scale": "NTS",
-   "software": "Illustrator"
-  },
-  {
-   "file": "ulsan-hhi-campus/section.webp",
-   "caption": "Campus edge section",
-   "drawing_type": "Section",
-   "scale": "[confirm scale]",
-   "software": "Rhino + Illustrator"
+   "file": "ulsan-hhi-campus/pf-10.webp",
+   "caption": "Campus opener and Mipo-dong wastewater expansion site plan",
+   "drawing_type": "Portfolio spread",
+   "scale": "",
+   "software": ""
   }
  ]
 }

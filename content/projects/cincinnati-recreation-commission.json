@@ -1,0 +1,28 @@
+{
+ "slug": "cincinnati-recreation-commission",
+ "title": "Cincinnati Recreation Commission",
+ "subtitle": "Professional work",
+ "location": "Cincinnati, OH",
+ "year": 2025,
+ "yearLabel": "Professional work",
+ "type": "Professional",
+ "scale": "Citywide public sites",
+ "role": "Public-space design support",
+ "collaborators": "Cincinnati Recreation Commission",
+ "software": [
+  "ArcGIS Pro"
+ ],
+ "summary": "Professional public-space design support — GIS inventory and analysis across city recreation sites, and planting installation in the field.",
+ "hidden": false,
+ "sortKey": 80,
+ "cover": "cincinnati-recreation-commission/cover.webp",
+ "images": [
+  {
+   "file": "cincinnati-recreation-commission/pf-09.webp",
+   "caption": "GIS inventory and planting installation — citywide tree cover and impervious-surface analysis",
+   "drawing_type": "Portfolio spread",
+   "scale": "",
+   "software": ""
+  }
+ ]
+}

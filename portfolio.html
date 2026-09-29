@@ -36,16 +36,42 @@
     <div>
       <div class="kicker" style="margin-bottom:14px">Selected Work · 2022–2026</div>
       <h1 class="h-serif" style="font-weight:400; font-size:clamp(38px,5.5vw,60px); line-height:1.05; margin:0 0 10px">Portfolio</h1>
-      <p class="mono-note" style="margin:0">Nine projects, capstone to professional work — read it here or take the PDF.</p>
+      <p class="mono-note" style="margin:0">Nine projects, capstone to professional work — 15 spreads, or take the PDF.</p>
     </div>
     <a class="btn" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf" style="min-height:44px; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; padding:0 20px; display:inline-flex; align-items:center">Download PDF ↓</a>
   </div>
 
-  <div class="rule-motif" style="margin:34px 0 30px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
+  <div class="rule-motif" style="margin:34px 0 26px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
 
-  <div id="pf-pages" style="display:flex; flex-direction:column; gap:10px; max-width:920px; margin:0 auto"></div>
+  <div class="viewer">
+    <div class="vbar">
+      <div class="vgroup">
+        <button class="vbtn" id="pf-prev" title="Previous spread">←</button>
+        <button class="vbtn" id="pf-next" title="Next spread">→</button>
+        <span class="vcount">SPREAD <span id="pf-num">01</span> / <span id="pf-count">15</span></span>
+      </div>
+      <div class="vgroup">
+        <button class="vbtn" id="pf-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
+        <button class="vbtn" id="pf-zin" title="Zoom in"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
+        <button class="vbtn vbtn-wide" id="pf-fit">FIT</button>
+      </div>
+    </div>
+    <div class="vstage tall" id="pf-stage">
+      <div class="vsurface" id="pf-surface"></div>
+      <div class="vbadge" id="pf-badge">100% · drag to pan</div>
+    </div>
+    <div class="vscrub">
+      <span class="end">01</span>
+      <input type="range" id="pf-scrub" min="0" max="14" value="0">
+      <span class="end">15</span>
+    </div>
+    <div class="vfoot">
+      <span id="pf-caption">Cover</span>
+      <span class="vmeta">Selected Work · 2022–2026</span>
+    </div>
+  </div>
 
-  <div style="display:flex; justify-content:center; margin-top:44px">
+  <div style="display:flex; justify-content:center; margin-top:36px">
     <a class="btn" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf" style="min-height:44px; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; padding:0 20px; display:inline-flex; align-items:center">Download PDF ↓</a>
   </div>
 </div>
@@ -64,19 +90,45 @@
 <script src="assets/js/site.js"></script>
 <script>
 (function () {
-  // 29 content pages pre-rendered from the PDF (the trailing colophon
-  // and blank sheet stay in the download only).
-  var N = 29, out = [];
-  for (var i = 1; i <= N; i++) {
-    var nn = (i < 10 ? '0' : '') + i;
-    out.push('<figure style="margin:0">' +
-      '<img src="assets/portfolio/page-' + nn + '.webp" alt="Portfolio page ' + i + '"' +
-      (i <= 2 ? ' fetchpriority="high"' : ' loading="lazy"') +
-      ' style="width:100%; display:block; border:1px solid var(--line); background:#FFF">' +
-      '<figcaption style="font-family:var(--mono); font-size:10px; letter-spacing:.08em; color:var(--faint); text-align:right; padding:4px 2px 8px">' + nn + ' / ' + N + '</figcaption>' +
-      '</figure>');
+  var N = 15, idx = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var CAPS = ['Cover', 'Contents · 01 Proctor Landing Park', 'Proctor Landing Park — master plan',
+    'Proctor Landing Park — design features', 'Proctor Landing Park — systems + planting',
+    'Proctor Landing Park — crossings + recognition', '02 Parc des Buttes-Chaumont — models',
+    '03 West End Transit Plaza', '04 Weaver Recreation Redesign', '05 Cincinnati Recreation Commission',
+    '06 Lunkenheimer Lot', '07 Hyundai Heavy Industries Campus', '08 Evans Park — concepts',
+    '09 Green Roof Studies', 'Other work and process'];
+  function src(k) { return 'assets/portfolio/spread-' + String(k).padStart(2, '0') + '.webp'; }
+  var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));
+  function show(k) {
+    idx = Math.min(Math.max(k, 0), N - 1);
+    var img = document.createElement('img');
+    img.src = src(idx);
+    img.alt = CAPS[idx];
+    img.draggable = false;
+    img.style.cssText = 'max-width:100%; max-height:100%; width:auto; height:auto; display:block; background:#FFF; user-select:none';
+    var surface = $('pf-surface');
+    surface.innerHTML = '';
+    surface.appendChild(img);
+    pz.fit();
+    $('pf-num').textContent = String(idx + 1).padStart(2, '0');
+    $('pf-caption').textContent = CAPS[idx];
+    $('pf-scrub').value = idx;
+    [idx + 1, idx - 1].forEach(function (n) {
+      if (n >= 0 && n < N) { var pre = new Image(); pre.src = src(n); }
+    });
   }
-  document.getElementById('pf-pages').innerHTML = out.join('');
+  $('pf-prev').onclick = function () { show(idx - 1); };
+  $('pf-next').onclick = function () { show(idx + 1); };
+  $('pf-zin').onclick = pz.zoomIn;
+  $('pf-zout').onclick = pz.zoomOut;
+  $('pf-fit').onclick = pz.fit;
+  $('pf-scrub').addEventListener('input', function (e) { show(parseInt(e.target.value, 10) || 0); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') show(idx - 1);
+    if (e.key === 'ArrowRight') show(idx + 1);
+  });
+  show(0);
 })();
 </script>
 </body>

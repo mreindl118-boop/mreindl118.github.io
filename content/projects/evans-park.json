@@ -1,12 +1,12 @@
 {
  "slug": "evans-park",
- "hidden": true,
+ "hidden": false,
  "title": "Evans Park",
  "subtitle": "Mill Creek Dam Replacement",
  "location": "Cincinnati, OH",
  "year": 2024,
  "yearLabel": "MLA studio [CONFIRM year]",
- "sortKey": 70,
+ "sortKey": 65,
  "type": "Water infrastructure",
  "scale": "Dam replacement + park",
  "role": "MLA stormwater studio [CONFIRM role/team]",
@@ -26,25 +26,18 @@
  ],
  "images": [
   {
-   "file": "evans-park/terrain.webp",
-   "caption": "Terrain and grading study at the dam",
-   "drawing_type": "Grading plan",
-   "scale": "[confirm scale]",
-   "software": "Rhino + AutoCAD"
+   "file": "evans-park/pf-12.webp",
+   "caption": "Concept plans — wetland loop and crossings; dam removal and dam retained",
+   "drawing_type": "Portfolio spread",
+   "scale": "",
+   "software": ""
   },
   {
-   "file": "evans-park/hydrology.webp",
-   "caption": "Watershed and flow analysis",
-   "drawing_type": "Analysis map",
-   "scale": "[confirm scale]",
-   "software": "ArcGIS Pro"
-  },
-  {
-   "file": "evans-park/section.webp",
-   "caption": "Section through spillway and terraces",
-   "drawing_type": "Section",
-   "scale": "[confirm scale]",
-   "software": "AutoCAD + Illustrator"
+   "file": "evans-park/pf-11.webp",
+   "caption": "Evans Park opener — two concepts for the Mill Creek dam replacement",
+   "drawing_type": "Portfolio spread",
+   "scale": "",
+   "software": ""
   }
  ]
 }

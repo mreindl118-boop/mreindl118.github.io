@@ -52,10 +52,15 @@ Nav is four tabs: Home, Projects (work.html, links to the portfolio),
 About (carries contact at `#contact`; contact.html redirects), Experience
 (resume.html, carries skills at `#skills`; skills.html redirects).
 
-`portfolio.html` shows the portfolio PDF as pre-rendered webps
-(`assets/portfolio/page-NN.webp`) with a download of
-`assets/Matthew_Reindl_Portfolio.pdf`; a replacement PDF goes through the
-privacy pass, then re-render the webps (PyMuPDF at 170 dpi, quality 80).
+`portfolio.html` is a booklet-style spread viewer (like the capstone
+booklet) over `assets/portfolio/spread-NN.webp` (00 = cover, 01-14 =
+two-page spreads), with `assets/Matthew_Reindl_Portfolio.pdf` rebuilt from
+those images as the download. The owner's PDF exports have had each spread
+clipped at the page edge; the full spreads were recovered by stitching the
+left/right half pages of the 31-page A4 export (2k, 2k+1 -> spread k at
+200 dpi). A corrected re-export replaces this pipeline: privacy pass, then
+re-render spreads and rebuild the download PDF. Portfolio spreads also
+feed the project pages (`content/projects/<slug>/pf-NN.webp`).
 
 Pages are static HTML + `content/site.json` and `content/projects/*.json`
 (`index.json` lists slugs). `hidden: true` unlists a project everywhere while

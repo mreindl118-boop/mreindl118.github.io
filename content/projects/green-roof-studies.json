@@ -1,0 +1,29 @@
+{
+ "slug": "green-roof-studies",
+ "title": "Green Roof Studies",
+ "subtitle": "Living architecture",
+ "location": "Chicago, IL",
+ "year": 2025,
+ "yearLabel": "Spring 2025",
+ "type": "Living architecture",
+ "scale": "Intensive green roof",
+ "role": "MLA coursework [CONFIRM role]",
+ "collaborators": "",
+ "software": [
+  "SketchUp",
+  "AutoCAD"
+ ],
+ "summary": "An intensive green-roof study for the Clarendon Park Community Center in Chicago — planted beds, HVAC screening, elevator core, and a paved loop designed as living architecture.",
+ "hidden": false,
+ "sortKey": 60,
+ "cover": "green-roof-studies/cover.webp",
+ "images": [
+  {
+   "file": "green-roof-studies/pf-13.webp",
+   "caption": "Roof plan, planted beds, massing model, and roof elevation — Clarendon Park Community Center",
+   "drawing_type": "Portfolio spread",
+   "scale": "",
+   "software": ""
+  }
+ ]
+}

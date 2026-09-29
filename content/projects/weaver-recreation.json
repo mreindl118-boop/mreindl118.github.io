@@ -1,12 +1,12 @@
 {
  "slug": "weaver-recreation",
- "hidden": true,
+ "hidden": false,
  "title": "Weaver Recreation Redesign",
  "subtitle": "Public Amphitheater",
  "location": "Cincinnati, OH — West End",
  "year": 2025,
  "yearLabel": "MLA studio [CONFIRM year]",
- "sortKey": 80,
+ "sortKey": 85,
  "type": "Public realm",
  "scale": "Neighborhood recreation site",
  "role": "MLA studio — CRC / West End [CONFIRM role/team]",
@@ -26,25 +26,11 @@
  ],
  "images": [
   {
-   "file": "weaver-recreation/site-plan.webp",
-   "caption": "Site plan, amphitheater and field reorganization",
-   "drawing_type": "Site plan",
-   "scale": "[confirm scale]",
-   "software": "AutoCAD + Photoshop"
-  },
-  {
-   "file": "weaver-recreation/section.webp",
-   "caption": "Section through amphitheater seating",
-   "drawing_type": "Section",
-   "scale": "[confirm scale]",
-   "software": "AutoCAD + Illustrator"
-  },
-  {
-   "file": "weaver-recreation/render.webp",
-   "caption": "Amphitheater in evening use",
-   "drawing_type": "Rendering",
-   "scale": "NTS",
-   "software": "Rhino + Photoshop"
+   "file": "weaver-recreation/pf-08.webp",
+   "caption": "Site plan, amphitheater rings, and planted rooms with aerial views",
+   "drawing_type": "Portfolio spread",
+   "scale": "",
+   "software": ""
   }
  ]
 }
