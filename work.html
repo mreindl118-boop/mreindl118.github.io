@@ -34,24 +34,37 @@
 <div class="wrap" style="padding-top:56px; padding-bottom:88px">
   <div class="kicker" style="margin-bottom:14px">Work</div>
   <h1 class="h-serif" style="font-weight:400; font-size:clamp(38px,5.5vw,60px); line-height:1.05; margin:0 0 10px">Projects</h1>
-  <p class="mono-note" id="count" style="margin:0 0 30px"></p>
+
+  <div style="display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; margin-top:8px">
+    <div class="kicker" style="font-size:11px; letter-spacing:.12em">Portfolio &middot; Selected Work 2022&ndash;2026</div>
+    <a class="link-mono" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf">Download PDF &darr;</a>
+  </div>
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:14px">
+    <div class="vgroup">
+      <button class="vbtn" id="pf-prev" title="Previous spread">&larr;</button>
+      <button class="vbtn" id="pf-next" title="Next spread">&rarr;</button>
+      <span class="vcount">SPREAD <span id="pf-num">01</span> / 16</span>
+    </div>
+    <div class="vgroup">
+      <button class="vbtn" id="pf-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
+      <button class="vbtn" id="pf-zin" title="Zoom in"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
+      <button class="vbtn vbtn-wide" id="pf-fit">FIT</button>
+    </div>
+  </div>
+  <div id="pf-stage" style="position:relative; height:min(74vh,680px); overflow:hidden; margin-top:8px; touch-action:none">
+    <div class="vsurface" id="pf-surface" style="border:none; background:transparent"></div>
+    <div class="vbadge" id="pf-badge">100% &middot; drag to pan</div>
+  </div>
+  <div class="thumbs" id="pf-tags" style="margin-top:10px"></div>
+
+  <div class="rule-motif" style="margin:56px 0 26px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
+  <h2 class="h-serif" style="font-size:30px; margin:0 0 6px">Individual Projects</h2>
+  <p class="mono-note" id="count" style="margin:0 0 22px"></p>
 
   <div class="chips" id="chips"></div>
 
   <div id="grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:36px 28px"></div>
 
-  <a class="feature-link" href="portfolio.html" style="display:block; margin-top:64px">
-    <div class="rule-motif" style="margin-bottom:22px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
-    <div style="display:flex; gap:24px 40px; align-items:center; flex-wrap:wrap; justify-content:space-between">
-      <div>
-        <span class="feature-tag">Portfolio · Selected Work 2022–2026</span>
-        <div class="feature-title" style="font-size:25px; margin-top:8px">The full portfolio</div>
-        <p style="font-size:15px; line-height:1.6; color:var(--muted); margin:8px 0 0; max-width:52ch">Nine projects, capstone to professional work — read it online or download the PDF.</p>
-        <span class="link-mono" style="display:inline-block; margin-top:14px">Open portfolio →</span>
-      </div>
-      <img src="assets/portfolio/spread-00.webp" alt="Portfolio cover" loading="lazy" style="width:150px; max-width:100%; border:1px solid var(--line); background:#FFF; display:block">
-    </div>
-  </a>
 </div>
 
 <footer class="foot-slim">
@@ -66,6 +79,43 @@
 </footer>
 
 <script src="assets/js/site.js"></script>
+<script>
+(function () {
+  var N = 16, idx = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var TAGS = [['Cover',0],['Contents',1],['01 Proctor',2],['02 Buttes-Chaumont',6],['03 West End',7],
+    ['04 Weaver',8],['05 CRC',9],['06 Lunkenheimer',10],['07 Hyundai',11],['08 Evans',12],
+    ['09 Green Roof',13],['Other Work',14],['Colophon',15]];
+  function src(k) { return 'assets/portfolio/spread-' + String(k).padStart(2, '0') + '.webp'; }
+  var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));
+  $('pf-tags').innerHTML = TAGS.map(function (t, i) {
+    return '<button class="thumbbtn" data-k="' + t[1] + '">' + t[0] + '</button>';
+  }).join('');
+  function show(k) {
+    idx = Math.min(Math.max(k, 0), N - 1);
+    var img = document.createElement('img');
+    img.src = src(idx); img.alt = 'Portfolio spread ' + (idx + 1); img.draggable = false;
+    img.style.cssText = 'max-width:100%; max-height:100%; width:auto; height:auto; display:block; user-select:none';
+    var sf = $('pf-surface'); sf.innerHTML = ''; sf.appendChild(img);
+    pz.fit();
+    $('pf-num').textContent = String(idx + 1).padStart(2, '0');
+    var active = 0;
+    TAGS.forEach(function (t, i) { if (idx >= t[1]) active = i; });
+    Array.prototype.forEach.call($('pf-tags').children, function (b, i) {
+      b.classList.toggle('active', i === active);
+    });
+    [idx + 1, idx - 1].forEach(function (n) { if (n >= 0 && n < N) { var p = new Image(); p.src = src(n); } });
+  }
+  $('pf-tags').addEventListener('click', function (e) {
+    var b = e.target.closest('.thumbbtn');
+    if (b) show(parseInt(b.getAttribute('data-k'), 10));
+  });
+  $('pf-prev').onclick = function () { show(idx - 1); };
+  $('pf-next').onclick = function () { show(idx + 1); };
+  $('pf-zin').onclick = pz.zoomIn; $('pf-zout').onclick = pz.zoomOut; $('pf-fit').onclick = pz.fit;
+  show(0);
+})();
+</script>
 <script>
 (function () {
   var all = [], active = 'All';
