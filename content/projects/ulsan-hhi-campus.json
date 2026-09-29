@@ -38,5 +38,28 @@
    "scale": "",
    "software": ""
   }
+ ],
+ "gallery": [
+  {
+   "file": "ulsan-hhi-campus/g-h21_f1.webp",
+   "caption": "Site plan — Mipo-dong wastewater expansion"
+  },
+  {
+   "file": "ulsan-hhi-campus/g-h22_f0.webp",
+   "caption": "Circular economies — closing the loop"
+  },
+  {
+   "file": "ulsan-hhi-campus/g-h22_f1.webp",
+   "caption": "Bamboo rain garden and stormwater management"
+  },
+  {
+   "file": "ulsan-hhi-campus/g-h22_f2.webp",
+   "caption": "Renewable energy — offshore wind to PEM station"
+  }
+ ],
+ "focus": [
+  "Systems thinking at industrial-campus scale",
+  "Water, energy, and material loops drawn as one legible diagram",
+  "Circular-economy strategy grounded in a real site plan"
  ]
 }

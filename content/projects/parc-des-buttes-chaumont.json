@@ -5,7 +5,7 @@
  "subtitle": "Modeling studies",
  "location": "Paris, France",
  "year": 2025,
- "yearLabel": "Modeling study [CONFIRM year]",
+ "yearLabel": "2025 [CONFIRM]",
  "sortKey": 95,
  "type": "Modeling study",
  "scale": "Park terrain studies",
@@ -32,5 +32,32 @@
    "scale": "",
    "software": ""
   }
+ ],
+ "gallery": [
+  {
+   "file": "parc-des-buttes-chaumont/g-h12_f1.webp",
+   "caption": "Terrain study model — carved contours around the lake basin"
+  },
+  {
+   "file": "parc-des-buttes-chaumont/g-h13_f0.webp",
+   "caption": "Contour map of the lake and belvedere island"
+  },
+  {
+   "file": "parc-des-buttes-chaumont/g-h13_f1.webp",
+   "caption": "Cast terrain model"
+  },
+  {
+   "file": "parc-des-buttes-chaumont/g-h13_f2.webp",
+   "caption": "Fold-out chipboard contour model"
+  },
+  {
+   "file": "parc-des-buttes-chaumont/g-h13_f3.webp",
+   "caption": "Section through the belvedere cliff"
+  }
+ ],
+ "focus": [
+  "Terrain literacy — reading and rebuilding extreme constructed topography",
+  "Model-making range: chipboard contours, cast terrain, digital contour mapping",
+  "Precedent analysis translated into section and circulation studies"
  ]
 }

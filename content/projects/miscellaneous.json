@@ -1,0 +1,62 @@
+{
+ "slug": "miscellaneous",
+ "gallery": [
+  {
+   "file": "miscellaneous/g-h28_f0.webp",
+   "caption": "Rome–Union Park, preliminary design"
+  },
+  {
+   "file": "miscellaneous/g-h28_f2.webp",
+   "caption": "Railroad Avenue pocket park, plan"
+  },
+  {
+   "file": "miscellaneous/g-h28_f3.webp",
+   "caption": "Streetscape planting plan"
+  },
+  {
+   "file": "miscellaneous/g-h29_f0.webp",
+   "caption": "Little Miami Trail — lowland crossings and open space"
+  },
+  {
+   "file": "miscellaneous/g-h28_f4.webp",
+   "caption": "Foam-core contour model in progress"
+  },
+  {
+   "file": "miscellaneous/g-h29_f1.webp",
+   "caption": "Clay terrain study"
+  },
+  {
+   "file": "miscellaneous/g-h28_f1.webp",
+   "caption": "Flying pig — illustration practice"
+  },
+  {
+   "file": "miscellaneous/g-h29_f2.webp",
+   "caption": "Portrait study, charcoal"
+  }
+ ],
+ "focus": [
+  "Preliminary park designs: Rome–Union Park and Railroad Avenue",
+  "Little Miami Trail lowland crossings and streetscape planting",
+  "The hands behind the work: clay, foam, charcoal, and illustration"
+ ],
+ "hidden": false,
+ "title": "Miscellaneous",
+ "subtitle": "Other work and process",
+ "location": "Cincinnati, OH",
+ "year": 2026,
+ "yearLabel": "2022–2026",
+ "sortKey": 55,
+ "type": "Other work",
+ "scale": "Studies + process",
+ "role": "Various",
+ "collaborators": "",
+ "software": [
+  "Rhino",
+  "Procreate",
+  "Illustrator"
+ ],
+ "cover": "miscellaneous/cover.webp",
+ "summary": "Process, side projects, and studies that don’t need a whole chapter — preliminary park designs, pocket parks, trail work, terrain models in progress, and drawing practice.",
+ "sections": [],
+ "images": []
+}

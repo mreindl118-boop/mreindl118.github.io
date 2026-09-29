@@ -32,5 +32,24 @@
    "scale": "",
    "software": ""
   }
+ ],
+ "gallery": [
+  {
+   "file": "weaver-recreation/g-h16_f1.webp",
+   "caption": "Site plan — amphitheater rings and planted rooms"
+  },
+  {
+   "file": "weaver-recreation/g-h17_f0.webp",
+   "caption": "Aerial — pavilion and path rings"
+  },
+  {
+   "file": "weaver-recreation/g-h17_f1.webp",
+   "caption": "Amphitheater seating from the street edge"
+  }
+ ],
+ "focus": [
+  "Amphitheater grading as landform, not object",
+  "Planted rooms and path rings that organize recreation",
+  "Plan and aerial studies pairing layout with experience"
  ]
 }

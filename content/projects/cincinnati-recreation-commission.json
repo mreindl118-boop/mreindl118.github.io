@@ -4,7 +4,7 @@
  "subtitle": "Professional work",
  "location": "Cincinnati, OH",
  "year": 2025,
- "yearLabel": "Professional work",
+ "yearLabel": "2025 · ongoing [CONFIRM]",
  "type": "Professional",
  "scale": "Citywide public sites",
  "role": "Public-space design support",
@@ -24,5 +24,32 @@
    "scale": "",
    "software": ""
   }
+ ],
+ "gallery": [
+  {
+   "file": "cincinnati-recreation-commission/g-h19_p1.webp",
+   "caption": "Installed entry planting"
+  },
+  {
+   "file": "cincinnati-recreation-commission/g-h19_p2.webp",
+   "caption": "Tree planting day"
+  },
+  {
+   "file": "cincinnati-recreation-commission/g-h18_f1.webp",
+   "caption": "Citywide tree cover and impervious surface"
+  },
+  {
+   "file": "cincinnati-recreation-commission/g-h18_f2.webp",
+   "caption": "GIS analysis, series A"
+  },
+  {
+   "file": "cincinnati-recreation-commission/g-h18_f3.webp",
+   "caption": "GIS analysis, series B"
+  }
+ ],
+ "focus": [
+  "Professional work with a public client",
+  "Citywide GIS inventory of tree cover and impervious surface",
+  "From analysis to shovel — planting designed and installed in the field"
  ]
 }

@@ -39,5 +39,32 @@
    "scale": "",
    "software": ""
   }
+ ],
+ "gallery": [
+  {
+   "file": "evans-park/g-h23_f1.webp",
+   "caption": "Concept 1 — dam removed, wetland corridor restored"
+  },
+  {
+   "file": "evans-park/g-h24_f2.webp",
+   "caption": "Concept 1 — wetland loop and crossings, plan detail"
+  },
+  {
+   "file": "evans-park/g-h24_f0.webp",
+   "caption": "Concept 1 — bridge crossing over the restored wetland"
+  },
+  {
+   "file": "evans-park/g-h24_f1.webp",
+   "caption": "Concept 1 — promenade along the wetland edge"
+  },
+  {
+   "file": "evans-park/g-h25_f1.webp",
+   "caption": "Concept 2 — dam retained, plaza on the impoundment"
+  }
+ ],
+ "focus": [
+  "Design as decision support — two honest options, drawn equally",
+  "Dam removal versus retention argued in plan and detail",
+  "Wetland loop, crossings, and recreation tested in both concepts"
  ]
 }

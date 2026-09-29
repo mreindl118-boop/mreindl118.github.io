@@ -67,6 +67,22 @@
 
 </div>
 
+
+<!-- In-page project blowout -->
+<div class="lightbox" id="bo-box" hidden>
+  <div class="lightbox-panel" style="width:min(96vw,1060px); max-height:92vh; display:flex; flex-direction:column">
+    <div class="vbar">
+      <span class="lightbox-title" id="bo-title"></span>
+      <div class="vgroup">
+        <button class="vbtn vbtn-wide" id="bo-prev" title="Previous project">&larr; PREV</button>
+        <button class="vbtn vbtn-wide" id="bo-next" title="Next project">NEXT &rarr;</button>
+        <button class="vbtn vbtn-close" id="bo-close" title="Close">&#10005;</button>
+      </div>
+    </div>
+    <div id="bo-body" style="overflow-y:auto; padding:24px 28px 34px; background:var(--paper)"></div>
+  </div>
+</div>
+
 <footer class="foot-slim">
   <div class="rule-motif" style="color:#454A4D; max-width:1240px; margin:0 auto 16px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
   <div class="foot-slim-inner">
@@ -154,6 +170,82 @@
     all = projects;
     render();
   }).catch(function (e) { console.warn('projects failed', e); });
+})();
+</script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var order = [], bySlug = {}, cur = -1;
+  var esc = US.esc, clean = US.clean;
+
+  function bodyHtml(p) {
+    var meta = [clean(p.type), clean(p.location), US.yearOf(p)].filter(Boolean).join(' &middot; ');
+    var h = '<div style="font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--pine)">' + meta + '</div>';
+    var blurb = clean(p.summary);
+    if (blurb) h += '<p style="font-size:16px; line-height:1.65; max-width:64ch; margin:12px 0 0; text-wrap:pretty">' + esc(blurb) + '</p>';
+    if (p.focus && p.focus.length) {
+      h += '<div class="rule-label" style="border-top:1px solid var(--ink); padding-top:10px; margin-top:22px; font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)">Why it matters</div>';
+      h += '<ul style="margin:10px 0 0; padding-left:18px; max-width:64ch">' + p.focus.map(function (f) {
+        return '<li style="font-size:14.5px; line-height:1.6; margin-top:6px">' + esc(clean(f)) + '</li>';
+      }).join('') + '</ul>';
+    }
+    if (p.slug === 'proctor-landing-park') {
+      h += '<div style="margin-top:18px"><a class="link-mono" href="project.html?slug=proctor-landing-park">Full capstone page + 45-page booklet &rarr;</a></div>';
+    }
+    var gal = p.gallery && p.gallery.length ? p.gallery : (p.images || []);
+    h += '<div style="display:flex; flex-direction:column; gap:26px; margin-top:28px">' + gal.map(function (g) {
+      return '<figure style="margin:0"><img src="content/projects/' + esc(g.file) + '" alt="' + esc(clean(g.caption)) + '" loading="lazy" style="width:100%; display:block; border:1px solid var(--line); background:#FFF">' +
+        '<figcaption style="font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:7px">' + esc(clean(g.caption)) + '</figcaption></figure>';
+    }).join('') + '</div>';
+    return h;
+  }
+
+  function open(slug, push) {
+    var i = order.indexOf(slug);
+    if (i < 0) return;
+    cur = i;
+    var p = bySlug[slug];
+    $('bo-title').textContent = p.title;
+    $('bo-body').innerHTML = bodyHtml(p);
+    $('bo-body').scrollTop = 0;
+    $('bo-box').hidden = false;
+    document.body.style.overflow = 'hidden';
+    if (push !== false) { try { history.replaceState(null, '', '#' + slug); } catch (e) {} }
+  }
+  function close() {
+    $('bo-box').hidden = true;
+    document.body.style.overflow = '';
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  }
+  function step(d) { if (cur >= 0) open(order[(cur + d + order.length) % order.length]); }
+
+  $('bo-close').onclick = close;
+  $('bo-prev').onclick = function () { step(-1); };
+  $('bo-next').onclick = function () { step(1); };
+  $('bo-box').addEventListener('click', function (e) { if (e.target === $('bo-box')) close(); });
+  document.addEventListener('keydown', function (e) {
+    if ($('bo-box').hidden) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') step(1);
+  });
+  // cards open the blowout instead of navigating (new-tab clicks still work)
+  $('grid').addEventListener('click', function (e) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+    var a = e.target.closest('a.card');
+    if (!a) return;
+    var m = /slug=([^&]+)/.exec(a.getAttribute('href') || '');
+    if (!m) return;
+    e.preventDefault();
+    open(decodeURIComponent(m[1]));
+  });
+  US.loadProjects().then(function (projects) {
+    var visible = projects.filter(function (p) { return !p.hidden; });
+    order = visible.map(function (p) { return p.slug; });
+    visible.forEach(function (p) { bySlug[p.slug] = p; });
+    var want = location.hash.replace('#', '');
+    if (want && bySlug[want]) open(want, false);
+  });
 })();
 </script>
 </body>
