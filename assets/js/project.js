@@ -27,6 +27,7 @@
     img.src = 'content/projects/' + im.file;
     img.alt = clean(im.caption);
     img.draggable = false;
+    img.onload = function () { dw.pz.fit(); };
     img.onerror = function () {
       surface.innerHTML =
         '<div style="width:900px; max-width:86vw; aspect-ratio:16/10; background:repeating-linear-gradient(45deg,#EDE9DB 0 8px,#F3F0E8 8px 16px); border:1px solid #C7C1AE; display:flex; align-items:center; justify-content:center">' +

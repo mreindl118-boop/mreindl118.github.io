@@ -43,7 +43,7 @@
     <div class="vgroup">
       <button class="vbtn" id="pf-prev" title="Previous spread">&larr;</button>
       <button class="vbtn" id="pf-next" title="Next spread">&rarr;</button>
-      <span class="vcount">SPREAD <span id="pf-num">01</span> / 16</span>
+      <span class="vcount">SPREAD <span id="pf-num">01</span> / 17</span>
     </div>
     <div class="vgroup">
       <button class="vbtn" id="pf-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
@@ -97,11 +97,11 @@
 <script src="assets/js/site.js"></script>
 <script>
 (function () {
-  var N = 16, idx = 0;
+  var N = 17, idx = 0;
   var $ = function (id) { return document.getElementById(id); };
   var TAGS = [['Cover',0],['Contents',1],['01 Proctor',2],['02 Buttes-Chaumont',6],['03 West End',7],
     ['04 Weaver',8],['05 CRC',9],['06 Lunkenheimer',10],['07 Hyundai',11],['08 Evans',12],
-    ['09 Green Roof',13],['Other Work',14],['Colophon',15]];
+    ['09 Green Roof',13],['Other Work',14],['Addendum',15],['Colophon',16]];
   function src(k) { return 'assets/portfolio/spread-' + String(k).padStart(2, '0') + '.webp'; }
   var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));
   $('pf-tags').innerHTML = TAGS.map(function (t, i) {
@@ -110,9 +110,20 @@
   function show(k) {
     idx = Math.min(Math.max(k, 0), N - 1);
     var img = document.createElement('img');
-    img.src = src(idx); img.alt = 'Portfolio spread ' + (idx + 1); img.draggable = false;
-    img.style.cssText = 'max-width:100%; max-height:100%; width:auto; height:auto; display:block; user-select:none';
-    var sf = $('pf-surface'); sf.innerHTML = ''; sf.appendChild(img);
+    img.src = src(idx);
+    img.alt = 'Portfolio spread ' + (idx + 1);
+    img.draggable = false;
+    img.style.cssText = 'max-width:100%; max-height:100%; width:auto; height:auto; display:block; background:#FFF; user-select:none; visibility:hidden';
+    var sf = $('pf-surface');
+    sf.innerHTML = '<span style="position:absolute; font-family:var(--mono); font-size:12px; color:var(--faint)">Loading spread\u2026</span>';
+    sf.appendChild(img);
+    var want = idx;
+    img.onload = function () {
+      if (want !== idx) return;
+      if (sf.firstChild && sf.firstChild.tagName === 'SPAN') sf.firstChild.remove();
+      img.style.visibility = 'visible';
+      pz.fit();
+    };
     pz.fit();
     $('pf-num').textContent = String(idx + 1).padStart(2, '0');
     var active = 0;
