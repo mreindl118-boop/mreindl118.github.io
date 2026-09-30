@@ -53,9 +53,14 @@ About (carries contact at `#contact`; contact.html redirects), Experience
 (resume.html, carries skills at `#skills`; skills.html redirects).
 
 `portfolio.html` is a booklet-style spread viewer (like the capstone
-booklet) over `assets/portfolio/spread-NN.webp` (00 = cover, 01-14 =
-two-page spreads), with `assets/Matthew_Reindl_Portfolio.pdf` rebuilt from
-those images as the download. The owner's PDF exports have had each spread
+booklet) over `assets/portfolio/spread-NN.webp` (00 = cover, 01-08 spreads,
+09 = Weaver laser-cut model spread added by Claude, 10-16 spreads incl.
+colophon), with `assets/Matthew_Reindl_Portfolio.pdf` rebuilt from the same
+half pages (33 pp) as the download. The owner's export clipped every
+bottom caption at the page edge, so each half page is extended 110 px and
+the clipped captions are re-typeset in IBM Plex Sans Text (transcriptions
+live in the session history; a future re-export needs the same pass unless
+the source gains a bottom margin). The owner's PDF exports have had each spread
 clipped at the page edge; the full spreads were recovered by stitching the
 left/right half pages of the 31-page A4 export (2k, 2k+1 -> spread k at
 200 dpi). A corrected re-export replaces this pipeline: privacy pass, then
