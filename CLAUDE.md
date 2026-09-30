@@ -60,16 +60,14 @@ half pages (33 pp) as the download. The owner's export clipped every
 bottom caption at the page edge, so each half page is extended 110 px and
 the clipped captions are re-typeset in IBM Plex Sans Text (transcriptions
 live in the session history; a future re-export needs the same pass unless
-the source gains a bottom margin). The owner's PDF exports have had each spread
-clipped at the page edge; the full spreads were recovered by stitching the
-left/right half pages of the 31-page A4 export (2k, 2k+1 -> spread k at
-200 dpi). A corrected re-export replaces this pipeline: privacy pass, then
-re-render spreads and rebuild the download PDF. Portfolio spreads also
+the source gains a bottom margin). Spreads are stitched from the export's left/right half
+pages (2k, 2k+1 -> spread k at 200 dpi). A re-export goes through the
+privacy pass, then the stitch, caption, model-spread and closer passes. Portfolio spreads also
 feed the project pages (`content/projects/<slug>/pf-NN.webp`), and the
 Projects-page blowouts use individual figures cut from the boards
 (`content/projects/<slug>/g-*.webp`, `gallery` + `focus` in each JSON).
 The final colophon page carries a composited closer (small b&w headshot +
-about block above the name) added by Claude on both spread-15.webp and the
+about block above the name) added by Claude on both spread-16.webp and the
 download PDF's last page — re-apply it after any portfolio re-export.
 
 Pages are static HTML + `content/site.json` and `content/projects/*.json`
