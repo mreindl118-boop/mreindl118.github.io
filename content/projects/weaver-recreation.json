@@ -39,6 +39,10 @@
    "caption": "Site plan — amphitheater rings and planted rooms"
   },
   {
+   "file": "weaver-recreation/model-01.webp",
+   "caption": "Laser-cut chipboard model — amphitheater rings, plaza pavilions, and planted rooms"
+  },
+  {
    "file": "weaver-recreation/g-h17_f0.webp",
    "caption": "Aerial — pavilion and path rings"
   },
@@ -51,5 +55,12 @@
   "Amphitheater grading as landform, not object",
   "Planted rooms and path rings that organize recreation",
   "Plan and aerial studies pairing layout with experience"
+ ],
+ "models": [
+  {
+   "file": "weaver-recreation/model-01.webp",
+   "caption": "Laser-cut chipboard model — amphitheater rings, plaza pavilions, and planted rooms",
+   "medium": "Laser-cut chipboard"
+  }
  ]
 }
