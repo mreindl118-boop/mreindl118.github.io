@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <nav class="nav">
   <div class="nav-inner">
@@ -30,6 +31,8 @@
     </div>
   </div>
 </nav>
+
+<main id="main" tabindex="-1">
 
 <div class="wrap" style="padding-top:56px; padding-bottom:88px">
   <div class="kicker" style="margin-bottom:14px">Work</div>
@@ -68,8 +71,10 @@
 </div>
 
 
+</main>
+
 <!-- In-page project blowout -->
-<div class="lightbox" id="bo-box" hidden>
+<div class="lightbox" id="bo-box" role="dialog" aria-modal="true" aria-labelledby="bo-title" hidden>
   <div class="lightbox-panel" style="width:min(96vw,1060px); max-height:92vh; display:flex; flex-direction:column">
     <div class="vbar">
       <span class="lightbox-title" id="bo-title"></span>
@@ -220,6 +225,7 @@
     return h;
   }
 
+  var opener = null;
   function open(slug, push) {
     var i = order.indexOf(slug);
     if (i < 0) return;
@@ -228,13 +234,16 @@
     $('bo-title').textContent = p.title;
     $('bo-body').innerHTML = bodyHtml(p);
     $('bo-body').scrollTop = 0;
+    var wasOpen = !$('bo-box').hidden;
     $('bo-box').hidden = false;
     document.body.style.overflow = 'hidden';
+    if (!wasOpen) { opener = document.activeElement; $('bo-close').focus(); }
     if (push !== false) { try { history.replaceState(null, '', '#' + slug); } catch (e) {} }
   }
   function close() {
     $('bo-box').hidden = true;
     document.body.style.overflow = '';
+    if (opener && opener.focus) opener.focus();
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
   }
   function step(d) { if (cur >= 0) open(order[(cur + d + order.length) % order.length]); }
@@ -246,6 +255,13 @@
   document.addEventListener('keydown', function (e) {
     if ($('bo-box').hidden) return;
     if (e.key === 'Escape') close();
+    if (e.key === 'Tab') {
+      var f = $('bo-box').querySelectorAll('button, a[href]');
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
     if (e.key === 'ArrowLeft') step(-1);
     if (e.key === 'ArrowRight') step(1);
   });

@@ -6,7 +6,7 @@
   --panel: #FAF8F2;
   --ink: #26292B;
   --muted: #5A5F58;
-  --faint: #8A8676;
+  --faint: #6E6A5C;
   --line: #D9D3C2;
   --line-soft: #E8E3D4;
   --line-mid: #C7C1AE;
@@ -371,4 +371,21 @@ img { max-width: 100%; }
   .resume-desk { background: #FFF; padding: 0; }
   .resume-sheet { box-shadow: none; max-width: none; padding: 0.25in 0.35in; }
   @page { size: letter; margin: 0.35in; }
+}
+
+/* ---------- Accessibility ---------- */
+.foot, .foot-slim { --faint: #A6A291; }
+.skip-link {
+  position: absolute; left: 12px; top: -60px; z-index: 1000; padding: 10px 16px;
+  background: var(--pine); color: var(--paper); font-family: var(--sans); font-weight: 600; text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
+main:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--pine); outline-offset: 3px; }
+.foot :focus-visible, .foot-slim :focus-visible { outline-color: var(--moss); }
+@media (max-width: 640px) {
+  .link-mono, .foot a, .foot-slim a, .foot-links a, a[href^="mailto:"], a[href*="linkedin.com"],
+  .navlinks a, a[href="work.html"][style*="font-family:var(--mono)"] {
+    display: inline-block; min-height: 24px; padding-top: 5px; padding-bottom: 5px;
+  }
 }

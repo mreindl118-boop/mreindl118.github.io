@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <nav class="nav">
   <div class="nav-inner">
@@ -29,6 +30,8 @@
     </div>
   </div>
 </nav>
+
+<main id="main" tabindex="-1">
 
 <div class="wrap" style="padding-top:36px; padding-bottom:88px">
   <a href="work.html" style="font-family:var(--mono); font-size:12px; text-decoration:none">← All work</a>
@@ -90,7 +93,7 @@
       </div>
       <div class="vscrub">
         <span class="end">01</span>
-        <input type="range" id="bk-scrub" min="0" max="0" value="0">
+        <input type="range" id="bk-scrub" min="0" max="0" value="0" aria-label="Booklet spread">
         <span class="end">45</span>
       </div>
       <div class="vfoot">
@@ -145,8 +148,10 @@
   </div>
 </div>
 
+</main>
+
 <!-- Master plan lightbox -->
-<div class="lightbox" id="mp-box" hidden>
+<div class="lightbox" id="mp-box" role="dialog" aria-modal="true" aria-label="Master plan, full screen" hidden>
   <div class="lightbox-panel">
     <div class="vbar">
       <span class="lightbox-title">Master plan — Proctor Landing Park</span>
