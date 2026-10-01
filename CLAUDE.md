@@ -56,7 +56,11 @@ About (carries contact at `#contact`; contact.html redirects), Experience
 booklet) over `assets/portfolio/spread-NN.webp` (00 = cover, 01-08 spreads,
 09 = Weaver laser-cut model spread added by Claude, 10-16 spreads incl.
 colophon), with `assets/Matthew_Reindl_Portfolio.pdf` rebuilt from the same
-half pages (33 pp) as the download. The owner's export clipped every
+half pages (33 pp) as the download. With the model spread at pp. 18-19, the
+Contents page numbers were re-set (CRC 20, Lunkenheimer 22, Hyundai 23,
+Evans 25, Green Roof 28), and both viewers count book pages ("PP. 12-13 / 33";
+spread k shows pages 2k, 2k+1). Projects-page tags hold each project's first
+page and open the spread containing its title page. The owner's export clipped every
 bottom caption at the page edge, so each half page is extended 110 px and
 the clipped captions are re-typeset in IBM Plex Sans Text (transcriptions
 live in the session history; a future re-export needs the same pass unless

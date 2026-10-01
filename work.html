@@ -43,7 +43,7 @@
     <div class="vgroup">
       <button class="vbtn" id="pf-prev" title="Previous spread">&larr;</button>
       <button class="vbtn" id="pf-next" title="Next spread">&rarr;</button>
-      <span class="vcount">SPREAD <span id="pf-num">01</span> / 17</span>
+      <span class="vcount"><span id="pf-num">P. 01</span> / 33</span>
     </div>
     <div class="vgroup">
       <button class="vbtn" id="pf-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
@@ -97,21 +97,26 @@
 <script src="assets/js/site.js"></script>
 <script>
 (function () {
-  var N = 17, idx = 0;
+  var N = 17, idx = 0, picked = null;
   var $ = function (id) { return document.getElementById(id); };
-  var TAGS = [['Cover',0],['Contents',1],['01 Proctor',2],['02 Buttes-Chaumont',6],['03 West End',7],
-    ['04 Weaver',8],['05 CRC',10],['06 Lunkenheimer',11],['07 Hyundai',12],['08 Evans',13],
-    ['09 Green Roof',14],['Other Work',15],['Colophon',16]];
+  // [label, first book page]; pages 2k and 2k+1 sit on spread k, the cover alone on spread 0
+  var PAGES = 33;
+  var TAGS = [['Cover',1],['Contents',2],['01 Proctor',3],['02 Buttes-Chaumont',12],['03 West End',14],
+    ['04 Weaver',16],['05 CRC',20],['06 Lunkenheimer',22],['07 Hyundai',23],['08 Evans',25],
+    ['09 Green Roof',28],['Other Work',30],['Colophon',32]];
+  function spreadOf(page) { return Math.floor(page / 2); }
+  function pagesOf(k) { return k === 0 ? [1, 1] : [2 * k, Math.min(2 * k + 1, PAGES)]; }
+  function pad(n) { return String(n).padStart(2, '0'); }
   function src(k) { return 'assets/portfolio/spread-' + String(k).padStart(2, '0') + '.webp'; }
   var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));
   $('pf-tags').innerHTML = TAGS.map(function (t, i) {
-    return '<button class="thumbbtn" data-k="' + t[1] + '">' + t[0] + '</button>';
+    return '<button class="thumbbtn" data-i="' + i + '">' + t[0] + '</button>';
   }).join('');
   function show(k) {
     idx = Math.min(Math.max(k, 0), N - 1);
     var img = document.createElement('img');
     img.src = src(idx);
-    img.alt = 'Portfolio spread ' + (idx + 1);
+    img.alt = 'Portfolio, ' + (idx === 0 ? 'cover' : 'pages ' + (2 * idx) + '\u2013' + (2 * idx + 1));
     img.draggable = false;
     img.style.cssText = 'max-width:100%; max-height:100%; width:auto; height:auto; display:block; background:#FFF; user-select:none; visibility:hidden';
     var sf = $('pf-surface');
@@ -125,17 +130,21 @@
       pz.fit();
     };
     pz.fit();
-    $('pf-num').textContent = String(idx + 1).padStart(2, '0');
-    var active = 0;
-    TAGS.forEach(function (t, i) { if (idx >= t[1]) active = i; });
+    var pp = pagesOf(idx);
+    $('pf-num').textContent = pp[0] === pp[1] ? 'P. ' + pad(pp[0]) : 'PP. ' + pad(pp[0]) + '\u2013' + pad(pp[1]);
     Array.prototype.forEach.call($('pf-tags').children, function (b, i) {
-      b.classList.toggle('active', i === active);
+      var first = TAGS[i][1], last = i + 1 < TAGS.length ? TAGS[i + 1][1] - 1 : PAGES;
+      var onScreen = first <= pp[1] && last >= pp[0];
+      b.classList.toggle('active', picked === null ? onScreen : i === picked);
     });
+    picked = null;
     [idx + 1, idx - 1].forEach(function (n) { if (n >= 0 && n < N) { var p = new Image(); p.src = src(n); } });
   }
   $('pf-tags').addEventListener('click', function (e) {
     var b = e.target.closest('.thumbbtn');
-    if (b) show(parseInt(b.getAttribute('data-k'), 10));
+    if (!b) return;
+    picked = parseInt(b.getAttribute('data-i'), 10);
+    show(spreadOf(TAGS[picked][1]));
   });
   $('pf-prev').onclick = function () { show(idx - 1); };
   $('pf-next').onclick = function () { show(idx + 1); };
