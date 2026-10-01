@@ -27,6 +27,12 @@ Procedure when asked to "check the drop box" (or when the trigger fires):
 2. Fetch each new file with the Artifact tool: `action: "read"`, `url` above,
    `path: <asset id>` (saves locally). Rows named `*.html` were uploaded as
    `text/plain` — rename to the row's `name` after download.
+   Big or unsupported files (`served: "chunked"`) arrive as pieces: fetch
+   every id in the row's `chunks` the same way, save the row JSON, then run
+   `python3 _drafts/tools/reassemble_dropbox.py row.json <piece dir> <out>`
+   (strips each piece's `USCHUNK1` header, checks per-piece SHA-256 and the
+   total size). Not every drop is for the website — HD source files may be
+   for Claude's use only; ask if the destination isn't clear.
 3. Implement: design `.dc.html` pages get ported into the production pages
    (and a copy kept in `_drafts/`); photos get optimized to webp and wired
    into `content/projects/*` (see the `models` array + Models gallery on
