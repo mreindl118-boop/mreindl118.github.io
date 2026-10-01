@@ -52,6 +52,15 @@ reads don't reach uploaded assets) and ask the owner what each file is for.
 Canva is connected but its export downloads (`export-download.canva.com`) are
 blocked by this environment's network policy until the owner allows that host.
 
+## Change approval (standing rule from the owner)
+
+Don't change any base site file (pages, CSS/JS, content JSON, images, PDFs)
+without first showing the owner a visual before/after comparison and getting
+approval. Work in a staging copy (`git worktree add`), audit it, publish the
+comparisons, ask, then fast-forward only the approved commits. The audit
+harness (axe-core + full-page screenshots + crop/tap-target checks) lives in
+the session scratchpad; rebuild it from `_drafts/tools/` notes if needed.
+
 ## Privacy rules (standing, non-negotiable)
 
 - No personal phone number anywhere on the site or in hosted PDFs. Any phone
