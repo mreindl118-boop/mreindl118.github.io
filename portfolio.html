@@ -36,7 +36,7 @@
     <div>
       <div class="kicker" style="margin-bottom:14px">Selected Work · 2022–2026</div>
       <h1 class="h-serif" style="font-weight:400; font-size:clamp(38px,5.5vw,60px); line-height:1.05; margin:0 0 10px">Portfolio</h1>
-      <p class="mono-note" style="margin:0">Nine projects, capstone to professional work — 33 pages, or take the PDF.</p>
+      <p class="mono-note" style="margin:0">Nine projects, capstone to professional work — 35 pages, or take the PDF.</p>
     </div>
     <a class="btn" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf" style="min-height:44px; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; padding:0 20px; display:inline-flex; align-items:center">Download PDF ↓</a>
   </div>
@@ -48,7 +48,7 @@
       <div class="vgroup">
         <button class="vbtn" id="pf-prev" title="Previous spread">←</button>
         <button class="vbtn" id="pf-next" title="Next spread">→</button>
-        <span class="vcount"><span id="pf-num">P. 01</span> / <span id="pf-count">33</span></span>
+        <span class="vcount"><span id="pf-num">P. 01</span> / <span id="pf-count">35</span></span>
       </div>
       <div class="vgroup">
         <button class="vbtn" id="pf-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
@@ -62,8 +62,8 @@
     </div>
     <div class="vscrub">
       <span class="end">01</span>
-      <input type="range" id="pf-scrub" min="0" max="16" value="0">
-      <span class="end">33</span>
+      <input type="range" id="pf-scrub" min="0" max="17" value="0">
+      <span class="end">35</span>
     </div>
     <div class="vfoot">
       <span id="pf-caption">Cover</span>
@@ -90,15 +90,14 @@
 <script src="assets/js/site.js"></script>
 <script>
 (function () {
-  var N = 17, idx = 0;
+  var N = 18, idx = 0;
   var $ = function (id) { return document.getElementById(id); };
   var CAPS = ['Cover', 'Contents · 01 Proctor Landing Park', '01 Proctor Landing Park — master plan',
     '01 Proctor Landing Park — design features', '01 Proctor Landing Park — systems + planting',
     '01 Proctor Landing Park — crossings + recognition', '02 Parc des Buttes-Chaumont',
     '03 West End Transit Plaza', '04 Weaver Recreation Redesign', '04 Weaver Recreation Redesign — laser-cut model',
-    '05 Cincinnati Recreation Commission', '06 Lunkenheimer Lot · 07 Hyundai Heavy Industries Campus',
-    '07 Hyundai — circular economies · 08 Evans Park', '08 Evans Park — concepts',
-    '09 Green Roof Studies', 'Other work and process', 'Colophon'];
+    '05 Cincinnati Recreation Commission', '06 Lunkenheimer Lot', '07 Hyundai Heavy Industries Campus',
+    '08 Evans Park', '08 Evans Park — two concepts', '09 Green Roof Studies', 'Other work and process', 'Colophon'];
   function pad(n) { return String(n).padStart(2, '0'); }
   function src(k) { return 'assets/portfolio/spread-' + String(k).padStart(2, '0') + '.webp'; }
   var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));

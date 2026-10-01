@@ -43,7 +43,7 @@
     <div class="vgroup">
       <button class="vbtn" id="pf-prev" title="Previous spread">&larr;</button>
       <button class="vbtn" id="pf-next" title="Next spread">&rarr;</button>
-      <span class="vcount"><span id="pf-num">P. 01</span> / 33</span>
+      <span class="vcount"><span id="pf-num">P. 01</span> / 35</span>
     </div>
     <div class="vgroup">
       <button class="vbtn" id="pf-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
@@ -97,13 +97,14 @@
 <script src="assets/js/site.js"></script>
 <script>
 (function () {
-  var N = 17, idx = 0, picked = null;
+  var N = 18, idx = 0, picked = null;
   var $ = function (id) { return document.getElementById(id); };
-  // [label, first book page]; pages 2k and 2k+1 sit on spread k, the cover alone on spread 0
-  var PAGES = 33;
-  var TAGS = [['Cover',1],['Contents',2],['01 Proctor',3],['02 Buttes-Chaumont',12],['03 West End',14],
-    ['04 Weaver',16],['05 CRC',20],['06 Lunkenheimer',22],['07 Hyundai',23],['08 Evans',25],
-    ['09 Green Roof',28],['Other Work',30],['Colophon',32]];
+  // [label, first page, last page]; pages 2k and 2k+1 sit on spread k, the cover alone
+  // on spread 0. Every project opens on a spread of its own (blank facing pages 23, 26).
+  var PAGES = 35;
+  var TAGS = [['Cover',1,1],['Contents',2,2],['01 Proctor',3,11],['02 Buttes-Chaumont',12,13],
+    ['03 West End',14,15],['04 Weaver',16,19],['05 CRC',20,21],['06 Lunkenheimer',22,22],
+    ['07 Hyundai',24,25],['08 Evans',27,29],['09 Green Roof',30,31],['Other Work',32,33],['Colophon',34,35]];
   function spreadOf(page) { return Math.floor(page / 2); }
   function pagesOf(k) { return k === 0 ? [1, 1] : [2 * k, Math.min(2 * k + 1, PAGES)]; }
   function pad(n) { return String(n).padStart(2, '0'); }
@@ -133,8 +134,7 @@
     var pp = pagesOf(idx);
     $('pf-num').textContent = pp[0] === pp[1] ? 'P. ' + pad(pp[0]) : 'PP. ' + pad(pp[0]) + '\u2013' + pad(pp[1]);
     Array.prototype.forEach.call($('pf-tags').children, function (b, i) {
-      var first = TAGS[i][1], last = i + 1 < TAGS.length ? TAGS[i + 1][1] - 1 : PAGES;
-      var onScreen = first <= pp[1] && last >= pp[0];
+      var onScreen = TAGS[i][1] <= pp[1] && TAGS[i][2] >= pp[0];
       b.classList.toggle('active', picked === null ? onScreen : i === picked);
     });
     picked = null;

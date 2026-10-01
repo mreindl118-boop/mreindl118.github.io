@@ -53,26 +53,31 @@ About (carries contact at `#contact`; contact.html redirects), Experience
 (resume.html, carries skills at `#skills`; skills.html redirects).
 
 `portfolio.html` is a booklet-style spread viewer (like the capstone
-booklet) over `assets/portfolio/spread-NN.webp` (00 = cover, 01-08 spreads,
-09 = Weaver laser-cut model spread added by Claude, 10-16 spreads incl.
-colophon), with `assets/Matthew_Reindl_Portfolio.pdf` rebuilt from the same
-half pages (33 pp) as the download. With the model spread at pp. 18-19, the
-Contents page numbers were re-set (CRC 20, Lunkenheimer 22, Hyundai 23,
-Evans 25, Green Roof 28), and both viewers count book pages ("PP. 12-13 / 33";
-spread k shows pages 2k, 2k+1). Projects-page tags hold each project's first
-page and open the spread containing its title page. The owner's export clipped every
-bottom caption at the page edge, so each half page is extended 110 px and
-the clipped captions are re-typeset in IBM Plex Sans Text (transcriptions
-live in the session history; a future re-export needs the same pass unless
-the source gains a bottom margin). Spreads are stitched from the export's left/right half
-pages (2k, 2k+1 -> spread k at 200 dpi). A re-export goes through the
-privacy pass, then the stitch, caption, model-spread and closer passes. Portfolio spreads also
-feed the project pages (`content/projects/<slug>/pf-NN.webp`), and the
-Projects-page blowouts use individual figures cut from the boards
-(`content/projects/<slug>/g-*.webp`, `gallery` + `focus` in each JSON).
-The final colophon page carries a composited closer (small b&w headshot +
-about block above the name) added by Claude on both spread-16.webp and the
-download PDF's last page — re-apply it after any portfolio re-export.
+booklet) over `assets/portfolio/spread-NN.webp`, with
+`assets/Matthew_Reindl_Portfolio.pdf` built from the same 35 pages as the
+download. Spread 0 is the cover; spread k shows pages 2k and 2k+1, and both
+viewers count book pages ("PP. 12-13 / 35"). Every project opens on a spread
+of its own: blank pages 23 and 26 separate Lunkenheimer, Hyundai and Evans,
+and Hyundai's two pages were moved across the spine (gutter shading mirrored,
+running-header labels swapped). Pages 18-19 are the Weaver laser-cut model
+spread. The Contents page numbers are re-set to match (Proctor 03,
+Buttes-Chaumont 12, West End 14, Weaver 16, CRC 20, Lunkenheimer 22,
+Hyundai 24, Evans 27, Green Roof 30). Projects-page tags hold each project's
+first/last page and open its title spread.
+
+The owner's export clips every bottom caption at the page edge. Each page is
+extended 110 px and the clipped captions are re-set in place exactly in the
+book's style: figure numbers IBM Plex Mono 24.5 px in pine (48,69,56), text
+IBM Plex Sans 29.5 px, 34 px gap, on one baseline; only the caption's own
+text box is painted (never the image above). The full pipeline (captions,
+contents numbers, pagination, Hyundai swap, model spread, cover headshot,
+colophon closer, spreads, PDF) is `_drafts/tools/rebuild_portfolio.py`, run
+on the export's half pages rendered at 200 dpi. A re-export goes through the
+privacy pass first, then this script (update its transcriptions if captions
+change). Portfolio spreads also feed the project pages
+(`content/projects/<slug>/pf-NN.webp`), and the Projects-page blowouts use
+individual figures cut from the boards (`content/projects/<slug>/g-*.webp`,
+`gallery` + `focus` in each JSON).
 
 Pages are static HTML + `content/site.json` and `content/projects/*.json`
 (`index.json` lists slugs). `hidden: true` unlists a project everywhere while
