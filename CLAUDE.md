@@ -42,6 +42,16 @@ Procedure when asked to "check the drop box" (or when the trigger fires):
    `update` with `status: "processed"` and a short `note` saying where it
    landed (pass `if_version`).
 
+A second, brand-agnostic uploader exists for big source files that aren't
+necessarily for the website: "Large File Drop",
+https://claude.ai/artifact/1o5W1WqSY4YnYsarKEjWQM (wake trigger
+`trig_01D64f3dJS5JimHMY8puvPnE`). Same `files` collection schema and chunk
+protocol as the drop box; fetch each asset id one at a time (batch `paths`
+reads don't reach uploaded assets) and ask the owner what each file is for.
+
+Canva is connected but its export downloads (`export-download.canva.com`) are
+blocked by this environment's network policy until the owner allows that host.
+
 ## Privacy rules (standing, non-negotiable)
 
 - No personal phone number anywhere on the site or in hosted PDFs. Any phone
