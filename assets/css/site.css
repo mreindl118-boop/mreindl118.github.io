@@ -389,3 +389,4 @@ main:focus { outline: none; }
     display: inline-block; min-height: 24px; padding-top: 5px; padding-bottom: 5px;
   }
 }
+@media (max-width: 640px) { input[type="range"] { min-height: 28px; } }
