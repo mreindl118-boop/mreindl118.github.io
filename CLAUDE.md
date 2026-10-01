@@ -44,8 +44,11 @@ Procedure when asked to "check the drop box" (or when the trigger fires):
 
 A second, brand-agnostic uploader exists for big source files that aren't
 necessarily for the website: "Large File Drop",
-https://claude.ai/artifact/1o5W1WqSY4YnYsarKEjWQM (wake trigger
-`trig_01D64f3dJS5JimHMY8puvPnE`). Same `files` collection schema and chunk
+https://claude.ai/artifact/1o5W1WqSY4YnYsarKEjWQM (Volume 1) and
+https://claude.ai/artifact/SPDR2AZtTKbWxBLYD15d31 (Volume 2), 1 GB each, linked
+to each other; wake trigger `trig_01D64f3dJS5JimHMY8puvPnE` covers both.
+The pages pre-check free space, clean up a failed upload's pieces, and offer
+"remove picked-up files" to reclaim room. Same `files` collection schema and chunk
 protocol as the drop box; fetch each asset id one at a time (batch `paths`
 reads don't reach uploaded assets) and ask the owner what each file is for.
 
