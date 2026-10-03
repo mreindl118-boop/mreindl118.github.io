@@ -5,11 +5,11 @@
  "subtitle": "Redevelopment suggestion",
  "location": "Cincinnati, OH",
  "year": 2025,
- "yearLabel": "Concept study [CONFIRM year]",
+ "yearLabel": "MLA studio",
  "sortKey": 75,
  "type": "Public realm",
  "scale": "Vacant-lot redevelopment",
- "role": "Concept design [CONFIRM course/context]",
+ "role": "MLA studio — client: Cincinnati Recreation Commission",
  "collaborators": "",
  "software": [
   "Rhino",
@@ -17,11 +17,11 @@
   "Laser cutting"
  ],
  "cover": "lunkenheimer-lot/cover.webp",
- "summary": "A redevelopment suggestion for the vacant Lunkenheimer lot — a skatepark plaza with planted edges, a covered stage, and terraced seating, developed in plan and digital terrain models. [CONFIRM details]",
+ "summary": "A skatepark redevelopment plan for the vacant Lunkenheimer lot in Cincinnati, designed in studio for a real client — the Cincinnati Recreation Commission: a bowl, a street course, a covered stage, and terraced seating set in planted edges, tested in plan and physical site models.",
  "sections": [
   {
    "heading": "Suggestion",
-   "body": "[CONFIRM] An underused industrial lot reimagined as a neighborhood skatepark: bowl, ledges, and banks set in a planted plaza, tested through a stylized plan and laser-cut-style digital terrain models."
+   "body": "An underused industrial lot reimagined as a neighborhood skatepark: bowl, street course, covered stage, and terraced seating in a planted plaza. Developed in studio for the Cincinnati Recreation Commission and tested through a stylized plan and physical site models."
   }
  ],
  "images": [

@@ -4,23 +4,23 @@
  "title": "Hyundai Heavy Industries Campus Addition",
  "location": "Ulsan, South Korea",
  "year": 2025,
- "yearLabel": "MLA studio [CONFIRM year]",
+ "yearLabel": "Fall 2025",
  "sortKey": 70,
  "type": "Campus",
  "scale": "Industrial campus addition",
- "role": "MLA studio — circular economies [CONFIRM role/team]",
- "collaborators": "[CONFIRM team]",
+ "role": "MLA circular-economies studio — Prof. Sang Cho",
+ "collaborators": "",
  "software": [
   "Rhino",
   "Illustrator",
   "Photoshop"
  ],
  "cover": "ulsan-hhi-campus/cover.webp",
- "summary": "A circular-economies studio project: a campus addition for Hyundai Heavy Industries in Ulsan that treats material flows, reuse, and landscape systems as one design problem at industrial scale. [CONFIRM project description]",
+ "summary": "A campus-systems study for the Hyundai Heavy Industries site in Ulsan, South Korea (Fall 2025, Prof. Sang Cho): expanding the Mipo-dong wastewater works into a circular-economy landscape where rain gardens and detention ponds feed purified water to hydrogen production powered by offshore wind, with public hiking trails threading the working site.",
  "sections": [
   {
    "heading": "Brief",
-   "body": "[CONFIRM] Campus-scale systems thinking in an international industrial context — a different design problem from the civic floodplain work."
+   "body": "Campus-scale systems design in an international industrial context: rainwater filters through bamboo rain gardens into detention ponds; purified water feeds PEM electrolysis producing hydrogen fuel, powered by offshore wind. By-product loops carry timber, rice-bran bioplastics, biogas from anaerobic digesters, and smart farming — and public hiking trails weave through the working site."
   }
  ],
  "images": [
