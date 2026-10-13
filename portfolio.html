@@ -95,22 +95,15 @@
 <script src="assets/js/site.js"></script>
 <script>
 (function () {
-  var N = 18, idx = 0;
+  var idx = 0, PF = null, N = 0;
   var $ = function (id) { return document.getElementById(id); };
-  var CAPS = ['Cover', 'Contents · 01 Proctor Landing Park', '01 Proctor Landing Park — master plan',
-    '01 Proctor Landing Park — design features', '01 Proctor Landing Park — systems + planting',
-    '01 Proctor Landing Park — crossings + recognition', '02 Parc des Buttes-Chaumont',
-    '03 West End Transit Plaza', '04 Weaver Recreation Redesign', '04 Weaver Recreation Redesign — laser-cut model',
-    '05 Cincinnati Recreation Commission', '06 Lunkenheimer Lot', '07 Hyundai Heavy Industries Campus',
-    '08 Evans Park', '08 Evans Park — two concepts', '09 Green Roof Studies', 'Other work and process', 'Colophon'];
-  function pad(n) { return String(n).padStart(2, '0'); }
-  function src(k) { return 'assets/portfolio/spread-' + String(k).padStart(2, '0') + '.webp'; }
   var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));
   function show(k) {
+    if (!PF) return;
     idx = Math.min(Math.max(k, 0), N - 1);
     var img = document.createElement('img');
-    img.src = src(idx);
-    img.alt = CAPS[idx];
+    img.src = PF.src(idx);
+    img.alt = PF.spreads[idx].caption + ', ' + PF.label(idx).toLowerCase();
     img.draggable = false;
     img.style.cssText = 'max-width:100%; max-height:100%; width:auto; height:auto; display:block; background:#FFF; user-select:none; visibility:hidden';
     var sf = $('pf-surface');
@@ -124,11 +117,11 @@
       pz.fit();
     };
     pz.fit();
-    $('pf-num').textContent = idx === 0 ? 'P. 01' : 'PP. ' + pad(2 * idx) + '\u2013' + pad(2 * idx + 1);
-    $('pf-caption').textContent = CAPS[idx];
+    $('pf-num').textContent = PF.label(idx);
+    $('pf-caption').textContent = PF.spreads[idx].caption;
     $('pf-scrub').value = idx;
     [idx + 1, idx - 1].forEach(function (n) {
-      if (n >= 0 && n < N) { var pre = new Image(); pre.src = src(n); }
+      if (n >= 0 && n < N) { var pre = new Image(); pre.src = PF.src(n); }
     });
   }
   $('pf-prev').onclick = function () { show(idx - 1); };
@@ -141,7 +134,13 @@
     if (e.key === 'ArrowLeft') show(idx - 1);
     if (e.key === 'ArrowRight') show(idx + 1);
   });
-  show(0);
+  US.loadPortfolio().then(function (m) {
+    PF = m; N = m.spreads.length;
+    $('pf-count').textContent = m.pages;
+    $('pf-scrub').max = N - 1;
+    document.querySelector('.vscrub .end:last-child').textContent = m.pages;
+    show(0);
+  });
 })();
 </script>
 </body>

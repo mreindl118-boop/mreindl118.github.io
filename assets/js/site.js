@@ -70,6 +70,36 @@
     }).then(apply).catch(function () { /* keep the photo-less vCard */ });
   }
 
+  /* Portfolio spreads, as built by _drafts/tools/rebuild_portfolio.py: spread 0 is the
+     cover, spread k holds book pages 2k and 2k+1, and a page facing a blank page is
+     published alone (centred by the viewer). Falls back to plain pairs if the manifest
+     can't be fetched. */
+  var portfolioP = null;
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function loadPortfolio() {
+    if (portfolioP) return portfolioP;
+    portfolioP = getJSON('assets/portfolio/spreads.json').catch(function () {
+      var spreads = [{ src: 'spread-00.webp', pages: [1], caption: 'Cover' }];
+      for (var k = 1; k <= 17; k++) spreads.push({ src: 'spread-' + pad2(k) + '.webp', pages: [2 * k, 2 * k + 1], caption: '' });
+      return { pages: 35, spreads: spreads };
+    }).then(function (m) {
+      m.src = function (k) { return 'assets/portfolio/' + m.spreads[k].src; };
+      m.range = function (k) { var p = m.spreads[k].pages; return [p[0], p[p.length - 1]]; };
+      m.label = function (k) {
+        var r = m.range(k);
+        return r[0] === r[1] ? 'P. ' + pad2(r[0]) : 'PP. ' + pad2(r[0]) + '\u2013' + pad2(r[1]);
+      };
+      m.spreadOf = function (page) {
+        for (var k = 0; k < m.spreads.length; k++) {
+          if (m.spreads[k].pages.indexOf(page) >= 0) return k;
+        }
+        return Math.min(Math.floor(page / 2), m.spreads.length - 1);   // a blank page: its spread
+      };
+      return m;
+    });
+    return portfolioP;
+  }
+
   function yearOf(p) { return clean(p.yearLabel || String(p.year)); }
   function roleShort(p) { return clean(p.role).split('—')[0].trim(); }
 
@@ -127,7 +157,7 @@
     loadSite: loadSite, loadProjects: loadProjects,
     vcardHref: vcardHref, bindVcard: bindVcard,
     yearOf: yearOf, roleShort: roleShort,
-    projectCard: projectCard, panZoom: panZoom
+    projectCard: projectCard, panZoom: panZoom, loadPortfolio: loadPortfolio
   };
 
   /* Nav indicator glide: on click, the square-line-circle indicator slides

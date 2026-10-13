@@ -1,0 +1,146 @@
+{
+ "pages": 35,
+ "spreads": [
+  {
+   "src": "spread-00.webp",
+   "pages": [
+    1
+   ],
+   "caption": "Cover"
+  },
+  {
+   "src": "spread-01.webp",
+   "pages": [
+    2,
+    3
+   ],
+   "caption": "Contents \u00b7 01 Proctor Landing Park"
+  },
+  {
+   "src": "spread-02.webp",
+   "pages": [
+    4,
+    5
+   ],
+   "caption": "01 Proctor Landing Park \u2014 master plan"
+  },
+  {
+   "src": "spread-03.webp",
+   "pages": [
+    6,
+    7
+   ],
+   "caption": "01 Proctor Landing Park \u2014 design features"
+  },
+  {
+   "src": "spread-04.webp",
+   "pages": [
+    8,
+    9
+   ],
+   "caption": "01 Proctor Landing Park \u2014 systems + planting"
+  },
+  {
+   "src": "spread-05.webp",
+   "pages": [
+    10,
+    11
+   ],
+   "caption": "01 Proctor Landing Park \u2014 crossings + recognition"
+  },
+  {
+   "src": "spread-06.webp",
+   "pages": [
+    12,
+    13
+   ],
+   "caption": "02 Parc des Buttes-Chaumont"
+  },
+  {
+   "src": "spread-07.webp",
+   "pages": [
+    14,
+    15
+   ],
+   "caption": "03 West End Transit Plaza"
+  },
+  {
+   "src": "spread-08.webp",
+   "pages": [
+    16,
+    17
+   ],
+   "caption": "04 Weaver Recreation Redesign"
+  },
+  {
+   "src": "spread-09.webp",
+   "pages": [
+    18,
+    19
+   ],
+   "caption": "04 Weaver Recreation Redesign \u2014 laser-cut model"
+  },
+  {
+   "src": "spread-10.webp",
+   "pages": [
+    20,
+    21
+   ],
+   "caption": "05 Cincinnati Recreation Commission"
+  },
+  {
+   "src": "spread-11.webp",
+   "pages": [
+    22
+   ],
+   "caption": "06 Lunkenheimer Lot"
+  },
+  {
+   "src": "spread-12.webp",
+   "pages": [
+    24,
+    25
+   ],
+   "caption": "07 Hyundai Heavy Industries Campus"
+  },
+  {
+   "src": "spread-13.webp",
+   "pages": [
+    27
+   ],
+   "caption": "08 Evans Park"
+  },
+  {
+   "src": "spread-14.webp",
+   "pages": [
+    28,
+    29
+   ],
+   "caption": "08 Evans Park \u2014 two concepts"
+  },
+  {
+   "src": "spread-15.webp",
+   "pages": [
+    30,
+    31
+   ],
+   "caption": "09 Green Roof Studies"
+  },
+  {
+   "src": "spread-16.webp",
+   "pages": [
+    32,
+    33
+   ],
+   "caption": "Other work and process"
+  },
+  {
+   "src": "spread-17.webp",
+   "pages": [
+    34,
+    35
+   ],
+   "caption": "Colophon"
+  }
+ ]
+}

@@ -84,7 +84,12 @@ About (carries contact at `#contact`; contact.html redirects), Experience
 booklet) over `assets/portfolio/spread-NN.webp`, with
 `assets/Matthew_Reindl_Portfolio.pdf` built from the same 35 pages as the
 download. Spread 0 is the cover; spread k shows pages 2k and 2k+1, and both
-viewers count book pages ("PP. 12-13 / 35"). Every project opens on a spread
+viewers count book pages ("PP. 12-13 / 35"). A page facing a blank page is
+published alone and centred ("P. 22"); the viewers read
+`assets/portfolio/spreads.json` (written by the pipeline) for the spread list,
+page labels and captions. The export's false page-curl bevel (an 80 px shadow
+at every page's spine edge) is divided out at load; the PDF keeps its blank
+pages. Every project opens on a spread
 of its own: blank pages 23 and 26 separate Lunkenheimer, Hyundai and Evans,
 and Hyundai's two pages were moved across the spine (gutter shading mirrored,
 running-header labels swapped). Pages 18-19 are the Weaver laser-cut model

@@ -1,6 +1,10 @@
 """Rebuild the portfolio pages from the owner's export (v3halves, 1700x2200 @200dpi):
-tight caption re-typesetting, contents renumbering, project pagination with
-blank pages, Hyundai side swap, Weaver model spread, closer, spreads + PDF."""
+spine-shading removal, tight caption re-typesetting, contents renumbering, project
+pagination with blank pages, Hyundai side swap, Weaver model spread, closer,
+spreads (a page facing a blank is shown alone) + spreads.json manifest + PDF.
+
+Env: PF_REPO (site checkout to write into), PF_OUT (page PNG dir), PF_DESHADE=0 to keep
+the export's baked gutter shading (regression check against older builds)."""
 import io, os, glob, json, shutil, sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageOps
@@ -9,8 +13,9 @@ import pymupdf
 S = '/tmp/claude-0/-home-user-mreindl118-github-io/27912a11-e1ee-5965-b7ca-05d1c446573a'
 SP = f'{S}/scratchpad'
 SRC = f'{SP}/v3halves'
-OUT = f'{SP}/fixed2'
-REPO = '/home/user/mreindl118.github.io'
+OUT = os.environ.get('PF_OUT', f'{SP}/fixed2')
+REPO = os.environ.get('PF_REPO', '/home/user/mreindl118.github.io')
+DESHADE = os.environ.get('PF_DESHADE', '1') != '0'
 os.makedirs(OUT, exist_ok=True)
 W, H, EXT = 1700, 2200, 110
 HH = H + EXT
@@ -26,7 +31,42 @@ REPORT = []
 
 
 def load(h):
-    return Image.open(f'{SRC}/h{h:02d}.png').convert('RGB')
+    img = Image.open(f'{SRC}/h{h:02d}.png').convert('RGB')
+    return deshade(img) if DESHADE else img
+
+
+# The export draws a false page-curl bevel: an 80 px darkening (to 0.94) at the
+# spine edge of every text page, identical on all of them and constant down the
+# page. Divide it out with one canonical curve measured on the contents page (h02,
+# spine on the right); full-bleed board pages (h04-h07) carry none and are left alone.
+_SHADE = None
+
+
+def shade_curve():
+    global _SHADE
+    if _SHADE is None:
+        a = np.asarray(Image.open(f'{SRC}/h02.png').convert('RGB')).astype(float)
+        col = np.median(a[0:100], axis=0)                # paper rows only on h02
+        flat = np.median(col[400:1300], axis=0)
+        s = np.clip(col / flat, 0.5, 1.0)
+        s[:1500] = 1.0                                   # only the spine-side band
+        _SHADE = s                                       # (W,3), spine on the right
+    return _SHADE
+
+
+def deshade(img):
+    a = np.asarray(img).astype(float)
+    s = shade_curve()
+    top = np.median(a[0:100], axis=0)
+    flat = np.median(top[400:1300], axis=0)
+    ratio = (top / flat).mean(axis=1)
+    right = ratio[1640:1690].mean() < 0.985
+    left = ratio[10:60].mean() < 0.985
+    if right == left:                                    # no shading (or ambiguous): leave as is
+        return img
+    curve = s if right else s[::-1]
+    out = np.clip(a / curve[None], 0, 255)
+    return Image.fromarray((out + 0.5).astype(np.uint8))
 
 
 def profile(img):
@@ -332,27 +372,52 @@ def model_spread(pages):
     return a[:, :W].copy(), a[:, W:].copy()
 
 
+SPREAD_CAPTIONS = ['Cover', 'Contents · 01 Proctor Landing Park', '01 Proctor Landing Park — master plan',
+    '01 Proctor Landing Park — design features', '01 Proctor Landing Park — systems + planting',
+    '01 Proctor Landing Park — crossings + recognition', '02 Parc des Buttes-Chaumont',
+    '03 West End Transit Plaza', '04 Weaver Recreation Redesign', '04 Weaver Recreation Redesign — laser-cut model',
+    '05 Cincinnati Recreation Commission', '06 Lunkenheimer Lot', '07 Hyundai Heavy Industries Campus',
+    '08 Evans Park', '08 Evans Park — two concepts', '09 Green Roof Studies', 'Other work and process', 'Colophon']
+PROJECT_SPREADS = [('parc-des-buttes-chaumont', 6), ('west-end-transit-plaza', 7), ('weaver-recreation', 8),
+                   ('weaver-recreation', 9), ('cincinnati-recreation-commission', 10), ('lunkenheimer-lot', 11),
+                   ('ulsan-hhi-campus', 12), ('evans-park', 13), ('evans-park', 14), ('green-roof-studies', 15)]
+
+
 def main():
     pages = caption_pages()
     fix_specials(pages)
     hyundai_swap(pages)
     mL, mR = model_spread(pages)
     bL, bR = blank(pages[12][1]), blank(pages[13][1])
+    BLANK = 'blank'
     order = ([pages[1][0]] + [pages[h][0] for h in range(2, 18)] + [mL, mR]
-             + [pages[18][0], pages[19][0], pages[20][0], bR, pages[21][0], pages[22][0], bL]
+             + [pages[18][0], pages[19][0], pages[20][0], BLANK, pages[21][0], pages[22][0], BLANK]
              + [pages[h][0] for h in range(23, 32)])
     assert len(order) == 35, len(order)
+    is_blank = [isinstance(a, str) for a in order]
+    order = [bR if (b and i % 2 == 0) else bL if b else a for i, (a, b) in enumerate(zip(order, is_blank))]
     for i, a in enumerate(order, 1):
         Image.fromarray(a).save(f'{OUT}/p{i:02d}.png')
-    # spreads: 0 = cover, k = pages 2k, 2k+1
+    # spreads: 0 = cover, k = pages 2k, 2k+1; a page facing a blank is shown alone
     for f in glob.glob(f'{REPO}/assets/portfolio/spread-*.webp'):
         os.remove(f)
-    Image.fromarray(order[0]).save(f'{REPO}/assets/portfolio/spread-00.webp', quality=85)
-    for k in range(1, 18):
-        sp = np.concatenate([order[2 * k - 1], order[2 * k]], axis=1)
-        Image.fromarray(sp).save(f'{REPO}/assets/portfolio/spread-{k:02d}.webp', quality=85)
+    n = len(order)
+    manifest = []
+    for k in range(0, n // 2 + 1):
+        pg = [1] if k == 0 else [p for p in (2 * k, 2 * k + 1) if p <= n]
+        shown = [p for p in pg if not is_blank[p - 1]]
+        sp = np.concatenate([order[p - 1] for p in shown], axis=1)
+        name = f'spread-{k:02d}.webp'
+        Image.fromarray(sp).save(f'{REPO}/assets/portfolio/{name}', quality=85)
+        manifest.append({'src': name, 'pages': shown, 'caption': SPREAD_CAPTIONS[k]})
+    with open(f'{REPO}/assets/portfolio/spreads.json', 'w') as fh:
+        json.dump({'pages': n, 'spreads': manifest}, fh, indent=1)
+        fh.write('\n')
+    # project pages reuse their portfolio spreads
+    for slug, k in PROJECT_SPREADS:
+        shutil.copyfile(f'{REPO}/assets/portfolio/spread-{k:02d}.webp', f'{REPO}/content/projects/{slug}/pf-{k:02d}.webp')
     doc = pymupdf.open(); kf = 72 / 200
-    for a in order:
+    for a in order:                                      # the PDF keeps its blank pages (print imposition)
         im = Image.fromarray(a); buf = io.BytesIO(); im.save(buf, 'JPEG', quality=88)
         pg = doc.new_page(width=im.width * kf, height=im.height * kf); pg.insert_image(pg.rect, stream=buf.getvalue())
     doc.save(f'{REPO}/assets/Matthew_Reindl_Portfolio.pdf', garbage=4, deflate=True)

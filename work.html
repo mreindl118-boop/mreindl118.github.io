@@ -46,7 +46,7 @@
     <div class="vgroup">
       <button class="vbtn" id="pf-prev" title="Previous spread">&larr;</button>
       <button class="vbtn" id="pf-next" title="Next spread">&rarr;</button>
-      <span class="vcount"><span id="pf-num">P. 01</span> / 35</span>
+      <span class="vcount"><span id="pf-num">P. 01</span> / <span id="pf-total">35</span></span>
     </div>
     <div class="vgroup">
       <button class="vbtn" id="pf-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
@@ -102,27 +102,24 @@
 <script src="assets/js/site.js"></script>
 <script>
 (function () {
-  var N = 18, idx = 0, picked = null;
+  var N = 0, idx = 0, picked = null, PF = null;
   var $ = function (id) { return document.getElementById(id); };
-  // [label, first page, last page]; pages 2k and 2k+1 sit on spread k, the cover alone
-  // on spread 0. Every project opens on a spread of its own (blank facing pages 23, 26).
-  var PAGES = 35;
+  // [label, first page, last page] in book pages. Spreads come from the portfolio manifest
+  // (assets/portfolio/spreads.json): pages 2k and 2k+1 sit on spread k, the cover alone on
+  // spread 0, and a page facing a blank (pp. 23, 26) is shown alone, centred.
   var TAGS = [['Cover',1,1],['Contents',2,2],['01 Proctor',3,11],['02 Buttes-Chaumont',12,13],
     ['03 West End',14,15],['04 Weaver',16,19],['05 CRC',20,21],['06 Lunkenheimer',22,22],
     ['07 Hyundai',24,25],['08 Evans',27,29],['09 Green Roof',30,31],['Other Work',32,33],['Colophon',34,35]];
-  function spreadOf(page) { return Math.floor(page / 2); }
-  function pagesOf(k) { return k === 0 ? [1, 1] : [2 * k, Math.min(2 * k + 1, PAGES)]; }
-  function pad(n) { return String(n).padStart(2, '0'); }
-  function src(k) { return 'assets/portfolio/spread-' + String(k).padStart(2, '0') + '.webp'; }
   var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));
   $('pf-tags').innerHTML = TAGS.map(function (t, i) {
     return '<button class="thumbbtn" data-i="' + i + '">' + t[0] + '</button>';
   }).join('');
   function show(k) {
+    if (!PF) return;
     idx = Math.min(Math.max(k, 0), N - 1);
     var img = document.createElement('img');
-    img.src = src(idx);
-    img.alt = 'Portfolio, ' + (idx === 0 ? 'cover' : 'pages ' + (2 * idx) + '\u2013' + (2 * idx + 1));
+    img.src = PF.src(idx);
+    img.alt = 'Portfolio, ' + (idx === 0 ? 'cover' : PF.label(idx).replace('PP.', 'pages').replace('P.', 'page'));
     img.draggable = false;
     img.style.cssText = 'max-width:100%; max-height:100%; width:auto; height:auto; display:block; background:#FFF; user-select:none; visibility:hidden';
     var sf = $('pf-surface');
@@ -136,25 +133,29 @@
       pz.fit();
     };
     pz.fit();
-    var pp = pagesOf(idx);
-    $('pf-num').textContent = pp[0] === pp[1] ? 'P. ' + pad(pp[0]) : 'PP. ' + pad(pp[0]) + '\u2013' + pad(pp[1]);
+    var pp = PF.range(idx);
+    $('pf-num').textContent = PF.label(idx);
     Array.prototype.forEach.call($('pf-tags').children, function (b, i) {
       var onScreen = TAGS[i][1] <= pp[1] && TAGS[i][2] >= pp[0];
       b.classList.toggle('active', picked === null ? onScreen : i === picked);
     });
     picked = null;
-    [idx + 1, idx - 1].forEach(function (n) { if (n >= 0 && n < N) { var p = new Image(); p.src = src(n); } });
+    [idx + 1, idx - 1].forEach(function (n) { if (n >= 0 && n < N) { var p = new Image(); p.src = PF.src(n); } });
   }
   $('pf-tags').addEventListener('click', function (e) {
     var b = e.target.closest('.thumbbtn');
     if (!b) return;
     picked = parseInt(b.getAttribute('data-i'), 10);
-    show(spreadOf(TAGS[picked][1]));
+    show(PF.spreadOf(TAGS[picked][1]));
   });
   $('pf-prev').onclick = function () { show(idx - 1); };
   $('pf-next').onclick = function () { show(idx + 1); };
   $('pf-zin').onclick = pz.zoomIn; $('pf-zout').onclick = pz.zoomOut; $('pf-fit').onclick = pz.fit;
-  show(0);
+  US.loadPortfolio().then(function (m) {
+    PF = m; N = m.spreads.length;
+    $('pf-total').textContent = m.pages;
+    show(0);
+  });
 })();
 </script>
 <script>
