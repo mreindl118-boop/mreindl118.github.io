@@ -191,6 +191,41 @@ img { max-width: 100%; }
   max-width: 100%; max-height: 100%; width: auto; height: auto;
   display: block; background: #FFF; user-select: none; -webkit-user-drag: none;
 }
+/* Compare slider (project pages): two same-frame images, wiped by a draggable divider */
+.cmp-stage {
+  position: relative; overflow: hidden; background: var(--paper); cursor: ew-resize;
+  touch-action: pan-y; user-select: none; -webkit-user-select: none;
+}
+.cmp-stage img { display: block; width: 100%; height: auto; -webkit-user-drag: none; }
+.cmp-stage .cmp-top { position: absolute; inset: 0; clip-path: inset(0 0 0 var(--cut, 50%)); }
+#cmp-section .vscrub { padding-left: 14px; padding-right: 14px; }
+.cmp-handle {
+  position: absolute; top: 0; bottom: 0; left: var(--cut, 50%); width: 2px; margin-left: -1px;
+  background: var(--paper); box-shadow: 0 0 0 1px rgba(38, 41, 43, .35); pointer-events: none;
+}
+.cmp-handle::after {
+  content: "\2039\00a0\203A"; position: absolute; top: 50%; left: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+  border-radius: 50%; background: var(--paper); border: 1px solid var(--ink); color: var(--ink);
+  font: 500 17px/32px var(--mono); text-align: center;
+}
+.cmp-tag {
+  position: absolute; top: 10px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 5px 8px; background: rgba(38, 41, 43, .82); color: var(--paper);
+  pointer-events: none; max-width: 44%; line-height: 1.35;
+}
+@media (max-width: 640px) { .cmp-tag { font-size: 9.5px; letter-spacing: .06em; padding: 4px 6px; top: 6px; } }
+.cmp-tag-a { left: 10px; }
+.cmp-tag-b { right: 10px; }
+.cmp-pick { display: flex; flex-wrap: wrap; gap: 10px 28px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.cmp-side { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cmp-lab { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.cmp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cmp-chips button {
+  font: 500 13px/1 var(--sans); min-height: 32px; padding: 0 12px; border: 1px solid var(--line);
+  background: var(--paper); color: var(--ink); cursor: pointer;
+}
+.cmp-chips button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.cmp-chips button:disabled { opacity: .4; cursor: default; }
 .vbadge {
   position: absolute; right: 12px; bottom: 10px; font-family: var(--mono); font-size: 11px;
   color: var(--faint); background: rgba(250, 248, 242, .85); padding: 3px 8px; pointer-events: none;

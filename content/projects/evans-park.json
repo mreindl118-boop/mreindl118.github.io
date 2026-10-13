@@ -18,6 +18,26 @@
  ],
  "cover": "evans-park/cover.webp",
  "summary": "A stormwater-management studio project replacing a Mill Creek dam and integrating the water infrastructure into public open space — terrain, ecological performance, and park experience designed together. [CONFIRM details]",
+ "compare": {
+  "title": "Two concepts, one site",
+  "note": "The two illustrative plans, registered to the same frame and scale. Drag across the plan to move between them.",
+  "start": [
+   0,
+   1
+  ],
+  "views": [
+   {
+    "label": "Concept 1 · dam removal",
+    "file": "evans-park/compare-concept-1.webp",
+    "caption": "Concept 1, dam removed and Mill Creek returned to a wetland corridor"
+   },
+   {
+    "label": "Concept 2 · dam retained",
+    "file": "evans-park/compare-concept-2.webp",
+    "caption": "Concept 2, dam kept with a plaza on the impoundment"
+   }
+  ]
+ },
  "sections": [
   {
    "heading": "Brief",

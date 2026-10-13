@@ -298,6 +298,68 @@
       '<div class="meta-value' + (mono ? ' mono' : '') + '">' + esc(value) + '</div></div>';
   }
 
+  /* Compare slider: views share one frame (aligned upstream), the right-hand image is
+     clipped at the divider. With three or more views each side gets a picker. */
+  function cmpInit(c) {
+    var views = c.views, ia = c.start ? c.start[0] : 0, ib = c.start ? c.start[1] : 1;
+    var stage = $('cmp-stage'), cut = 50, drag = false;
+    $('cmp-section').hidden = false;
+    $('cmp-title').textContent = clean(c.title) || 'Compare';
+    $('cmp-note').textContent = clean(c.note);
+    function setCut(v) {
+      cut = Math.max(0, Math.min(100, v));
+      stage.style.setProperty('--cut', cut + '%');
+      $('cmp-range').value = cut;
+      $('cmp-range').setAttribute('aria-valuetext', Math.round(100 - cut) + '% ' + clean(views[ib].label));
+    }
+    function apply() {
+      var a = views[ia], b = views[ib];
+      $('cmp-img-a').src = 'content/projects/' + a.file;
+      $('cmp-img-a').alt = clean(a.caption || a.label);
+      $('cmp-img-b').src = 'content/projects/' + b.file;
+      $('cmp-img-b').alt = clean(b.caption || b.label);
+      $('cmp-tag-a').textContent = clean(a.label);
+      $('cmp-tag-b').textContent = clean(b.label);
+      $('cmp-caption').textContent = 'Left: ' + clean(a.caption || a.label) + ' \u00b7 Right: ' + clean(b.caption || b.label);
+      ['a', 'b'].forEach(function (side) {
+        var me = side === 'a' ? ia : ib, other = side === 'a' ? ib : ia;
+        Array.prototype.forEach.call($('cmp-chips-' + side).children, function (btn, i) {
+          btn.setAttribute('aria-pressed', i === me ? 'true' : 'false');
+          btn.disabled = i === other;
+        });
+      });
+      setCut(cut);
+    }
+    if (views.length > 2) {
+      $('cmp-pick').hidden = false;
+      ['a', 'b'].forEach(function (side) {
+        $('cmp-chips-' + side).innerHTML = views.map(function (v, i) {
+          return '<button type="button" data-i="' + i + '">' + esc(clean(v.label)) + '</button>';
+        }).join('');
+        $('cmp-chips-' + side).addEventListener('click', function (e) {
+          var btn = e.target.closest('button');
+          if (!btn || btn.disabled) return;
+          if (side === 'a') ia = +btn.getAttribute('data-i'); else ib = +btn.getAttribute('data-i');
+          apply();
+        });
+      });
+    }
+    function fromEvent(e) {
+      var r = stage.getBoundingClientRect();
+      setCut((e.clientX - r.left) / r.width * 100);
+    }
+    stage.addEventListener('pointerdown', function (e) {
+      drag = true;
+      try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+      fromEvent(e);
+    });
+    stage.addEventListener('pointermove', function (e) { if (drag) fromEvent(e); });
+    stage.addEventListener('pointerup', function () { drag = false; });
+    stage.addEventListener('pointercancel', function () { drag = false; });
+    $('cmp-range').addEventListener('input', function (e) { setCut(parseFloat(e.target.value)); });
+    apply();
+  }
+
   function renderProject(p, order) {
     document.title = p.title + ' — Understory Design Studio';
     $('p-title').textContent = p.title;
@@ -340,6 +402,8 @@
       $('p-next').href = 'project.html?slug=' + encodeURIComponent(next.slug);
       $('p-next-title').textContent = next.title;
     }
+
+    if (p.compare && (p.compare.views || []).length >= 2) cmpInit(p.compare);
 
     if (p.images && p.images.length) {
       dwInit(p);

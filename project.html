@@ -45,6 +45,31 @@
   </div>
   <div class="meta-grid" id="p-meta"></div>
 
+  <!-- Compare slider: same-frame views (existing site, concepts) declared as "compare" in the project JSON -->
+  <section id="cmp-section" hidden aria-labelledby="cmp-title">
+    <h2 class="h-serif" id="cmp-title" style="font-size:26px; margin:48px 0 6px"></h2>
+    <p class="mono-note" id="cmp-note" style="margin:0 0 14px; max-width:70ch"></p>
+    <div class="viewer">
+      <div class="cmp-pick" id="cmp-pick" hidden>
+        <div class="cmp-side"><span class="cmp-lab" id="cmp-lab-a">Left</span><div class="cmp-chips" id="cmp-chips-a" role="group" aria-labelledby="cmp-lab-a"></div></div>
+        <div class="cmp-side"><span class="cmp-lab" id="cmp-lab-b">Right</span><div class="cmp-chips" id="cmp-chips-b" role="group" aria-labelledby="cmp-lab-b"></div></div>
+      </div>
+      <div class="cmp-stage" id="cmp-stage">
+        <img id="cmp-img-a" alt="" draggable="false">
+        <img id="cmp-img-b" class="cmp-top" alt="" draggable="false">
+        <div class="cmp-handle" aria-hidden="true"></div>
+        <span class="cmp-tag cmp-tag-a" id="cmp-tag-a"></span>
+        <span class="cmp-tag cmp-tag-b" id="cmp-tag-b"></span>
+      </div>
+      <div class="vscrub">
+        <input type="range" id="cmp-range" min="0" max="100" value="50" step="0.5" aria-label="Compare: drag left or right">
+      </div>
+      <div class="vfoot">
+        <span id="cmp-caption"></span>
+      </div>
+    </div>
+  </section>
+
   <!-- Master plan full spread (Proctor only) -->
   <div id="mp-section" hidden>
     <div class="rule-section" style="margin-top:40px">
