@@ -5,11 +5,11 @@
  "subtitle": "Public Amphitheater",
  "location": "Cincinnati, OH — West End",
  "year": 2025,
- "yearLabel": "MLA studio [CONFIRM year]",
+ "yearLabel": "MLA studio",
  "sortKey": 85,
  "type": "Public realm",
  "scale": "Neighborhood recreation site",
- "role": "MLA studio — CRC / West End [CONFIRM role/team]",
+ "role": "MLA studio project",
  "collaborators": "Cincinnati Recreation Commission studio context",
  "software": [
   "AutoCAD",
@@ -17,11 +17,11 @@
   "Photoshop"
  ],
  "cover": "weaver-recreation/cover.webp",
- "summary": "A recreation-site redesign with a public amphitheater as the resolved civic gathering move, grounded in West End stakeholder work: heat island, low canopy, unsafe crossings, and underused open fields identified with community partners. [CONFIRM details]",
+ "summary": "A redesign of the Weaver Recreation site in Cincinnati’s West End as a public amphitheater landscape: concentric seating rings around a central stage pavilion, planted garden rooms, and looping paths that stitch the block together. Site plan and aerial renderings by Matthew Reindl, UC DAAP MLA.",
  "sections": [
   {
    "heading": "Brief",
-   "body": "[CONFIRM] Civic programming and community gathering space for a West End recreation site, from stakeholder and SWOT analysis to a resolved amphitheater intervention."
+   "body": "A West End recreation site redesigned around civic gathering: concentric amphitheater seating around a glazed stage pavilion with a folded roof, circular planted garden rooms, and looping paths that knit the block together — with the existing corner building kept in use."
   }
  ],
  "images": [
