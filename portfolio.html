@@ -131,6 +131,7 @@
   $('pf-fit').onclick = pz.fit;
   $('pf-scrub').addEventListener('input', function (e) { show(parseInt(e.target.value, 10) || 0); });
   document.addEventListener('keydown', function (e) {
+    if (e.target === $('pf-scrub')) return;
     if (e.key === 'ArrowLeft') show(idx - 1);
     if (e.key === 'ArrowRight') show(idx + 1);
   });
