@@ -202,7 +202,8 @@ Diagonal hatching marks placeholders.
 - **Primary:** pine fill, paper text, IBM Plex Sans 500 15px, 26px side padding.
 - **Hover / Focus:** fill shifts to ink; 2px pine focus ring offset 3px.
 - **Outline:** 1.5px ink border; hover turns border and text clay.
-- **Mono link:** uppercase mono 12px pine link with an arrow ("View project →").
+- **Mono link:** uppercase mono 12px pine link with an arrow ("View project →"). The arrow says
+  where it goes: → opens a page, ↓ downloads a file ("Download PDF ↓", "vCard ↓"), ↗ leaves the site.
 
 ### Chips (filters)
 - **Style:** uppercase mono 12px, no fill, 2px underline; the active chip is ink with a clay
