@@ -85,6 +85,7 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
         }
         item { Label("Your call") ; CallCard(b) }
         item { Label("Check off"); Tiles(day, b) }
+        if (date == today) item { Spacer(Modifier.height(12.dp)); FeelRow(date); Spacer(Modifier.height(10.dp)); InsightHead { onOpen("insights") } }
         val stepped = day.boxes.filter { it.steps.isNotEmpty() }.sortedBy { Store.MAIN.indexOf(it.key).let { i -> if (i < 0) 99 else i } }
         if (stepped.isNotEmpty()) {
             item { Label("Step by step") }
