@@ -46,6 +46,7 @@ import com.mattlabs.planlab.core.Coach
 import com.mattlabs.planlab.core.Day
 import com.mattlabs.planlab.core.LogDoc
 import com.mattlabs.planlab.core.NICE_DAY
+import com.mattlabs.planlab.core.TodayPick
 import com.mattlabs.planlab.data.Store
 import java.time.LocalDate
 
@@ -57,6 +58,9 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
     val day = st.plan.day(date)
     val b = remember(st.version, st.plan, st.health, date) { Store.brief(date) }
     val tk = t()
+    var openArea by remember { mutableStateOf<String?>(null) }
+    var showAll by remember { mutableStateOf(false) }
+    var more by remember { mutableStateOf(false) }
 
     LazyColumn(Modifier.fillMaxWidth().statusBarsPadding(), contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp, 8.dp, 16.dp, 32.dp)) {
         item {
@@ -72,9 +76,9 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
             }
             if (date != today) Text("Back to today", Modifier.padding(top = 4.dp).clip(CircleShape).background(tk.accent).clickable { date = today }.padding(horizontal = 12.dp, vertical = 5.dp), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             if (st.error.isNotEmpty()) Text(st.error, Modifier.padding(top = 8.dp), color = tk.warn, style = MaterialTheme.typography.bodyMedium)
-            Spacer(Modifier.height(14.dp))
-            Hero(b, day, onOpen)
-            st.progress?.let { Spacer(Modifier.height(10.dp)); LevelCard(it) { onOpen("progress") } }
+            Spacer(Modifier.height(10.dp))
+            HeaderPills(b) { onOpen("health") }
+            if (day != null) { Spacer(Modifier.height(14.dp)); DayBar(day) }
         }
         if (day == null) {
             item {
@@ -83,25 +87,19 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
             }
             return@LazyColumn
         }
-        item { Label("Your call") ; CallCard(b) }
-        item { Label("Check off"); Tiles(day, b) }
-        if (date == today) item { Spacer(Modifier.height(12.dp)); FeelRow(date); Spacer(Modifier.height(10.dp)); InsightHead { onOpen("insights") } }
+        item { Label("Next up"); NextUpCard(day) }
+        item { LaterToday(day) { openArea = if (openArea == it) null else it } }
+        item { Label("Areas"); AreaRings(day) { openArea = if (openArea == it) null else it } }
+        val opened = day.boxes.firstOrNull { it.key == openArea && it.steps.isNotEmpty() }
+        if (opened != null && !showAll) item { Spacer(Modifier.height(10.dp)); StepCard(day, opened) }
+        item { Spacer(Modifier.height(10.dp)); WeekChart(date) }
+        item {
+            Text(if (showAll) "Hide all steps" else "Show all steps", Modifier.padding(top = 12.dp).clip(CircleShape).background(tk.sunk).clickable { showAll = !showAll }.padding(horizontal = 14.dp, vertical = 8.dp),
+                color = tk.accent, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        }
+        if (showAll) for (box in TodayPick.order(day.boxes.filter { it.steps.isNotEmpty() })) item { Spacer(Modifier.height(10.dp)); StepCard(day, box) }
+        if (date == today) item { Spacer(Modifier.height(16.dp)); FeelRow(date); Spacer(Modifier.height(10.dp)); InsightHead { onOpen("insights") } }
         item { Label("Eat"); EatCard(day, date) }
-        val stepped = day.boxes.filter { it.steps.isNotEmpty() }.sortedBy { Store.MAIN.indexOf(it.key).let { i -> if (i < 0) 99 else i } }
-        if (stepped.isNotEmpty()) {
-            item { Label("Step by step") }
-            for (box in stepped) item { StepCard(day, box); Spacer(Modifier.height(10.dp)) }
-        }
-        val others = day.boxes.filter { it.key !in Store.MAIN && it.steps.isEmpty() }
-        if (others.isNotEmpty()) item {
-            Spacer(Modifier.height(10.dp))
-            PCard(pad = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 6.dp)) {
-                for (box in others) {
-                    val on = Store.isDone(day, box)
-                    RowItem(lead = { CheckDot(on, tk.accent, 30.dp) { Store.toggle(day, box) } }, title = box.label.replaceFirstChar { it.uppercase() }, titleColor = if (on) tk.muted else tk.fg)
-                }
-            }
-        }
         item {
             Spacer(Modifier.height(10.dp))
             val pf = LogDoc.pelvic(st.log, date.toString())
@@ -117,6 +115,14 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
                 }
             }
         }
+        item {
+            val due = st.plan.inbox.count { it.date == date && !LogDoc.ticked(st.log, "inbox", it.key, it.done) }
+            Text(if (more) "Less" else "More for today" + if (due > 0) " · $due due" else "",
+                Modifier.padding(top = 18.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(tk.surface).clickable { more = !more }.padding(16.dp),
+                color = if (due > 0 && !more) tk.warn else tk.accent, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        }
+        if (!more) return@LazyColumn
+        st.progress?.let { p -> item { Spacer(Modifier.height(10.dp)); LevelCard(p) { onOpen("progress") } } }
         if (b.nudges.isNotEmpty()) item {
             Label("Heads up")
             PCard(pad = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 6.dp)) {
@@ -159,107 +165,17 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
 }
 
 
-@OptIn(ExperimentalLayoutApi::class)
+/** Readiness and the countdown, as two small pills. Tap readiness for the health screen. */
 @Composable
-private fun Hero(b: Coach.Brief, day: Day?, onOpen: (String) -> Unit) {
+private fun HeaderPills(b: Coach.Brief, onHealth: () -> Unit) {
     val tk = t()
-    val r = b.readiness
-    val c = r?.let { tk.score(it.score) } ?: tk.accent
-    val done = day?.boxes?.count { Store.isDone(day, it) } ?: 0
-    val n = day?.boxes?.size ?: 0
-    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp))
-        .background(Brush.linearGradient(listOf(c.copy(alpha = if (tk.dark) 0.32f else 0.16f), tk.surface)))
-        .clickable { onOpen("health") }
-        .padding(18.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Ring(r?.let { it.score / 100f } ?: 0f, c, 96.dp, 10.dp) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(r?.score?.toString() ?: "–", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = tk.fg)
-                    Text("ready", fontSize = 11.sp, color = tk.muted, fontWeight = FontWeight.Bold)
-                }
-            }
-            Spacer(Modifier.size(16.dp))
-            Column(Modifier.weight(1f)) {
-                Text(r?.label ?: "Connect your health data", style = MaterialTheme.typography.headlineSmall, color = tk.fg)
-                Spacer(Modifier.height(4.dp))
-                Text(r?.reasons?.joinToString(" · ") ?: "Sleep, heart and steps tune today's plan.", color = tk.muted, style = MaterialTheme.typography.bodyMedium)
-                Spacer(Modifier.height(10.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (n > 0) Pill("$done of $n done", if (done == n) tk.ok else tk.accent, if (done == n) tk.okSoft else tk.accentSoft)
-                    val d = b.daysToBig
-                    if (d != null && b.bigName.isNotEmpty()) Pill(when { d > 1 -> "$d days to ${b.bigName}"; d == 1L -> "${b.bigName.replaceFirstChar { it.uppercase() }} tomorrow"; d == 0L -> "${b.bigName.replaceFirstChar { it.uppercase() }} today"; else -> "Day ${-d} after" }, tk.warn, tk.warnSoft)
-                    Pill(b.phase.short, tk.muted, tk.sunk)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CallCard(b: Coach.Brief) {
-    val tk = t()
-    PCard {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(10.dp).clip(CircleShape).background(tk.body))
-            Spacer(Modifier.size(10.dp))
-            Text(b.body.title, style = MaterialTheme.typography.titleMedium, color = tk.fg, modifier = Modifier.weight(1f))
-            if (b.body.easier) Pill("Eased", tk.warn, tk.warnSoft)
-        }
-        if (b.body.detail.isNotBlank()) Text(b.body.detail, Modifier.padding(start = 20.dp, top = 2.dp), color = tk.muted, style = MaterialTheme.typography.bodyMedium)
-        Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            val eaten = Store.eaten(b.date).protein
-            Stat("Protein", "${b.protein} g", if (eaten > 0) "$eaten eaten" else b.proteinEaten?.let { "$it eaten" }, tk.eat, Modifier.weight(1f))
-            Stat("Water", "${b.waterL} L", null, tk.accent, Modifier.weight(1f))
-            b.steps?.let { Stat("Steps", it.title, null, tk.body, Modifier.weight(1f)) }
-        }
-    }
-}
-
-@Composable
-private fun Stat(label: String, value: String, sub: String?, color: Color, modifier: Modifier) {
-    val tk = t()
-    Column(modifier.clip(RoundedCornerShape(14.dp)).background(tk.sunk).padding(10.dp)) {
-        Text(label.uppercase(), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = color)
-        Text(value, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = tk.fg, maxLines = 2)
-        if (sub != null) Text(sub, fontSize = 12.sp, color = tk.muted)
-    }
-}
-
-@Composable
-private fun Tiles(day: Day, b: Coach.Brief) {
-    val tk = t()
-    val st by Store.state.collectAsState()
-    val main = day.boxes.filter { it.key in Store.MAIN }
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        main.chunked(2).forEach { pair ->
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                for (box in pair) {
-                    val on = Store.isDone(day, box)
-                    val skipped = !on && LogDoc.skipped(st.log, day.date.toString(), box.key)
-                    val color = tk.kind(box.key)
-                    val next = if (on) null else Store.nextStep(day, box)
-                    val sub = if (next != null) "${Store.stepsDone(day, box)}/${box.steps.size} · ${next.label}" else when (box.key) {
-                        "meals" -> "${day.protein().takeIf { it > 0 } ?: b.protein} g protein"
-                        "body" -> b.body.title
-                        "piano" -> LogDoc.minutes(st.log, day.date.toString(), "piano").let { if (it > 0) "$it of ${day.plannedMinutes("piano")} min" else b.piano?.title?.removePrefix("Piano, ") ?: "" }
-                        "voice" -> LogDoc.minutes(st.log, day.date.toString(), "voice").let { if (it > 0) "$it of ${day.plannedMinutes("voice")} min" else b.voice?.title?.removePrefix("Voice, ") ?: "" }
-                        else -> ""
-                    }
-                    PCard(Modifier.weight(1f), color = if (on) color.copy(alpha = if (tk.dark) 0.28f else 0.14f) else tk.surface, onClick = { if (next != null) Store.setStep(day, box, next, true) else Store.toggle(day, box) }, pad = androidx.compose.foundation.layout.PaddingValues(14.dp)) {
-                        Row(verticalAlignment = Alignment.Top) {
-                            Column(Modifier.weight(1f)) {
-                                Text(Store.LABEL[box.key] ?: box.label, style = MaterialTheme.typography.titleMedium, color = color, fontWeight = FontWeight.ExtraBold)
-                                Spacer(Modifier.height(2.dp))
-                                Text(if (skipped) "Skipped" else sub, color = tk.muted, fontSize = 13.sp, maxLines = 2, lineHeight = 16.sp)
-                            }
-                            CheckDot(on, color, 30.dp) { Store.toggle(day, box) }
-                        }
-                    }
-                }
-                if (pair.size == 1) Spacer(Modifier.weight(1f))
-            }
-        }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        val r = b.readiness
+        val c = r?.let { tk.score(it.score) } ?: tk.muted
+        Text(if (r != null) "${r.score} ready" else "Connect health", Modifier.clip(CircleShape).background(c.copy(alpha = if (tk.dark) 0.22f else 0.12f)).clickable { onHealth() }.padding(horizontal = 12.dp, vertical = 6.dp),
+            color = c, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        val d = b.daysToBig
+        if (d != null && b.bigName.isNotEmpty()) Pill(when { d > 1 -> "$d days to ${b.bigName}"; d == 1L -> "${b.bigName.replaceFirstChar { it.uppercase() }} tomorrow"; d == 0L -> "${b.bigName.replaceFirstChar { it.uppercase() }} today"; else -> "Day ${-d} after" }, tk.warn, tk.warnSoft)
     }
 }
 
