@@ -240,6 +240,7 @@ async function load() {
     store.set("planlab-cache", JSON.stringify(S.plan));
     S.error = "";
     pullLog();
+    file("log/insights.json").then(t => { if (t) { S.ins = JSON.parse(t); store.set("planlab-ins", t); render(); } }).catch(() => {});
   } catch (e) {
     S.error = e.message === "key" || e.status === 403 ? "Your GitHub key didn't work. It may have expired or not include GeneralStorage." : "Couldn't reach GitHub. Showing the last copy you loaded.";
     if (e.message === "key" || e.status === 403) S.badKey = true;
@@ -425,6 +426,36 @@ function tileDetail(day, key) {
 }
 const MEAL = ["Breakfast", "Lunch", "Dinner", "Also"];
 
+// ---------- insights (log/insights.json, written by tools/insights.py in the private repo)
+S.ins = store.json("planlab-ins", null);
+const FEEL = ["Rough", "Low", "OK", "Good", "Great"];
+const feelOf = d => { const o = S.log.ticks["feel-" + d] || {}; return +(Object.keys(o).find(k => o[k] === true) || 0); };
+function feelRow(date) {
+  const f = feelOf(date);
+  return `<div class="card feel"><span class="rl">How do you feel?</span><div class="feel-b">${FEEL.map((l, i) => `<button data-feel="${i + 1}" aria-pressed="${f === i + 1}" aria-label="${l}"${f === i + 1 ? ' class="on"' : ""}><b>${i + 1}</b><span>${l}</span></button>`).join("")}</div></div>`;
+}
+function insightCard() {
+  const h = S.ins?.headline; if (!h) return "";
+  return `<button class="card ins-head" data-tab="you"><span class="eyebrow">${h.kind === "waiting" ? "Learning you" : h.kind === "likely" ? "This week's insight" : h.kind === "hint" ? "An early hint" : "This week"}</span><span class="rl">${esc(h.text)}</span>${h.try ? `<span class="rs">${esc(h.try)}</span>` : ""}</button>`;
+}
+function spark(vals, cls) {
+  const pts = vals.map((v, i) => [i, v]).filter(p => p[1] != null); if (pts.length < 2) return "";
+  const lo = Math.min(...pts.map(p => p[1])), hi = Math.max(...pts.map(p => p[1])), sp = hi - lo || 1, W = 120, H = 32, n = vals.length - 1 || 1;
+  const xy = ([i, v]) => `${(i / n * W).toFixed(1)},${(H - 3 - (v - lo) / sp * (H - 6)).toFixed(1)}`;
+  return `<svg class="spark ${cls}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts.map(xy).join(" ")}"/></svg>`;
+}
+function viewInsights() {
+  const I = S.ins; if (!I) return `<section class="sec">${lab("What we're learning")}<div class="card list"><div class="row"><span class="rt"><span class="rl">Insights arrive after the first nightly run.</span><span class="rs">They come from your ticks, check-ins and health data.</span></span></div></div></section>`;
+  const c = I.counts || {};
+  let h = `<section class="sec">${lab("What we're learning")}${insightCard().replace('data-tab="you"', "")}</section>`;
+  if (I.findings?.length) h += `<section class="sec">${lab("Patterns in your days")}<div class="card list">${I.findings.slice(0, 5).map(f => `<div class="row"><span class="rt"><span class="rl">${esc(f.text)}</span>${f.groups?.length === 2 && f.id.includes("~did:") ? `<span class="bars">${f.groups.map((g, i) => `<span class="bar${i ? " b" : ""}"><i style="width:${Math.round(g.value * 100)}%"></i></span>`).join("")}</span>` : ""}${f.try ? `<span class="rs">${esc(f.try)}</span>` : ""}</span>${pill(f.kind_of === "likely" ? "Likely" : "Hint", f.kind_of === "likely" ? "ok" : "soft")}</div>`).join("")}</div></section>`;
+  const sr = I.series || {}, tr = (I.trends || []).filter(t => t.text);
+  if (tr.length) h += `<section class="sec">${lab("This week vs your usual")}<div class="card list">${tr.map(t => `<div class="row"><span class="rt"><span class="rl">${esc(t.text)}</span></span>${spark((sr[t.key] || []).slice(-28), t.good === true ? "up" : t.good === false ? "down" : "")}</div>`).join("")}</div></section>`;
+  if (I.waiting?.length) h += `<section class="sec"><div class="labrow">${lab("Coming soon")}<span class="rs">${c.planner_days || 0} planner days · ${c.sleep_days || 0} nights of sleep</span></div><div class="card list">${I.waiting.slice(0, 4).map(w => `<div class="row"><span class="rt"><span class="rl">${esc(w.label)}</span><span class="prog"><i style="width:${Math.round(100 * w.have / (w.have + w.need || 1))}%"></i></span><span class="rs">${w.need} more day${w.need === 1 ? "" : "s"}${w.short_side ? ` (needs more ${esc(w.short_side)})` : ""}</span></span></div>`).join("")}</div></section>`;
+  if (I.note) h += `<p class="rs legend">${esc(I.note)}</p>`;
+  return h;
+}
+
 // ---------- views
 function viewSetup() {
   const step = S.setupStep || 1;
@@ -464,6 +495,7 @@ function viewToday() {
     return `<div class="tile k-${b.key}${on ? " on" : ""}"><button class="tile-main" data-open="${b.key}" aria-label="Open ${KIND[b.key]}">
       <span class="tile-ic">${IC[b.key]}</span><span class="tile-name">${KIND[b.key]}</span><span class="tile-sub">${tileDetail(day, b.key)}</span></button>
       <button class="tile-check" role="checkbox" aria-checked="${on}" aria-label="${KIND[b.key]} done" data-list="${date}" data-item="${b.key}"><span class="box">${IC.check}</span></button></div>`; }).join("")}</div>`;
+  if (date === t) h += feelRow(date) + insightCard();
   const stepped = day.boxes.filter(b => b.steps?.length);
   for (const b of stepped) { const n = stepsDone(date, b);
     h += `<section class="sec">${lab(`${esc(KIND[b.key] || cap(b.label))} <span class="cnt">${n === b.steps.length ? "done" : `${n} of ${b.steps.length}`}</span>`)}<div class="card list compact">${b.steps.map(x => checkRow(`data-list="${date}" data-item="${x.key}"`, tickGet(date, x), recipeLinks(cap(x.label)), "")).join("")}</div></section>`; }
@@ -565,7 +597,7 @@ function viewFood() {
 
 function viewYou() {
   const P = S.plan; if (!P) return hero("", "You") + `<div class="empty">${IC.you}<p>Loading…</p></div>`;
-  let h = hero("Progress and the long game", "You");
+  let h = hero("Progress and the long game", "You") + viewInsights();
   h += `<section class="sec">${lab("Streaks")}<div class="tiles four">${Object.entries(KIND).map(([k, l]) => { const n = streak(k); return `<div class="card streak${n ? " hot" : ""}"><span class="st-ic">${n ? IC.flame : IC[k]}</span><b>${n}</b><span>${l}${n === 1 ? " · 1 day" : n ? ` · ${n} days` : ""}</span></div>`; }).join("")}</div></section>`;
   // practice minutes, last 7 days
   const days = [...Array(7)].map((_, i) => addDays(todayIso(), i - 6));
@@ -759,6 +791,7 @@ document.addEventListener("click", async e => {
   if (q("#ses-pause")) { togglePause(); return; }
   if (q("#ses-next")) { nextStep(); return; }
   if (q("#ses-stop")) { finishSession(); return; }
+  if ((el = q("[data-feel]"))) { const n = +el.dataset.feel; S.log.ticks["feel-" + todayIso()] = Object.fromEntries([1, 2, 3, 4, 5].map(i => [String(i), i === n])); touch(); eng("feel"); try { navigator.vibrate && navigator.vibrate(8); } catch {} render(); return; }
   if ((el = q("[data-addmin]"))) { logMinutes(S.day, el.dataset.addmin, +el.dataset.m); render(); return; }
   if ((el = q("[data-set]"))) { const sk = "sets-" + S.day; S.log.ticks[sk] = { ...(S.log.ticks[sk] || {}), [el.dataset.set]: +el.dataset.n }; touch();
     const w = workoutFor(findDay(S.day)); if (w && w.moves.every(m => (S.log.ticks[sk][m.key] || 0) >= m.sets)) { tickPut(S.day, "body", true); beep(1); } render(); return; }

@@ -352,6 +352,24 @@ a.iconbtn { color: var(--accent); margin-left: auto; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
 @media (max-width: 350px) { .tiles, .recipes { grid-template-columns: 1fr; } .tag { width: 64px; } }
+/* insights */
+.feel { padding: 12px 14px; display: grid; gap: 8px; }
+.feel .rl { font-weight: 700; }
+.feel-b { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.feel-b button { display: grid; justify-items: center; gap: 2px; padding: 8px 0; border-radius: var(--r-ctl); background: var(--sunk); color: var(--muted); font-size: 12px; transition: background .15s var(--ease); }
+.feel-b button b { font: 800 18px var(--round); color: var(--fg); }
+.feel-b button.on { background: var(--accent); color: var(--accent-ink); }
+.feel-b button.on b { color: var(--accent-ink); }
+.ins-head { display: grid; gap: 4px; padding: 14px; width: 100%; background: var(--accent-soft); }
+.ins-head .rl { font-weight: 700; }
+.ins-head .rs { color: var(--muted); font-size: 14px; }
+.spark { width: 84px; height: 28px; flex: none; }
+.spark polyline { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.spark.up polyline { stroke: var(--ok); } .spark.down polyline { stroke: var(--warn); }
+.bars { display: grid; gap: 4px; margin: 6px 0 2px; }
+.bar, .prog { display: block; height: 8px; border-radius: 99px; background: var(--sunk); overflow: hidden; }
+.bar i, .prog i { display: block; height: 100%; border-radius: 99px; background: var(--warn); }
+.bar.b i { background: var(--ok); } .prog { margin: 6px 0 2px; } .prog i { background: var(--accent); }
 </style>
 </head>
 <body>

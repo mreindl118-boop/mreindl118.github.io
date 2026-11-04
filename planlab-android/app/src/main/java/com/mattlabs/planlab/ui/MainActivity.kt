@@ -113,9 +113,10 @@ class MainActivity : ComponentActivity() {
                     Column(Modifier.fillMaxSize()) {
                         when (k) {
                             "today" -> TodayScreen(loading, onSettings = { settings = true }, onOpen = { tab = it })
-                            "health" -> HealthScreen(onSettings = { settings = true })
+                            "health" -> HealthScreen(onSettings = { settings = true }, onInsights = { tab = "insights" })
                             "week" -> WeekScreen()
                             "progress" -> ProgressScreen()
+                            "insights" -> InsightsScreen(onBack = back)
                             else -> PlannerScreen(onBack = back)
                         }
                     }
