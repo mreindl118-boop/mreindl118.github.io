@@ -211,7 +211,7 @@
     }
     el.innerHTML =
       '<div style="font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#2E4A3B">Proctor Landing Park · MLA Capstone</div>' +
-      '<div style="font-family:var(--serif); font-weight:400; font-size:30px; letter-spacing:-.01em; margin-top:10px">Recognition</div>' +
+      '<div class="h-head" style="font-size:30px; margin-top:10px">Recognition</div>' +
       '<div style="border-top:1px solid #26292B; margin-top:14px"></div>' +
       '<div style="display:flex; flex-direction:column; gap:20px; margin-top:24px">' +
       row('assets/logos/daapworks.jpg', 'DAAPWorks 2026', "Director's Choice Gallery selection", '100px') +
@@ -381,7 +381,7 @@
       var body = clean(s.body);
       if (!body) return '';
       return '<div style="margin-top:32px; max-width:68ch">' +
-        '<h2 class="h-serif" style="font-size:24px; margin:0 0 8px">' + esc(s.heading) + '</h2>' +
+        '<h2 class="h-head" style="font-size:24px; margin:0 0 8px">' + esc(s.heading) + '</h2>' +
         '<p style="font-size:16px; line-height:1.65; margin:0; text-wrap:pretty">' + esc(body) + '</p>' +
         (/recognition/i.test(s.heading) ? logos : '') +
         '</div>';

@@ -1,5 +1,6 @@
 /* Understory Designs — production stylesheet, translated from the design canvas.
-   Palette: paper #F3F0E8 · panel #FAF8F2 · ink #26292B · pine #2E4A3B · clay #B4603A · moss #B7C95A */
+   Palette: paper #F3F0E8 · panel #FAF8F2 · ink #26292B · pine #2E4A3B · clay #B4603A · moss #B7C95A
+   Logo arcs: pine (outer) · leaf #7A9A3C (middle) · clay (inner). Headings use the wordmark face. */
 
 :root {
   --paper: #F3F0E8;
@@ -14,7 +15,6 @@
   --pine: #2E4A3B;
   --clay: #B4603A;
   --moss: #B7C95A;
-  --serif: 'Source Serif 4', Georgia, serif;
   --sans: 'IBM Plex Sans', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
@@ -140,7 +140,7 @@ img { max-width: 100%; }
 }
 .card-type { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--pine); margin-top: 14px; }
 .card-titlerow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 6px; }
-.card-title { font-family: var(--serif); font-weight: 600; font-size: 21px; }
+.card-title { font-family: var(--sans); font-weight: 700; font-size: 20px; letter-spacing: -.015em; line-height: 1.25; }
 .card-year { font-family: var(--mono); font-size: 12px; color: var(--muted); }
 .card-sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
 .card-soft { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-top: 8px; }
@@ -156,7 +156,8 @@ img { max-width: 100%; }
 .chip.active { color: var(--ink); border-bottom-color: var(--clay); }
 
 /* ---------- Section headers ---------- */
-.h-serif { font-family: var(--serif); font-weight: 600; letter-spacing: -.01em; margin: 0; }
+/* Headings are set in the wordmark's face: IBM Plex Sans Bold, tracked tight like "Understory" */
+.h-head { font-family: var(--sans); font-weight: 700; letter-spacing: -.02em; margin: 0; }
 .rowhead { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
 .rowhead .link-mono { text-decoration: none; }
 .rowhead .link-mono:hover { color: var(--clay); }
@@ -272,14 +273,14 @@ img { max-width: 100%; }
   position: relative; background: var(--paper); border: 1px solid var(--ink);
   width: min(1560px, 97vw); height: 93vh; display: flex; flex-direction: column;
 }
-.lightbox-title { font-family: var(--serif); font-weight: 600; font-size: 18px; }
+.lightbox-title { font-family: var(--sans); font-weight: 700; font-size: 17px; letter-spacing: -.01em; }
 .lightbox .vstage { height: auto; flex: 1; }
 .vbtn-close { border-color: var(--ink); background: var(--ink); color: var(--paper); font-size: 16px; }
 
 /* ---------- Footers ---------- */
 .foot { background: var(--ink); color: var(--paper); padding: 44px 32px 28px; }
 .foot-top { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; align-items: flex-end; }
-.foot-name { font-family: var(--serif); font-weight: 600; font-size: 26px; letter-spacing: -.01em; }
+.foot-name { font-family: var(--sans); font-weight: 700; font-size: 26px; letter-spacing: -.02em; }
 .foot-sub { font-family: var(--mono); font-size: 12px; color: #B8B4A6; margin-top: 6px; }
 .foot-links { display: flex; gap: 26px; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; }
 .foot a { color: var(--paper); }
@@ -293,7 +294,7 @@ img { max-width: 100%; }
   max-width: 1240px; margin: 0 auto; display: flex; justify-content: space-between;
   gap: 16px; flex-wrap: wrap; align-items: baseline;
 }
-.foot-slim .foot-brand { font-family: var(--serif); font-weight: 600; font-size: 18px; }
+.foot-slim .foot-brand { font-family: var(--sans); font-weight: 700; font-size: 18px; letter-spacing: -.02em; }
 .foot-slim a { color: var(--paper); }
 .foot-slim a:hover { color: var(--moss); }
 
@@ -312,8 +313,8 @@ img { max-width: 100%; }
 }
 @media (max-width: 640px) { .hero-grid { padding: 56px 18px 48px; grid-template-columns: 1fr; } }
 .hero h1 {
-  font-family: var(--serif); font-weight: 400; font-size: clamp(32px, 4.4vw, 54px);
-  line-height: 1.16; letter-spacing: -.015em; max-width: 26ch; margin: 20px 0 0; text-wrap: pretty;
+  font-family: var(--sans); font-weight: 600; font-size: clamp(32px, 4.4vw, 52px);
+  line-height: 1.12; letter-spacing: -.025em; max-width: 26ch; margin: 20px 0 0; text-wrap: pretty;
 }
 .img-fade {
   width: 100%; display: block; mix-blend-mode: multiply;
@@ -335,7 +336,7 @@ img { max-width: 100%; }
 .feature-cover { aspect-ratio: 21 / 9; min-height: 260px; max-width: 100%; border: 1px solid var(--line); overflow: hidden; background: var(--panel); }
 .feature-cover img { width: 100%; height: 100%; object-fit: cover; object-position: center 38%; display: block; }
 .feature-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 14px; flex-wrap: wrap; }
-.feature-title { font-family: var(--serif); font-weight: 600; font-size: 20px; }
+.feature-title { font-family: var(--sans); font-weight: 700; font-size: 20px; letter-spacing: -.02em; }
 .feature-tag { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--pine); }
 .process-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 20px 24px; }
 .process-step { border-top: 1px solid var(--ink); padding-top: 12px; }

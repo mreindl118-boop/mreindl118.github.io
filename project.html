@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
@@ -41,13 +41,13 @@
       <div class="kicker">Project</div>
       <span id="p-unlisted" hidden style="font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--clay); border:1px solid var(--clay); padding:3px 8px">Unlisted · In development</span>
     </div>
-    <h1 id="p-title" class="h-serif" style="font-weight:400; font-size:clamp(32px,5vw,50px); margin:12px 0 0; line-height:1.08; max-width:24ch; text-wrap:pretty"></h1>
+    <h1 id="p-title" class="h-head" style="font-size:clamp(32px,5vw,50px); margin:12px 0 0; line-height:1.08; max-width:24ch; text-wrap:pretty"></h1>
   </div>
   <div class="meta-grid" id="p-meta"></div>
 
   <!-- Compare slider: same-frame views (existing site, concepts) declared as "compare" in the project JSON -->
   <section id="cmp-section" hidden aria-labelledby="cmp-title">
-    <h2 class="h-serif" id="cmp-title" style="font-size:26px; margin:48px 0 6px"></h2>
+    <h2 class="h-head" id="cmp-title" style="font-size:26px; margin:48px 0 6px"></h2>
     <p class="mono-note" id="cmp-note" style="margin:0 0 14px; max-width:70ch"></p>
     <div class="viewer">
       <div class="cmp-pick" id="cmp-pick" hidden>
@@ -76,7 +76,7 @@
       <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap">
         <div>
           <div class="kicker" style="font-size:11px; letter-spacing:.12em">Drawing 01 · Full spread</div>
-          <div class="h-serif" style="font-size:24px; margin-top:4px">Master plan</div>
+          <div class="h-head" style="font-size:24px; margin-top:4px">Master plan</div>
           <div style="font-size:14px; color:var(--muted); margin-top:4px">Seamless composite of booklet pp. 24–25 — no page fold.</div>
         </div>
         <button id="mp-open" class="vbtn vbtn-wide" style="min-height:44px; border-color:var(--pine); color:var(--pine)">Fullscreen ⤢</button>
@@ -86,7 +86,7 @@
       </div>
     </div>
 
-    <h2 id="booklet" class="h-serif" style="font-size:26px; margin:48px 0 14px">Capstone Booklet</h2>
+    <h2 id="booklet" class="h-head" style="font-size:26px; margin:48px 0 14px">Capstone Booklet</h2>
     <div class="viewer">
       <div class="vbar">
         <div class="vgroup">
@@ -130,7 +130,7 @@
 
   <!-- Drawing set (hidden for projects that only have models) -->
   <div id="dw-section">
-  <h2 class="h-serif" style="font-size:26px; margin:48px 0 14px">Drawing set</h2>
+  <h2 class="h-head" style="font-size:26px; margin:48px 0 14px">Drawing set</h2>
   <div class="viewer">
     <div class="vbar">
       <div class="vgroup">
@@ -162,7 +162,7 @@
   <!-- Physical + digital models; shown when the project declares any -->
   <div id="p-models" hidden>
     <div class="rule-motif" style="margin:56px 0 18px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
-    <h2 class="h-serif" style="font-size:26px; margin:0 0 4px">Models</h2>
+    <h2 class="h-head" style="font-size:26px; margin:0 0 4px">Models</h2>
     <p class="mono-note" style="margin:0 0 18px">Physical and digital models — terrain, fabrication, and study pieces.</p>
     <div id="p-models-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:28px 24px"></div>
   </div>
