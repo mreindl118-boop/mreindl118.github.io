@@ -172,9 +172,13 @@ counters, figure numbers. It is never used for running text or headings.
 
 One centred container (1240px) with 32px gutters, 18px on phones (640px breakpoint). Grids use
 `auto-fit` with generous minimums (cards ~270–340px, meta cells 165px, process steps 170px) and
-collapse to one column on phones. Sections are framed by a full-width ink rule or the rule motif
+collapse to one column on phones; a minimum is written `min(<n>px, 100%)` so a track never outgrows
+a 320px screen. Sections are framed by a full-width ink rule or the rule motif
 above a header row (`.rowhead`: title left, a mono link right). The nav is sticky: a 96%-opaque
-paper bar with a light backdrop blur and a hairline underneath.
+paper bar with a light backdrop blur and a hairline underneath. It is the only sticky element.
+In-page anchors (`#contact`, `#skills`) land 18px below it: `html` takes `scroll-padding-top` from
+the nav's measured height (`--nav-h`, set by `site.js`; 66px, 53px at 476–640px, 96px on two rows
+at 474px and below), so sections carry no scroll margins of their own.
 
 ## Elevation & Depth
 
@@ -210,6 +214,8 @@ Diagonal hatching marks placeholders.
 - **Shadow Strategy:** none.
 - **Border:** a 1px ink rule on top of each card.
 - **Internal Padding:** 16px above the content.
+- **Year label:** mono, always on one line; the title beside it wraps instead. Empty fields are
+  left out of the card's `·` lines rather than leaving a stray separator.
 
 ### Navigation
 - Wordmark left (brand mark + "Understory / Design Studio"), four mono links right; the current

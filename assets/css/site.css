@@ -23,6 +23,8 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
+/* anchors land clear of the sticky nav; --nav-h is its measured height (set by site.js) */
+html { scroll-padding-top: calc(var(--nav-h, 66px) + 18px); }
 body {
   margin: 0;
   background: var(--paper);
@@ -82,7 +84,7 @@ img { max-width: 100%; }
 
 /* Gliding indicator: a floating copy that slides between tabs on click */
 .navlinks .ind-fly {
-  position: absolute; opacity: 1; pointer-events: none; margin: 0;
+  position: absolute; display: flex; align-items: center; opacity: 1; pointer-events: none; margin: 0;
   transition: left .3s cubic-bezier(.4, 0, .2, 1), top .3s cubic-bezier(.4, 0, .2, 1), width .3s cubic-bezier(.4, 0, .2, 1);
 }
 .navlinks a.arriving { color: var(--clay); transition: color .2s ease; }
@@ -147,7 +149,7 @@ main .rule-motif .ci { border-color: var(--clay); }
 .card-type { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--pine); margin-top: 14px; }
 .card-titlerow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 6px; }
 .card-title { font-family: var(--sans); font-weight: 700; font-size: 20px; letter-spacing: -.015em; line-height: 1.25; }
-.card-year { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.card-year { font-family: var(--mono); font-size: 12px; color: var(--muted); flex-shrink: 0; white-space: nowrap; }
 .card-sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
 .card-soft { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-top: 8px; }
 
@@ -398,6 +400,7 @@ main .rule-motif .ci { border-color: var(--clay); }
 .rb::before { content: ""; width: 5px; height: 5px; background: var(--pine); flex-shrink: 0; margin-top: 8px; }
 .rb span { font-size: 14.5px; line-height: 1.4; }
 .resume-brand { display: none; }
+.resume-contact { text-align: right; }
 @media (max-width: 780px) {
   /* Header wraps on narrow screens: name gets its own row, then the
      Understory logo lockup fills the space beside the contact block. */
@@ -405,9 +408,12 @@ main .rule-motif .ci { border-color: var(--clay); }
   .resume-brand { display: flex; align-items: center; gap: 10px; align-self: center; }
   .resume-contact { flex: 1; }
 }
+/* on phones the contact block drops below the name, so the second lockup would only
+   repeat the mark: keep one */
+@media (max-width: 640px) { .resume-brand { display: none; } .resume-contact { text-align: left; } }
 @media print { .resume-brand { display: none !important; } }
 .resume-actions {
-  position: sticky; top: 76px; z-index: 4; display: flex; gap: 10px; justify-content: flex-end;
+  position: static; display: flex; gap: 10px; justify-content: flex-end;
   max-width: 850px; margin: 0 auto 18px;
 }
 @media print {
@@ -428,7 +434,8 @@ main:focus { outline: none; }
 :focus-visible { outline: 2px solid var(--pine); outline-offset: 3px; }
 .foot :focus-visible, .foot-slim :focus-visible { outline-color: var(--moss); }
 @media (max-width: 640px) {
-  .link-mono, .foot a, .foot-slim a, .foot-links a, a[href^="mailto:"], a[href*="linkedin.com"],
+  .link-mono, .foot a, .foot-slim a, .foot-links a,
+  a[href^="mailto:"]:not(.btn):not(.btn-outline), a[href*="linkedin.com"]:not(.btn):not(.btn-outline),
   .navlinks a, a[href="work.html"][style*="font-family:var(--mono)"] {
     display: inline-block; min-height: 24px; padding-top: 5px; padding-bottom: 5px;
   }

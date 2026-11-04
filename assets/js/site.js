@@ -27,7 +27,7 @@
     return getJSON('content/projects/index.json').then(function (slugs) {
       return Promise.all(slugs.map(function (s) { return getJSON('content/projects/' + s + '.json'); }));
     }).then(function (projects) {
-      projects.sort(function (a, b) { return (b.sortKey || b.year) - (a.sortKey || a.year); });
+      projects.sort(function (a, b) { return (b.sortKey || b.year || 0) - (a.sortKey || a.year || 0); });
       return projects;
     });
   }
@@ -100,7 +100,7 @@
     return portfolioP;
   }
 
-  function yearOf(p) { return clean(p.yearLabel || String(p.year)); }
+  function yearOf(p) { return clean(p.yearLabel || (p.year != null ? String(p.year) : '')); }
   function roleShort(p) { return clean(p.role).split('—')[0].trim(); }
 
   /* Project card markup shared by home + work pages. */
@@ -110,9 +110,9 @@
       : '<div class="cover ph"><span class="ph-label">cover — coming soon</span></div>';
     return '<a class="card" href="project.html?slug=' + esc(p.slug) + '">' +
       cover +
-      '<div class="card-type">' + esc(clean(p.type)) + ' · ' + esc(clean(p.scale)) + '</div>' +
+      '<div class="card-type">' + [clean(p.type), clean(p.scale)].filter(Boolean).map(esc).join(' · ') + '</div>' +
       '<div class="card-titlerow"><span class="card-title">' + esc(p.title) + '</span><span class="card-year">' + esc(yearOf(p)) + '</span></div>' +
-      '<div class="card-sub">' + esc(clean(p.location)) + ' · ' + esc(roleShort(p)) + '</div>' +
+      '<div class="card-sub">' + [clean(p.location), roleShort(p)].filter(Boolean).map(esc).join(' · ') + '</div>' +
       (withSoftware ? '<div class="card-soft">' + esc((p.software || []).join(' · ')) + '</div>' : '') +
       '</a>';
   }
@@ -176,6 +176,15 @@
     } catch (e) { /* storage unavailable — skip the settle effect */ }
 
     var gliding = false;
+    /* A page restored from the back/forward cache comes back mid-glide: clear the
+       flying copy, the clay target and the hidden indicator so the tabs work again. */
+    window.addEventListener('pageshow', function (e) {
+      if (!e.persisted) return;
+      gliding = false;
+      Array.prototype.forEach.call(nav.querySelectorAll('.ind-fly'), function (f) { f.remove(); });
+      Array.prototype.forEach.call(nav.querySelectorAll('a.arriving'), function (a) { a.classList.remove('arriving'); });
+      Array.prototype.forEach.call(nav.querySelectorAll('.ind'), function (i) { i.style.opacity = ''; });
+    });
     nav.addEventListener('click', function (e) {
       var link = e.target.closest('a');
       if (!link || !nav.contains(link)) return;
@@ -220,9 +229,20 @@
     });
   }
 
+  /* Expose the sticky nav's real height (it wraps to two rows on narrow phones) as
+     --nav-h, which html's scroll-padding-top uses to land anchors clear of it. */
+  function initNavHeight() {
+    var n = document.querySelector('.nav');
+    if (!n) return;
+    function setNavH() { document.documentElement.style.setProperty('--nav-h', n.offsetHeight + 'px'); }
+    setNavH();
+    if (window.ResizeObserver) new ResizeObserver(setNavH).observe(n);
+  }
+
+  function init() { initNavHeight(); initNavGlide(); }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initNavGlide);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    initNavGlide();
+    init();
   }
 })();
