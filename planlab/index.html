@@ -251,6 +251,9 @@ h1, h2, p { margin: 0; }
 .tailbtn { flex: none; width: 48px; align-self: stretch; display: grid; place-items: center; color: var(--accent); }
 .tailbtn svg { width: 20px; height: 20px; }
 .tailbtn:active { background: var(--sunk); }
+.lbtns { flex: none; display: flex; gap: 6px; align-items: center; padding-right: 10px; flex-wrap: wrap; justify-content: flex-end; max-width: 46%; }
+.lbtn { display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border-radius: 999px; background: var(--accent-soft, var(--sunk)); color: var(--accent); font-weight: 700; font-size: 13px; text-decoration: none; white-space: nowrap; }
+.lbtn:active { filter: brightness(.95); }
 .center { text-align: center; justify-self: center; }
 .pad { padding: 16px; }
 .seg.three { grid-template-columns: repeat(3, 1fr); }

@@ -18,6 +18,22 @@ object Md {
 
     fun strip(s: String): String = s.replace(BOLD, "$1").replace(CODE, "$1").replace(LINK, "$1").replace(MDREF, "").trim()
 
+    private val LINKS = Regex("""\[([^\]]+)\]\(([^)\s]+)\)""")
+    private val BARE = Regex("""\s+(https?://\S+)\s*$""")
+
+    /**
+     * A step's links: "text · [Practice](app:piano) · [Tutorial](https://…)", a step whose text is itself a link, or a bare
+     * URL at the end. Returns the text to key and show (before the first " · [") and the links, in order.
+     */
+    fun splitLinks(s: String): Pair<String, List<Link>> {
+        val links = LINKS.findAll(s).map { Link(strip(it.groupValues[1]), it.groupValues[2]) }.toMutableList()
+        var t = s
+        val i = t.indexOf(" · [")
+        if (i >= 0) t = t.substring(0, i)
+        BARE.find(t)?.let { links += Link("Open", it.groupValues[1]); t = t.substring(0, it.range.first) }
+        return t to links
+    }
+
     fun keyOf(s: String): String =
         strip(s).lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').take(60)
 
@@ -66,17 +82,18 @@ object Md {
                 if (!t.startsWith("- ")) continue
                 val indented = raw.startsWith(" ") || raw.startsWith("\t")
                 val single = CHECK.find(raw)
+                val split = single?.let { splitLinks(it.groupValues[2]) }
                 if (area != null && single != null) {
-                    val label = strip(single.groupValues[2])
-                    steps.getOrPut(area) { mutableListOf() } += Box("$area/${keyOf(label)}", label, single.groupValues[1].equals("x", true))
+                    val label = strip(split!!.first)
+                    steps.getOrPut(area) { mutableListOf() } += Box("$area/${keyOf(label)}", label, single.groupValues[1].equals("x", true), links = split.second)
                     continue
                 }
                 if (indented && single != null) {
-                    val full = strip(single.groupValues[2])
+                    val full = strip(split!!.first)
                     val c = full.indexOf(':')
                     val parent = if (c > 0) keyOf(full.substring(0, c)) else boxes.lastOrNull()?.key ?: continue
                     val label = if (c > 0) full.substring(c + 1).trim() else full
-                    steps.getOrPut(parent) { mutableListOf() } += Box(keyOf(full), label, single.groupValues[1].equals("x", true))
+                    steps.getOrPut(parent) { mutableListOf() } += Box(keyOf(full), label, single.groupValues[1].equals("x", true), links = split.second)
                     continue
                 }
                 val line = t.substring(2)
@@ -129,8 +146,9 @@ object Md {
         val items = mutableListOf<Item>()
         for (l in body.lines()) {
             val m = CHECK.find(l) ?: continue
-            val t = strip(m.groupValues[2])
-            val item = Item(keyOf(t), t, m.groupValues[1].equals("x", true), name)
+            val (raw, links) = splitLinks(m.groupValues[2])
+            val t = strip(raw)
+            val item = Item(keyOf(t), t, m.groupValues[1].equals("x", true), name, links = links)
             val indented = l.startsWith("  ") || l.startsWith("\t")
             if (indented && items.isNotEmpty()) items[items.size - 1] = items.last().let { it.copy(steps = it.steps + item) }
             else items += item
