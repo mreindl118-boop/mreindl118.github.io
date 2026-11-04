@@ -99,7 +99,7 @@ object Store {
         schedulePush()
     }
 
-    fun tick(list: String, key: String, value: Boolean) = addOps(LogDoc.tickOp(list, key, value))
+    fun tick(list: String, key: String, value: Boolean) { if (value) count("tick"); addOps(LogDoc.tickOp(list, key, value)) }
     fun addMinutes(date: LocalDate, key: String, n: Int) = addOps(LogDoc.addOp("mins", date.toString(), key, n))
     fun pelvicSet(date: LocalDate) = addOps(LogDoc.addOp("ticks", "pf-$date", "n", 1))
     fun skip(date: LocalDate, key: String) = addOps(LogDoc.tickOp("skip-$date", key, true))
@@ -107,6 +107,7 @@ object Store {
 
     /** Marks a day's box done, logging the planned minutes for piano and voice if none were logged. */
     fun done(date: LocalDate, key: String, minutes: Int? = null) {
+        count("tick")
         val ops = mutableListOf(LogDoc.tickOp(date.toString(), key, true))
         val d = _state.value.plan.day(date)
         if (key == "piano" || key == "voice") {
@@ -116,8 +117,41 @@ object Store {
         addOps(*ops.toTypedArray())
     }
 
-    fun isDone(day: Day, box: Box): Boolean = LogDoc.ticked(_state.value.log, day.date.toString(), box.key, box.done)
+    /** Ticked directly, or (when it has steps and was never ticked directly) all its steps ticked. */
+    fun isDone(day: Day, box: Box): Boolean {
+        LogDoc.tick(_state.value.log, day.date.toString(), box.key)?.let { return it }
+        if (box.steps.isNotEmpty() && box.steps.all { stepDone(day, it) }) return true
+        return box.done
+    }
+    fun stepDone(day: Day, step: Box): Boolean = LogDoc.ticked(_state.value.log, day.date.toString(), step.key, step.done)
+    fun nextStep(day: Day, box: Box): Box? = box.steps.firstOrNull { !stepDone(day, it) }
+    fun stepsDone(day: Day, box: Box): Int = box.steps.count { stepDone(day, it) }
     fun toggle(day: Day, box: Box) = if (isDone(day, box)) tick(day.date.toString(), box.key, false) else done(day.date, box.key)
+
+    /** Ticks one step; ticking the last open step ticks its box too, and unticking a step unticks the box. */
+    fun setStep(day: Day, box: Box, step: Box, value: Boolean) {
+        val d = day.date.toString()
+        if (value) count("tick")
+        val ops = mutableListOf(LogDoc.tickOp(d, step.key, value))
+        if (value && box.steps.all { it.key == step.key || stepDone(day, it) }) {
+            ops += LogDoc.tickOp(d, box.key, true)
+            if (box.key == "piano" || box.key == "voice") {
+                val m = day.plannedMinutes(box.key)
+                if (m > 0 && LogDoc.minutes(_state.value.log, d, box.key) == 0) ops += LogDoc.addOp("mins", d, box.key, m)
+            }
+        }
+        if (!value && LogDoc.tick(_state.value.log, d, box.key) == true) ops += LogDoc.tickOp(d, box.key, false)
+        addOps(*ops.toTypedArray())
+    }
+
+    /** Ticks the next open step of [key] on [date] (from a widget or a notification button). */
+    fun doNextStep(date: LocalDate, key: String, stepKey: String? = null) {
+        val day = _state.value.plan.day(date) ?: return
+        val box = day.boxes.firstOrNull { it.key == key } ?: return
+        if (box.steps.isEmpty()) { done(date, key); return }
+        val step = stepKey?.let { k -> box.steps.firstOrNull { it.key == k } } ?: nextStep(day, box) ?: return
+        setStep(day, box, step, true)
+    }
 
     fun brief(date: LocalDate = LocalDate.now()): Coach.Brief = Coach.brief(_state.value.plan, _state.value.health, date, LocalTime.now())
 
@@ -127,6 +161,42 @@ object Store {
         scope.launch {
             runCatching { Widgets.updateAll(app) }
             runCatching { Notifier.refreshPinned(app) }
+        }
+    }
+
+    // ---------- engagement: counts only (what got used, what got ignored), so Claude can make planLAB easier to use
+    @Synchronized
+    fun count(event: String, date: LocalDate = LocalDate.now()) {
+        if (!::app.isInitialized) return
+        val o = runCatching { JSONObject(prefs.getString("eng", "{}")) }.getOrDefault(JSONObject())
+        val d = o.optJSONObject(date.toString()) ?: JSONObject().also { o.put(date.toString(), it) }
+        d.put(event, d.optInt(event, 0) + 1)
+        prefs.edit().putString("eng", o.toString()).apply()
+    }
+
+    private fun pushEngagement(gh: GitHub) {
+        val pending = synchronized(this) {
+            val o = runCatching { JSONObject(prefs.getString("eng", "{}")) }.getOrDefault(JSONObject())
+            if (o.length() == 0) return
+            prefs.edit().putString("eng", "{}").apply(); o
+        }
+        try {
+            val remote = gh.json("log/engagement.json")
+            val doc = remote?.first ?: JSONObject().put("v", 1)
+            val days = doc.optJSONObject("days") ?: JSONObject().also { doc.put("days", it) }
+            for (date in pending.keys()) {
+                val add = pending.getJSONObject(date)
+                val d = days.optJSONObject(date) ?: JSONObject().also { days.put(date, it) }
+                for (e in add.keys()) d.put(e, d.optInt(e, 0) + add.getInt(e))
+            }
+            val cutoff = LocalDate.now().minusDays(60).toString()
+            days.keys().asSequence().toList().filter { it < cutoff }.forEach { days.remove(it) }
+            doc.put("updated", System.currentTimeMillis()).put("app", com.mattlabs.planlab.BuildConfig.VERSION_NAME)
+            gh.put("log/engagement.json", doc.toString(1), remote?.second, "planLAB app: usage ${LocalDate.now()}")
+        } catch (e: Exception) {
+            // Put the counts back for the next try.
+            synchronized(this) { for (date in pending.keys()) { val add = pending.getJSONObject(date); for (ev in add.keys()) repeat(add.getInt(ev)) { count(ev, LocalDate.parse(date)) } } }
+            throw e
         }
     }
 
@@ -150,6 +220,7 @@ object Store {
             val gh = GitHub(k)
             if (full) err = runCatching { pullPlan(gh) }.exceptionOrNull()?.let(::describe) ?: ""
             runCatching { pushLog(gh) }.exceptionOrNull()?.let { if (err.isEmpty()) err = describe(it) }
+            runCatching { pushEngagement(gh) }
         }
         runCatching { readHealth() }
         if (k != null) runCatching { pushHealth(GitHub(k)) }

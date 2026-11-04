@@ -84,7 +84,12 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
         }
         item { Label("Your call") ; CallCard(b) }
         item { Label("Check off"); Tiles(day, b) }
-        val others = day.boxes.filter { it.key !in Store.MAIN }
+        val stepped = day.boxes.filter { it.steps.isNotEmpty() }.sortedBy { Store.MAIN.indexOf(it.key).let { i -> if (i < 0) 99 else i } }
+        if (stepped.isNotEmpty()) {
+            item { Label("Step by step") }
+            for (box in stepped) item { StepCard(day, box); Spacer(Modifier.height(10.dp)) }
+        }
+        val others = day.boxes.filter { it.key !in Store.MAIN && it.steps.isEmpty() }
         if (others.isNotEmpty()) item {
             Spacer(Modifier.height(10.dp))
             PCard(pad = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 6.dp)) {
@@ -133,7 +138,11 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
                 for (e in events) RowItem(lead = { Dot(tk.warn) }, title = e.what, sub = e.notes)
                 for (i in due) {
                     val on = LogDoc.ticked(st.log, "inbox", i.key, i.done)
-                    RowItem(lead = { CheckDot(on, tk.accent, 28.dp) { Store.tick("inbox", i.key, !on) } }, title = i.what, sub = "Due today")
+                    RowItem(lead = { CheckDot(on, tk.accent, 28.dp) { Store.tick("inbox", i.key, !on) } }, title = i.what, sub = if (i.steps.isEmpty()) "Due today" else "Due today · ${i.steps.count { LogDoc.ticked(st.log, "inbox", it.key, it.done) }} of ${i.steps.size} steps")
+                    for (sub in i.steps) {
+                        val so = LogDoc.ticked(st.log, "inbox", sub.key, sub.done)
+                        RowItem(Modifier.padding(start = 28.dp), lead = { CheckDot(so, tk.accent, 24.dp) { Store.tick("inbox", sub.key, !so) } }, title = sub.text, titleColor = if (so) tk.muted else tk.fg)
+                    }
                 }
                 for (c in day.coming) RowItem(lead = { Dot(tk.line) }, title = c.replaceFirstChar { it.uppercase() })
                 for (x in extra) RowItem(lead = { Dot(tk.line) }, title = x.replaceFirstChar { it.uppercase() }, sub = "If you feel like it")
@@ -222,14 +231,15 @@ private fun Tiles(day: Day, b: Coach.Brief) {
                     val on = Store.isDone(day, box)
                     val skipped = !on && LogDoc.skipped(st.log, day.date.toString(), box.key)
                     val color = tk.kind(box.key)
-                    val sub = when (box.key) {
+                    val next = if (on) null else Store.nextStep(day, box)
+                    val sub = if (next != null) "${Store.stepsDone(day, box)}/${box.steps.size} · ${next.label}" else when (box.key) {
                         "meals" -> "${day.protein().takeIf { it > 0 } ?: b.protein} g protein"
                         "body" -> b.body.title
                         "piano" -> LogDoc.minutes(st.log, day.date.toString(), "piano").let { if (it > 0) "$it of ${day.plannedMinutes("piano")} min" else b.piano?.title?.removePrefix("Piano, ") ?: "" }
                         "voice" -> LogDoc.minutes(st.log, day.date.toString(), "voice").let { if (it > 0) "$it of ${day.plannedMinutes("voice")} min" else b.voice?.title?.removePrefix("Voice, ") ?: "" }
                         else -> ""
                     }
-                    PCard(Modifier.weight(1f), color = if (on) color.copy(alpha = if (tk.dark) 0.28f else 0.14f) else tk.surface, onClick = { Store.toggle(day, box) }, pad = androidx.compose.foundation.layout.PaddingValues(14.dp)) {
+                    PCard(Modifier.weight(1f), color = if (on) color.copy(alpha = if (tk.dark) 0.28f else 0.14f) else tk.surface, onClick = { if (next != null) Store.setStep(day, box, next, true) else Store.toggle(day, box) }, pad = androidx.compose.foundation.layout.PaddingValues(14.dp)) {
                         Row(verticalAlignment = Alignment.Top) {
                             Column(Modifier.weight(1f)) {
                                 Text(Store.LABEL[box.key] ?: box.label, style = MaterialTheme.typography.titleMedium, color = color, fontWeight = FontWeight.ExtraBold)
@@ -259,6 +269,7 @@ private fun Wish() {
             Text(msg.ifEmpty { "Claude gives it a date tomorrow morning." }, Modifier.weight(1f), color = tk.muted, fontSize = 13.sp)
             PButton("Add") {
                 val w = text.trim(); if (w.isEmpty()) return@PButton
+                Store.count("wish")
                 Store.sendWish(w) { ok -> msg = if (ok) "Added \"$w\"." else "Couldn't add it. Try again online."; if (ok) text = "" }
             }
         }

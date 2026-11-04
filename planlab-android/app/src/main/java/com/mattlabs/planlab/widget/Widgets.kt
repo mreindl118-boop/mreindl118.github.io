@@ -66,15 +66,19 @@ private object WC {
     fun score(s: Int) = when { s >= 80 -> ok; s >= 65 -> accent; s >= 50 -> warm; else -> ColorProvider(day = Color(0xFFC2410C), night = Color(0xFFFF8A4C)) }
 }
 
+private val FROM = ActionParameters.Key<String>("from")
+
 class ToggleAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         Store.init(context)
         val key = parameters[KEY] ?: return
+        Store.count("widget:tick")
         val today = LocalDate.now()
         if (key == "pf") Store.pelvicSet(today) else {
             val day = Store.state.value.plan.day(today) ?: return
             val box = day.boxes.firstOrNull { it.key == key } ?: return
-            Store.toggle(day, box)
+            // An area with steps ticks its next step; one without ticks (or unticks) the area.
+            if (box.steps.isNotEmpty() && !Store.isDone(day, box)) Store.doNextStep(today, key) else Store.toggle(day, box)
         }
         Widgets.updateAll(context)
     }
@@ -98,7 +102,7 @@ private fun TodayContent() {
     val day = st.plan.day(today)
     val b = Store.brief(today)
     Column(GlanceModifier.fillMaxSize().background(WC.bg).cornerRadius(24.dp).padding(14.dp)) {
-        Row(GlanceModifier.fillMaxWidth().clickable(actionStartActivity<MainActivity>()), verticalAlignment = Alignment.CenterVertically) {
+        Row(GlanceModifier.fillMaxWidth().clickable(actionStartActivity<MainActivity>(actionParametersOf(FROM to "widget"))), verticalAlignment = Alignment.CenterVertically) {
             Column(GlanceModifier.defaultWeight()) {
                 val done = day?.boxes?.count { Store.isDone(day, it) } ?: 0
                 Text(if (day == null) "planLAB" else if (done == day.boxes.size) "All done" else "Today  $done/${day.boxes.size}",
@@ -121,7 +125,7 @@ private fun TodayContent() {
             Text(if (st.hasKey) "Nothing planned today." else "Open planLAB to set it up.", style = TextStyle(color = WC.muted, fontSize = 14.sp))
         } else {
             val log = st.log
-            for (box in day.boxes.take(6)) {
+            for (box in day.boxes.take(7)) {
                 val on = Store.isDone(day, box)
                 val skipped = LogDoc.skipped(log, today.toString(), box.key)
                 Row(GlanceModifier.fillMaxWidth().padding(vertical = 3.dp).clickable(actionRunCallback<ToggleAction>(actionParametersOf(ToggleAction.KEY to box.key))),
@@ -130,8 +134,12 @@ private fun TodayContent() {
                         Text(if (on) "✓" else "", style = TextStyle(color = WC.white, fontSize = 14.sp, fontWeight = FontWeight.Bold))
                     }
                     Spacer(GlanceModifier.width(10.dp))
-                    Text((Store.LABEL[box.key] ?: box.label.replaceFirstChar { it.uppercase() }) + if (skipped && !on) "  (skipped)" else "",
-                        style = TextStyle(color = if (on) WC.muted else WC.fg, fontSize = 15.sp, fontWeight = if (on) FontWeight.Normal else FontWeight.Medium), maxLines = 1)
+                    Column(GlanceModifier.defaultWeight()) {
+                        Text((Store.LABEL[box.key] ?: box.label.replaceFirstChar { it.uppercase() }) + (if (box.steps.isNotEmpty()) "  ${Store.stepsDone(day, box)}/${box.steps.size}" else "") + if (skipped && !on) "  (skipped)" else "",
+                            style = TextStyle(color = if (on) WC.muted else WC.fg, fontSize = 15.sp, fontWeight = if (on) FontWeight.Normal else FontWeight.Medium), maxLines = 1)
+                        val next = if (on) null else Store.nextStep(day, box)
+                        if (next != null) Text("Next: ${next.label} · tap when done", style = TextStyle(color = WC.kind(box.key), fontSize = 12.sp), maxLines = 1)
+                    }
                 }
             }
             val pf = LogDoc.pelvic(log, today.toString())
@@ -162,7 +170,7 @@ private fun ReadyContent() {
     val today = LocalDate.now()
     val b = Store.brief(today)
     val r = b.readiness
-    Column(GlanceModifier.fillMaxSize().background(WC.bg).cornerRadius(24.dp).padding(14.dp).clickable(actionStartActivity<MainActivity>())) {
+    Column(GlanceModifier.fillMaxSize().background(WC.bg).cornerRadius(24.dp).padding(14.dp).clickable(actionStartActivity<MainActivity>(actionParametersOf(FROM to "widget")))) {
         Text(r?.let { "${it.score}" } ?: "–", style = TextStyle(color = r?.let { WC.score(it.score) } ?: WC.muted, fontSize = 40.sp, fontWeight = FontWeight.Bold))
         Text(r?.label ?: "Connect health", style = TextStyle(color = WC.fg, fontSize = 14.sp, fontWeight = FontWeight.Bold), maxLines = 1)
         Spacer(GlanceModifier.height(6.dp))

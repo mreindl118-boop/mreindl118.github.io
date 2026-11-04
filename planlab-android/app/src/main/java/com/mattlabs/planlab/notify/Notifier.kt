@@ -36,20 +36,25 @@ object Notifier {
         Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
     fun openApp(ctx: Context, tab: String = "today"): PendingIntent =
-        PendingIntent.getActivity(ctx, tab.hashCode(), Intent(ctx, MainActivity::class.java).putExtra("tab", tab).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+        PendingIntent.getActivity(ctx, tab.hashCode(), Intent(ctx, MainActivity::class.java).putExtra("tab", tab).putExtra("from", "notif").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
     /** A button that runs [ActionReceiver] with these extras. */
-    fun action(ctx: Context, label: String, act: String, slot: Slot?, key: String = "", minutes: Int = 0, notif: Int = 0): NotificationCompat.Action {
-        val i = Intent(ctx, ActionReceiver::class.java).setAction("planlab.$act.$key.${slot?.name}.$minutes")
-            .putExtra("act", act).putExtra("key", key).putExtra("slot", slot?.name).putExtra("min", minutes).putExtra("notif", notif)
+    fun action(ctx: Context, label: String, act: String, slot: Slot?, key: String = "", minutes: Int = 0, notif: Int = 0, step: String = ""): NotificationCompat.Action {
+        val i = Intent(ctx, ActionReceiver::class.java).setAction("planlab.$act.$key.${slot?.name}.$minutes.$step")
+            .putExtra("act", act).putExtra("key", key).putExtra("slot", slot?.name).putExtra("min", minutes).putExtra("notif", notif).putExtra("step", step)
             .putExtra("date", LocalDate.now().toString())
-        val pi = PendingIntent.getBroadcast(ctx, (act + key + slot?.name + minutes).hashCode(), i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val pi = PendingIntent.getBroadcast(ctx, (act + key + slot?.name + minutes + step).hashCode(), i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         return NotificationCompat.Action.Builder(0, label, pi).build()
     }
 
     private fun post(ctx: Context, id: Int, b: NotificationCompat.Builder) {
         if (!allowed(ctx)) return
+        Slot.entries.firstOrNull { it.notifId == id }?.let { slot ->
+            Store.count("notif_shown:${slot.name}")
+            val i = Intent(ctx, ActionReceiver::class.java).setAction("planlab.dismiss.${slot.name}").putExtra("act", "dismiss").putExtra("slot", slot.name)
+            b.setDeleteIntent(PendingIntent.getBroadcast(ctx, 500 + slot.ordinal, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+        }
         try { NotificationManagerCompat.from(ctx).notify(id, b.build()) } catch (_: SecurityException) {}
     }
 
@@ -97,34 +102,22 @@ object Notifier {
             }
             Slot.BODY -> {
                 if (!boxOpen("body")) return false
-                post(ctx, id, base(ctx, CH_NUDGE, b.body.title, b.body.detail)
-                    .addAction(action(ctx, "Done", "done", slot, "body", notif = id))
-                    .addAction(action(ctx, "In 1 hour", "snooze", slot, minutes = 60, notif = id))
-                    .addAction(action(ctx, "Skip today", "skip", slot, "body", notif = id)))
+                return area(ctx, slot, day!!, "body", b.body.title, b.body.detail, listOf("In 1 hour" to 60))
             }
             Slot.VOICE -> {
                 if (!boxOpen("voice")) return false
                 val m = day?.plannedMinutes("voice") ?: 10
-                post(ctx, id, base(ctx, CH_NUDGE, b.voice?.title ?: "Voice, $m min", b.voice?.detail ?: "")
-                    .addAction(action(ctx, "Did $m min", "done", slot, "voice", m, id))
-                    .addAction(action(ctx, "In 1 hour", "snooze", slot, minutes = 60, notif = id))
-                    .addAction(action(ctx, "Skip", "skip", slot, "voice", notif = id)))
+                return area(ctx, slot, day!!, "voice", b.voice?.title ?: "Voice, $m min", b.voice?.detail ?: "", listOf("In 1 hour" to 60), "Did $m min" to m)
             }
             Slot.PIANO -> {
                 if (!boxOpen("piano")) return false
                 val m = day?.plannedMinutes("piano") ?: 25
-                post(ctx, id, base(ctx, CH_NUDGE, b.piano?.title ?: "Piano, $m min", b.piano?.detail ?: "")
-                    .addAction(action(ctx, "Did $m min", "done", slot, "piano", m, id))
-                    .addAction(action(ctx, "Did 10", "done", slot, "piano", 10, id))
-                    .addAction(action(ctx, "In 1 hour", "snooze", slot, minutes = 60, notif = id)))
+                return area(ctx, slot, day!!, "piano", b.piano?.title ?: "Piano, $m min", b.piano?.detail ?: "", listOf("In 1 hour" to 60), "Did $m min" to m)
             }
             Slot.MEALS -> {
                 if (!boxOpen("meals")) return false
                 val target = b.protein
-                post(ctx, id, base(ctx, CH_NUDGE, "Ate the plan today?", day?.eat?.lastOrNull()?.let { "Dinner: $it · aim for $target g protein" } ?: "Aim for $target g protein")
-                    .addAction(action(ctx, "Yes", "done", slot, "meals", notif = id))
-                    .addAction(action(ctx, "Mostly", "done", slot, "meals", notif = id))
-                    .addAction(action(ctx, "Not really", "skip", slot, "meals", notif = id)))
+                return area(ctx, slot, day!!, "meals", "Ate the plan today?", day.eat.lastOrNull()?.let { "Dinner: $it · aim for $target g protein" } ?: "Aim for $target g protein", emptyList(), "Yes" to 0)
             }
             Slot.ELEVATE_1, Slot.ELEVATE_2, Slot.ELEVATE_3 -> {
                 if (b.phase != Phase.NWB) return false
@@ -137,12 +130,40 @@ object Notifier {
                 val open = day.boxes.filter { !Store.isDone(day, it) && !LogDoc.skipped(log, today.toString(), it.key) }
                 if (open.isEmpty()) return false
                 val done = day.boxes.size - open.size
-                val nb = base(ctx, CH_NUDGE, "$done of ${day.boxes.size} done today", "Tap what you did: " + open.joinToString(", ") { Store.LABEL[it.key] ?: it.label })
-                open.take(3).forEach { nb.addAction(action(ctx, "✓ " + (Store.LABEL[it.key] ?: it.label.take(14)), "done", slot, it.key, notif = id)) }
+                val nb = base(ctx, CH_NUDGE, "$done of ${day.boxes.size} done today", "Still open:\n" + open.joinToString("\n") { nextLabel(day, it) })
+                open.take(3).forEach { nb.addAction(action(ctx, "✓ " + (Store.LABEL[it.key] ?: it.label.take(14)), "step", slot, it.key, notif = id)) }
                 post(ctx, id, nb)
             }
         }
         return true
+    }
+
+    /**
+     * One area's banner. With steps, it shows the next step and "Done" ticks just that step, then the banner comes
+     * back with the step after it. Without steps, "Done" ticks the whole area.
+     */
+    private fun area(ctx: Context, slot: Slot, day: com.mattlabs.planlab.core.Day, key: String, title: String, text: String,
+                     snoozes: List<Pair<String, Int>>, whole: Pair<String, Int>? = null): Boolean {
+        val id = slot.notifId
+        val box = day.boxes.firstOrNull { it.key == key } ?: return false
+        val next = Store.nextStep(day, box)
+        val nb = if (next != null) {
+            val n = Store.stepsDone(day, box)
+            base(ctx, CH_NUDGE, "${Store.LABEL[key] ?: box.label} · step ${n + 1} of ${box.steps.size}", next.label + if (n == 0 && title.isNotBlank()) "\n$title" else "")
+                .addAction(action(ctx, "✓ Done", "step", slot, key, notif = id, step = next.key))
+        } else {
+            base(ctx, CH_NUDGE, title, text).addAction(action(ctx, whole?.first ?: "Done", "done", slot, key, whole?.second ?: 0, id))
+        }
+        snoozes.forEach { (label, m) -> nb.addAction(action(ctx, label, "snooze", slot, minutes = m, notif = id)) }
+        nb.addAction(action(ctx, "Skip today", "skip", slot, key, notif = id))
+        post(ctx, id, nb)
+        return true
+    }
+
+    private fun nextLabel(day: com.mattlabs.planlab.core.Day, box: com.mattlabs.planlab.core.Box): String {
+        val name = Store.LABEL[box.key] ?: box.label.replaceFirstChar { it.uppercase() }
+        val next = Store.nextStep(day, box) ?: return name
+        return "$name: ${next.label}"
     }
 
     /** The pinned card: progress and one-tap buttons for what's left. */
@@ -161,12 +182,12 @@ object Notifier {
             b.readiness?.let { append(" · ${it.score} ${it.label.lowercase()}") }
             if (b.daysToBig != null && b.daysToBig > 0) append(" · ${b.daysToBig}d to ${b.bigName}")
         }
-        val text = if (open.isEmpty()) "Nice work." else "Next: " + open.joinToString(" · ") { Store.LABEL[it.key] ?: it.label }
+        val text = if (open.isEmpty()) "Nice work." else open.joinToString("\n") { nextLabel(day, it) }
         val nb = NotificationCompat.Builder(ctx, CH_TODAY).setSmallIcon(R.drawable.ic_stat).setColor(0xFF2F7DE1.toInt())
-            .setContentTitle(title).setContentText(text).setOngoing(true).setOnlyAlertOnce(true).setSilent(true)
+            .setContentTitle(title).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text)).setOngoing(true).setOnlyAlertOnce(true).setSilent(true)
             .setContentIntent(openApp(ctx)).setProgress(day.boxes.size, done, false)
             .setPriority(NotificationCompat.PRIORITY_LOW).setCategory(NotificationCompat.CATEGORY_STATUS)
-        open.take(3).forEach { nb.addAction(action(ctx, "✓ " + (Store.LABEL[it.key] ?: it.label.take(14)), "done", null, it.key, notif = 0)) }
+        open.take(3).forEach { nb.addAction(action(ctx, "✓ " + (Store.LABEL[it.key] ?: it.label.take(14)), "step", null, it.key, notif = 0)) }
         post(ctx, ID_TODAY, nb)
     }
 }

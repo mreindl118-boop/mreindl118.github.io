@@ -100,14 +100,19 @@ class ActionReceiver : BroadcastReceiver() {
         val notif = intent.getIntExtra("notif", 0)
         val slot = intent.getStringExtra("slot")?.let { n -> Slot.entries.firstOrNull { it.name == n } }
         val date = runCatching { LocalDate.parse(intent.getStringExtra("date")) }.getOrDefault(LocalDate.now())
+        Store.count(if (act == "dismiss") "notif_dismissed:${slot?.name}" else "notif_action:${slot?.name ?: "PINNED"}:$act")
+        if (act == "dismiss") return
         when (act) {
             "done" -> Store.done(date, key, min.takeIf { it > 0 })
+            "step" -> Store.doNextStep(date, key, intent.getStringExtra("step")?.takeIf { it.isNotEmpty() })
             "skip" -> Store.skip(date, key)
             "pelvic" -> Store.pelvicSet(date)
             "elevate" -> Store.addCount(date, "elevate")
             "snooze" -> slot?.let { Alarms.snooze(ctx, it, if (min > 0) min else 60) }
         }
         if (notif != 0) Notifier.cancel(ctx, notif)
+        // A step done from a banner brings the banner back with the next step.
+        if (act == "step" && slot != null && date == LocalDate.now()) Notifier.fire(ctx, slot)
         val p = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try { Notifier.refreshPinned(ctx); runCatching { Widgets.updateAll(ctx) } } finally { p.finish() }

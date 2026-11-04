@@ -20,7 +20,7 @@ class MdTest {
         val mon = w.days[0]
         assertEquals(LocalDate.of(2030, 3, 4), mon.date)
         assertEquals("Pre-op A, 20 min", mon.body)
-        assertEquals(listOf("meals", "body", "piano", "voice", "stew-frozen"), mon.boxes.map { it.key })
+        assertEquals(listOf("meals", "body", "piano", "voice", "stew-frozen", "stretch"), mon.boxes.map { it.key })
         assertTrue(mon.boxes[1].done)
         assertEquals(25, mon.plannedMinutes("piano"))
         assertEquals(10, mon.plannedMinutes("voice"))
@@ -42,6 +42,23 @@ class MdTest {
         assertTrue(plan.inbox[1].done)
         assertEquals(listOf("shower-chair", "ride-arranged"), plan.setup.map { it.key })
         assertEquals(170, plan.proteinTarget)
+    }
+
+    @Test fun readsStepsInBothForms() {
+        val mon = plan.weeks.single().days[0]
+        val piano = mon.boxes.first { it.key == "piano" }
+        assertEquals(listOf("piano/warm-up-five-finger-pattern-3-min", "piano/g-major-scale-hands-separate", "piano/test-piece-bars-1-4-slow"), piano.steps.map { it.key })
+        assertEquals("Warm-up: five-finger pattern, 3 min", piano.steps[0].label)
+        assertTrue(piano.steps[1].done)
+        assertEquals("stretch", mon.boxes.last().label)
+        assertEquals(1, mon.boxes.last().steps.size)
+        val tue = plan.weeks.single().days[1]
+        assertEquals(3, tue.boxes.size)
+        val body = tue.boxes.first { it.key == "body" }
+        assertEquals(listOf("body-walk-to-the-test-corner", "body-stretch-5-min"), body.steps.map { it.key })
+        assertEquals("stretch 5 min", body.steps[1].label)
+        assertEquals(listOf("measure-the-test-desk"), plan.inbox[0].steps.map { it.key })
+        assertEquals(2, plan.inbox.size)
     }
 
     @Test fun keysMatchTheWebPage() {
