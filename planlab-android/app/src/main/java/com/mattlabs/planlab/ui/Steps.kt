@@ -62,13 +62,32 @@ fun StepCard(day: Day, box: Box) {
                     Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(if (isNext) color.copy(alpha = if (tk.dark) 0.18f else 0.09f) else androidx.compose.ui.graphics.Color.Transparent)
                         .padding(horizontal = 6.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         CheckDot(on, color, 28.dp) { Store.setStep(day, box, step, !on) }
-                        Text(step.label, Modifier.weight(1f), color = if (on) tk.muted else tk.fg, style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = if (isNext) FontWeight.SemiBold else FontWeight.Normal, textDecoration = if (on) TextDecoration.LineThrough else null)
+                        Column(Modifier.weight(1f)) {
+                            Text(step.label, color = if (on) tk.muted else tk.fg, style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = if (isNext) FontWeight.SemiBold else FontWeight.Normal, textDecoration = if (on) TextDecoration.LineThrough else null)
+                            if (step.links.isNotEmpty() && !on) LinkChips(step.links, step.label, color, Modifier.padding(top = 6.dp))
+                        }
                         val mins = Md.minutes(step.label)
                         if (mins > 0 && !on) StepTimer(mins, color) { Store.setStep(day, box, step, true) }
                     }
                 }
             }
+        }
+    }
+}
+
+/** A step's links as buttons: the first one filled, the rest outlined. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+fun LinkChips(links: List<com.mattlabs.planlab.core.Link>, stepLabel: String, color: androidx.compose.ui.graphics.Color, modifier: Modifier = Modifier) {
+    val tk = t()
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    androidx.compose.foundation.layout.FlowRow(modifier, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        links.take(3).forEachIndexed { i, l ->
+            val ext = !l.url.startsWith("app:")
+            Text(Links.name(l, stepLabel) + if (ext) " ↗" else " ›",
+                Modifier.clip(CircleShape).background(if (i == 0) color else tk.sunk).clickable { Links.open(ctx, l, "step") }.padding(horizontal = 12.dp, vertical = 7.dp),
+                color = if (i == 0) androidx.compose.ui.graphics.Color.White else color, fontWeight = FontWeight.Bold, fontSize = 13.sp)
         }
     }
 }
