@@ -145,7 +145,9 @@ function planned(label, db, extra) {
   const what = (m ? m[2] : label).trim().replace(/\s+·\s+[^()]*$/, "");
   const p = (what.match(/\((?:~)?(\d+)\s*g\b/) || label.match(/(\d+)\s*g protein/) || [])[1];
   const k = (what.match(/(\d[\d,]*)\s*kcal/) || [])[1];
-  const name = what.replace(/\s*\([^)]*\)\s*$/, "").replace(/:.*$/, "").trim();
+  // "Breakfast with 40 g protein (eggs, Greek yogurt or a shake)": the hint in brackets is the name.
+  const withForm = m && /^\s*\d+\s*g protein/i.test(m[2]);
+  const name = withForm ? ((what.match(/\(([^)]*)\)\s*$/) || [])[1] || "your pick") : what.replace(/\s*\([^)]*\)\s*$/, "").replace(/:.*$/, "").trim();
   let kcal = k ? +k.replace(/,/g, "") : 0, protein = p ? +p : 0, carbs = 0, fat = 0, src = "plan";
   if (!kcal) {
     const all = db ? merged(db, extra) : (extra || []);

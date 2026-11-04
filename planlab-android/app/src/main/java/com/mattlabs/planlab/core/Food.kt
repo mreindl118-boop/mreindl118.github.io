@@ -208,7 +208,10 @@ object Foods {
         val what = (m?.groupValues?.get(2) ?: label).trim().replace(Regex("""\s+·\s+[^()]*$"""), "")
         val p = (Regex("""\(~?(\d+)\s*g\b""").find(what) ?: Regex("""(\d+)\s*g protein""").find(label))?.groupValues?.get(1)
         val k = Regex("""(\d[\d,]*)\s*kcal""").find(what)?.groupValues?.get(1)
-        val name = what.replace(Regex("""\s*\([^)]*\)\s*$"""), "").replace(Regex(":.*$"), "").trim()
+        // "Breakfast with 40 g protein (eggs, Greek yogurt or a shake)": the hint in brackets is the name.
+        val withForm = m != null && Regex("""^\s*\d+\s*g protein""", RegexOption.IGNORE_CASE).containsMatchIn(m.groupValues[2])
+        val name = if (withForm) Regex("""\(([^)]*)\)\s*$""").find(what)?.groupValues?.get(1) ?: "your pick"
+            else what.replace(Regex("""\s*\([^)]*\)\s*$"""), "").replace(Regex(":.*$"), "").trim()
         var kcal = k?.replace(",", "")?.toInt() ?: 0; var protein = p?.toInt() ?: 0; var carbs = 0; var fat = 0; var src = "plan"
         if (kcal == 0) {
             val all = if (db != null) merged(db, mine) else mine
