@@ -141,7 +141,8 @@ function entryOf(row, extra) {
 function planned(label, db, extra) {
   const m = String(label).match(/^(breakfast|lunch|dinner|snack)\s*:\s*(.+)$/i) || String(label).match(/^(breakfast|lunch|dinner)\s+with\b(.+)$/i);
   const meal = m ? m[1].toLowerCase() : /shake|yogurt|snack/i.test(label) ? "snack" : "";
-  const what = (m ? m[2] : label).trim();
+  // A trailing " · Recipe" or " · Food" (a link in the week file) isn't part of the meal.
+  const what = (m ? m[2] : label).trim().replace(/\s+·\s+[^()]*$/, "");
   const p = (what.match(/\((?:~)?(\d+)\s*g\b/) || label.match(/(\d+)\s*g protein/) || [])[1];
   const k = (what.match(/(\d[\d,]*)\s*kcal/) || [])[1];
   const name = what.replace(/\s*\([^)]*\)\s*$/, "").replace(/:.*$/, "").trim();

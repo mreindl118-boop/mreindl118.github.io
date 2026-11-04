@@ -32,6 +32,8 @@ test("entries and planned meals", () => {
   assert.deepStrictEqual([e.kcal, e.protein_g, e.src], [560, 24, "skyline"]);
   const p = F.planned("Lunch: chicken wrap: 5 oz rotisserie chicken, tortilla, greens, salsa (45 g · 420 kcal)", db);
   assert.deepStrictEqual([p.meal, p.name, p.kcal, p.protein_g], ["lunch", "Chicken wrap", 420, 45]);
+  const l = F.planned("Snack: protein shake, 1 scoop whey in milk (30 g · 240 kcal) · Food", db);
+  assert.deepStrictEqual([l.meal, l.name, l.kcal, l.protein_g], ["snack", "Protein shake, 1 scoop whey in milk", 240, 30]);
   const g = F.planned("Breakfast with 40 g protein (eggs, Greek yogurt or a shake)", db);
   assert.deepStrictEqual([g.meal, g.protein_g, g.src], ["breakfast", 40, "plan-est"]);
   const t = F.targets("Protein target: about 180 g a day.\nCalorie target: about 2,400 kcal a day.");

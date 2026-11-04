@@ -204,7 +204,8 @@ object Foods {
         val m = Regex("""^(breakfast|lunch|dinner|snack)\s*:\s*(.+)$""", RegexOption.IGNORE_CASE).find(label)
             ?: Regex("""^(breakfast|lunch|dinner)\s+with\b(.+)$""", RegexOption.IGNORE_CASE).find(label)
         val meal = m?.groupValues?.get(1)?.lowercase() ?: if (Regex("shake|yogurt|snack", RegexOption.IGNORE_CASE).containsMatchIn(label)) "snack" else ""
-        val what = (m?.groupValues?.get(2) ?: label).trim()
+        // A trailing " · Recipe" or " · Food" (a link in the week file) isn't part of the meal.
+        val what = (m?.groupValues?.get(2) ?: label).trim().replace(Regex("""\s+·\s+[^()]*$"""), "")
         val p = (Regex("""\(~?(\d+)\s*g\b""").find(what) ?: Regex("""(\d+)\s*g protein""").find(label))?.groupValues?.get(1)
         val k = Regex("""(\d[\d,]*)\s*kcal""").find(what)?.groupValues?.get(1)
         val name = what.replace(Regex("""\s*\([^)]*\)\s*$"""), "").replace(Regex(":.*$"), "").trim()

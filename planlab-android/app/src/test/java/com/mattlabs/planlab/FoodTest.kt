@@ -49,6 +49,8 @@ class FoodTest {
         assertEquals(listOf(560, 24), listOf(e.kcal, e.protein)); assertEquals("skyline", e.src)
         val p = Foods.planned("Lunch: chicken wrap: 5 oz rotisserie chicken, tortilla, greens, salsa (45 g · 420 kcal)", db)
         assertEquals(listOf("lunch", "Chicken wrap"), listOf(p.meal, p.name)); assertEquals(listOf(420, 45), listOf(p.m.kcal, p.m.protein))
+        val l = Foods.planned("Snack: protein shake, 1 scoop whey in milk (30 g · 240 kcal) · Food", db)
+        assertEquals(listOf("snack", "Protein shake, 1 scoop whey in milk", "240", "30"), listOf(l.meal, l.name, l.m.kcal.toString(), l.m.protein.toString()))
         val g = Foods.planned("Breakfast with 40 g protein (eggs, Greek yogurt or a shake)", db)
         assertEquals(listOf("breakfast", "40", "plan-est"), listOf(g.meal, g.m.protein.toString(), g.src))
         val t = Foods.targets("Protein target: about 180 g a day.\nCalorie target: about 2,400 kcal a day.", 180)
