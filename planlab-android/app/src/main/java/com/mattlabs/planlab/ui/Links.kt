@@ -23,13 +23,14 @@ object Links {
 
     fun open(ctx: Context, link: Link, from: String) {
         Store.count(if (link.url.startsWith("app:")) "link:${link.url.removePrefix("app:").substringBefore('/')}" else "link:web")
+        if (link.url.startsWith("app:move/") && from == "step") { MoveSheet.show(MoveSheet.Req(java.time.LocalDate.now(), null, null, link.url.removePrefix("app:move/"))); return }
         runCatching { ctx.startActivity(intent(ctx, link.url, from)) }
     }
 
     /** Which tab an in-app target opens; anything else opens the planner at that view. */
-    fun tabFor(target: String): String = when (target) {
-        "wish" -> "today"
-        in TABS -> target
+    fun tabFor(target: String): String = when {
+        target == "wish" || target.startsWith("move/") -> "today"
+        target in TABS -> target
         else -> "planner"
     }
 

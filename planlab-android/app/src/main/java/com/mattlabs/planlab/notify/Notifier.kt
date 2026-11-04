@@ -23,12 +23,14 @@ object Notifier {
     const val CH_NUDGE = "nudges"
     const val CH_BRIEF = "brief"
     const val CH_TODAY = "today"
+    const val CH_BREAK = "breaks"
     const val ID_TODAY = 1
 
     fun channels(ctx: Context) {
         val nm = ctx.getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(NotificationChannel(CH_BRIEF, "Morning plan", NotificationManager.IMPORTANCE_HIGH).apply { description = "Your day and how ready your body is, each morning" })
         nm.createNotificationChannel(NotificationChannel(CH_NUDGE, "Reminders", NotificationManager.IMPORTANCE_HIGH).apply { description = "Body, practice, meals and recovery, with buttons to answer" })
+        nm.createNotificationChannel(NotificationChannel(CH_BREAK, "Move breaks", NotificationManager.IMPORTANCE_DEFAULT).apply { description = "A gentle nudge to get up and move for a minute" })
         nm.createNotificationChannel(NotificationChannel(CH_TODAY, "Today card", NotificationManager.IMPORTANCE_LOW).apply { description = "A pinned card with what's left today"; setShowBadge(false) })
     }
 
@@ -134,6 +136,19 @@ object Notifier {
                     .addAction(action(ctx, "Done", "elevate", slot, notif = id))
                     .addAction(action(ctx, "In 30 min", "snooze", slot, minutes = 30, notif = id)))
             }
+            Slot.MOVE_1, Slot.MOVE_2, Slot.MOVE_3 -> {
+                val box = day?.boxes?.firstOrNull { it.key == "move" } ?: return false
+                val step = box.steps.getOrNull(slot.breakIndex) ?: return false
+                if (Store.stepDone(day, step) || LogDoc.skipped(log, today.toString(), "move")) return false
+                val kind = com.mattlabs.planlab.core.Moves.kindOf(box, step, day)
+                val nb = NotificationCompat.Builder(ctx, CH_BREAK).setSmallIcon(R.drawable.ic_stat).setColor(0xFF0E8FB0.toInt())
+                    .setContentTitle("Break · ${kind?.minutes ?: 1} min").setContentText(com.mattlabs.planlab.ui.MoveSheet.shortLabel(step.label))
+                    .setContentIntent(moveIntent(ctx, box.key, step)).setAutoCancel(true).setCategory(NotificationCompat.CATEGORY_REMINDER)
+                    .addAction(action(ctx, "✓ Done", "step", slot, box.key, notif = id, step = step.key))
+                    .addAction(NotificationCompat.Action.Builder(0, "How to", moveIntent(ctx, box.key, step)).build())
+                    .addAction(action(ctx, "In 15 min", "snooze", slot, minutes = 15, notif = id))
+                post(ctx, id, nb)
+            }
             Slot.EVENING -> {
                 if (day == null) return false
                 val open = day.boxes.filter { !Store.isDone(day, it) && !LogDoc.skipped(log, today.toString(), it.key) }
@@ -208,6 +223,14 @@ object Notifier {
     fun foodIntent(ctx: Context): PendingIntent =
         PendingIntent.getActivity(ctx, 78, Intent(ctx, com.mattlabs.planlab.ui.FoodActivity::class.java).putExtra("from", "notif").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+    /** Opens the app on today's instruction card for this step. */
+    fun moveIntent(ctx: Context, boxKey: String, step: com.mattlabs.planlab.core.Box): PendingIntent {
+        val key = step.links.firstOrNull { it.url.startsWith("app:move/") }?.url?.removePrefix("app:") ?: "move/"
+        val i = Intent(ctx, MainActivity::class.java).putExtra("go", key).putExtra("box", boxKey).putExtra("step", step.key).putExtra("from", "notif")
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        return PendingIntent.getActivity(ctx, step.key.hashCode(), i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    }
 
     fun linkIntent(ctx: Context, url: String): PendingIntent =
         PendingIntent.getActivity(ctx, url.hashCode(), com.mattlabs.planlab.ui.Links.intent(ctx, url, "notif"), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)

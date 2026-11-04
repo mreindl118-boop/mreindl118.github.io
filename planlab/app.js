@@ -135,6 +135,40 @@ function parseMove(name, rx) {
   const time = !hold && /\bmin\b/.test(name + " " + rx) ? mins(name + " " + rx) * 60 : 0;
   return { key: keyOf(name), name, rx, sets, hold, perSide, time };
 }
+// body/moves.md: "## Dead bug" then "- **Do:** …", "- **Cues:** a · b", "- **Dose:** …", "- **Safe:** …", "- **Demo:** [Video](…)".
+function parseMoves(text) {
+  const out = {};
+  for (const [head, body] of sections(text || "")) {
+    const m = { key: keyOf(head), name: stripMd(head), f: {}, links: [] };
+    for (const l of body.split("\n")) { const g = l.trim().match(/^-\s+\*\*(.+?):\*\*\s*(.+)$/); if (!g) continue;
+      const sp = splitLinks(g[2]); m.links.push(...sp.links.map(x => ({ ...x, label: /^(video|demo)$/i.test(x.label) ? "Watch demo" : x.label })));
+      const t = stripMd(sp.text); if (t && !(sp.links.length && t === sp.links[0].label)) m.f[g[1].trim().toLowerCase()] = t; }
+    out[m.key] = m;
+  }
+  return out;
+}
+// "Break 1 at 10:30, 1 min: stand up" -> "Stand up", with a "Break · 1 min · 10:30" badge.
+const breakShort = l => /^break\b/i.test(l) && l.includes(": ") ? cap(l.slice(l.indexOf(": ") + 2)) : l;
+function stepBadge(boxKey, label) {
+  if (boxKey === "move" || /^break\b/i.test(label)) { const t = label.match(/\bat\s+(\d{1,2}:\d\d)/); return `Break · ${mins(label) || 1} min${t ? " · " + t[1] : ""}`; }
+  return "";
+}
+function findMove(label, links) {
+  const mv = S.plan?.moves || {}; const l = (links || []).find(x => x.url.startsWith("app:move/")); if (l && mv[l.url.slice(9)]) return mv[l.url.slice(9)];
+  const low = label.toLowerCase().replace(/^break \d+.*?:\s+/, ""); let best = null;
+  for (const m of Object.values(mv)) if (low.startsWith(m.name.toLowerCase()) && (!best || m.name.length > best.name.length)) best = m;
+  return best;
+}
+function drawMove(key) {
+  const m = (S.plan?.moves || {})[key]; if (!m) return sheetWrap("How to", "", `<p class="rs">No instructions for this one yet.</p>`);
+  const cues = (m.f.cues || "").split(/\s+·\s+|;\s+/).filter(Boolean);
+  return sheetWrap(m.name, m.f.dose || "", `
+    ${m.f.do ? `<p class="mv-do">${esc(m.f.do)}</p>` : ""}
+    ${cues.length ? `<ol class="mv-cues">${cues.map(c => `<li>${esc(cap(c))}</li>`).join("")}</ol>` : ""}
+    ${m.f.safe ? `<p class="mv-safe">⚠ ${esc(m.f.safe)}</p>` : ""}
+    ${m.links.length ? `<div class="seg two">${m.links.map(l => `<a class="segbtn" href="${esc(l.url)}" target="_blank" rel="noopener" data-ext="1">${esc(l.label)} ${IC.right}</a>`).join("")}</div>` : ""}`);
+}
+
 function parseProgram(text) {
   const out = { daily: null, workouts: {}, phases: [], goals: [] };
   for (const [head, body] of sections(text)) {
@@ -240,7 +274,7 @@ async function load() {
   if (!S.token) return;
   S.loading = true; render();
   try {
-    const names = ["social/calendar.md", "inbox.md", "me/recovery.md", "body/program.md", "music/piano.md", "music/voice.md", "music/guitar.md", "meals/freezer.md", "social/ideas.md", "social/trips.md", "me/profile.md", "meals/foods.md"];
+    const names = ["social/calendar.md", "inbox.md", "me/recovery.md", "body/program.md", "music/piano.md", "music/voice.md", "music/guitar.md", "meals/freezer.md", "social/ideas.md", "social/trips.md", "me/profile.md", "meals/foods.md", "body/moves.md"];
     const [weekIds, groceryIds, recipeIds, ...txt] = await Promise.all([listDir("weeks"), listDir("groceries"), listDir("meals/recipes"), ...names.map(file)]);
     const T = Object.fromEntries(names.map((n, i) => [n, txt[i]]));
     const weeks = await Promise.all(weekIds.sort().map(async id => parseWeek(id, await file(`weeks/${id}.md`))));
@@ -250,7 +284,7 @@ async function load() {
     const setup = parseChecklists(T["me/recovery.md"])[0];
     S.plan = { v: 2, built: new Date().toISOString(), weeks, calendar: c.events, watching: c.watching, inbox: parseInbox(T["inbox.md"]), setup: setup ? setup.items : [], groceries, recipes,
       program: parseProgram(T["body/program.md"]), piano: parseMusic(T["music/piano.md"]), voice: parseMusic(T["music/voice.md"]), guitar: parseMusic(T["music/guitar.md"]),
-      freezer: parseFreezer(T["meals/freezer.md"]), recovery: parseRecovery(T["me/recovery.md"]), ideas: parseIdeas(T["social/ideas.md"]), trips: parseTrips(T["social/trips.md"]), profile: parseProfile(T["me/profile.md"]), profileMd: T["me/profile.md"], foodsMd: T["meals/foods.md"] };
+      freezer: parseFreezer(T["meals/freezer.md"]), recovery: parseRecovery(T["me/recovery.md"]), ideas: parseIdeas(T["social/ideas.md"]), trips: parseTrips(T["social/trips.md"]), profile: parseProfile(T["me/profile.md"]), profileMd: T["me/profile.md"], foodsMd: T["meals/foods.md"], moves: parseMoves(T["body/moves.md"]) };
     store.set("planlab-cache", JSON.stringify(S.plan));
     S.error = "";
     pullLog();
@@ -519,7 +553,7 @@ function viewToday() {
   if (date === t) h += feelRow(date) + insightCard();
   const stepped = day.boxes.filter(b => b.steps?.length);
   for (const b of stepped) { const n = stepsDone(date, b);
-    h += `<section class="sec">${lab(`${esc(KIND[b.key] || cap(b.label))} <span class="cnt">${n === b.steps.length ? "done" : `${n} of ${b.steps.length}`}</span>`)}<div class="card list compact">${b.steps.map(x => checkRow(`data-list="${date}" data-item="${x.key}"`, tickGet(date, x), recipeLinks(cap(x.label)), "", linkBtns(x))).join("")}</div></section>`; }
+    h += `<section class="sec">${lab(`${esc(KIND[b.key] || cap(b.label))} <span class="cnt">${n === b.steps.length ? "done" : `${n} of ${b.steps.length}`}</span>`)}<div class="card list compact">${b.steps.map(x => checkRow(`data-list="${date}" data-item="${x.key}"`, tickGet(date, x), recipeLinks(cap(breakShort(x.label))), stepBadge(b.key, x.label), linkBtns(x))).join("")}</div></section>`; }
   const plain = other.filter(b => !b.steps?.length);
   if (plain.length) h += `<div class="card list">${plain.map(b => checkRow(`data-list="${date}" data-item="${b.key}"`, tickGet(date, b), recipeLinks(cap(b.label)), "")).join("")}</div>`;
   const pf = S.plan?.program?.daily;
@@ -872,6 +906,7 @@ function goTarget(t) {
   const [k, arg] = t.split("/"); eng("web_go:" + k);
   if (["body", "pelvic", "piano", "voice", "meals"].includes(k)) { if (S.tab !== "today") goTab("today"); openKind(k); }
   else if ((k === "recipe" || k === "cook") && arg) show("recipe", () => drawRecipe(arg));
+  else if (k === "move" && arg) show("move", () => drawMove(arg));
   else if (k === "kroger" || k === "freezer" || k === "recipes") { S.food = k === "kroger" ? "list" : k; goTab("food"); }
   else if (k === "calendar" || k === "inbox" || k === "wish") { goTab("soon"); if (k === "wish") setTimeout(() => document.getElementById("capture-text")?.focus(), 50); }
   else if (k === "bugs") { const text = prompt("What bugs you? A mess, a chore, anything you keep walking past."); if (text?.trim()) gh("issues", { method: "POST", body: JSON.stringify({ title: `Bugs me: ${text.trim().slice(0, 80)}`, body: `Captured on planLAB web on ${nice(todayIso())}. Claude: turn it into steps.` }) }).catch(() => alert("Couldn't send it. Try again online.")); }

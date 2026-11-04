@@ -50,6 +50,7 @@ fun StepCard(day: Day, box: Box) {
     PCard(pad = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth().clickable { open = !open }, verticalAlignment = Alignment.CenterVertically) {
             Text(Store.LABEL[box.key] ?: box.label.replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.titleMedium, color = color, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
+            com.mattlabs.planlab.core.Moves.kindOf(box, null, day)?.takeIf { !all }?.let { Pill(it.badge, color, color.copy(alpha = if (tk.dark) 0.22f else 0.12f), Modifier.padding(end = 6.dp)) }
             Pill(if (all) "Done" else "$n of ${box.steps.size}", if (all) tk.ok else color, if (all) tk.okSoft else tk.sunk)
         }
         Spacer(Modifier.height(8.dp))
@@ -62,10 +63,13 @@ fun StepCard(day: Day, box: Box) {
                     Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(if (isNext) color.copy(alpha = if (tk.dark) 0.18f else 0.09f) else androidx.compose.ui.graphics.Color.Transparent)
                         .padding(horizontal = 6.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         CheckDot(on, color, 28.dp) { Store.setStep(day, box, step, !on) }
-                        Column(Modifier.weight(1f)) {
-                            Text(step.label, color = if (on) tk.muted else tk.fg, style = MaterialTheme.typography.bodyLarge,
+                        // Tap the words for the instruction card (cues, dose, demo); the circle ticks it.
+                        Column(Modifier.weight(1f).clickable { MoveSheet.show(MoveSheet.Req(day.date, box.key, step.key, null)) }) {
+                            val kind = com.mattlabs.planlab.core.Moves.kindOf(box, step, day)
+                            if (kind != null && !on && (kind.kind == "Break" || kind.minutes > 0)) Text(kind.badge.uppercase(), color = color, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text(MoveSheet.shortLabel(step.label), color = if (on) tk.muted else tk.fg, style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = if (isNext) FontWeight.SemiBold else FontWeight.Normal, textDecoration = if (on) TextDecoration.LineThrough else null)
-                            if (step.links.isNotEmpty() && !on) LinkChips(step.links, step.label, color, Modifier.padding(top = 6.dp))
+                            if (step.links.isNotEmpty() && !on && isNext) LinkChips(step.links, step.label, color, Modifier.padding(top = 6.dp))
                         }
                         val mins = Md.minutes(step.label)
                         if (mins > 0 && !on) StepTimer(mins, color) { Store.setStep(day, box, step, true) }
