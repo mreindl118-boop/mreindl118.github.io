@@ -35,7 +35,7 @@ raise them as findings at most, and only change them after the owner says so.
 | Skill rule | On this site | Why |
 | --- | --- | --- |
 | taste: no monospace; impeccable: "monospace as costume" | **Kept** for labels, dates, counters, nav and figure numbers (DESIGN.md, the Title Block Rule). Never for running text or headings. | It is drawing-sheet lettering, the site's annotation voice. |
-| taste: no tiny uppercase tracked labels; no eyebrows. impeccable: kicker/eyebrow is a ban | **Kept for now** (`.kicker`, `.feature-tag`, `.meta-label`). Open question for the owner: these are the first thing both skills would cut. | Owner decision pending. |
+| taste: no tiny uppercase tracked labels; no eyebrows. impeccable: kicker/eyebrow is a ban | **Open to change.** The eyebrows above headings (`.kicker`, `.feature-tag`) may be proposed for removal or rewriting, with a before/after for approval. Labels that annotate data (`.meta-label`, dates, counters, figure numbers) stay under the Title Block Rule. | The owner chose to let the skills propose changes here (Nov 2026). |
 | taste: no thin rules, no 1px boxes | **Kept**: 1px ink rules and the square–line–circle motif are the structural language. | From the owner's design board. |
 | taste: "assistant palette" (cream ground with terracotta/rust) | **Kept**: paper, ink, pine, clay and moss are the brand palette. | Landscape-material colours chosen by the owner. |
 | taste/impeccable: no index numbering | **Allowed only for real sequences**: the six practice phases, project numbers in the portfolio book. | The order is information. |
