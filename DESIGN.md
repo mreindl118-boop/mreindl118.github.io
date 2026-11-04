@@ -153,8 +153,8 @@ lettering does the annotating.
 - **Display** (600, clamp(32px, 4.4vw, 52px), 1.12, -0.025em): the home hero statement only. It
   is a full sentence, so it takes the semibold weight.
 - **Headline** (700, 24–60px, -0.02em): page and section titles (`.h-head`).
-- **Title** (700, 17–20px, -0.01 to -0.02em): project card, feature and lightbox titles. The
-  footer name (26px) and brand (18px) use the same face at -0.02em.
+- **Title** (700, 17–20px, -0.01 to -0.02em): project card and lightbox titles; Home's featured
+  project title (an h2) runs at 30px under its full-width plan. The footer name (26px) and brand (18px) use the same face at -0.02em.
 - **Body** (400, 14.5–18px, ~1.6): reading text, held to about 66–68ch.
 - **Label** (400–500, 9–12px, 0.06–0.24em tracking, uppercase): the annotation voice: kickers,
   meta labels, nav links, counters, dates, captions' figure numbers.
@@ -179,6 +179,10 @@ paper bar with a light backdrop blur and a hairline underneath. It is the only s
 In-page anchors (`#contact`, `#skills`) land 18px below it: `html` takes `scroll-padding-top` from
 the nav's measured height (`--nav-h`, set by `site.js`; 66px, 53px at 476–640px, 96px on two rows
 at 474px and below), so sections carry no scroll margins of their own.
+
+On Home the featured project is the page's one full-width picture: its whole master plan at the
+container width (never cropped), with the title in the left third and its sentence in the right
+two-thirds underneath (one column on phones), so it doesn't repeat the hero's text-and-picture split.
 
 ## Elevation & Depth
 

@@ -348,6 +348,9 @@ main .rule-motif .ci { border-color: var(--clay); }
 .feature-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 14px; flex-wrap: wrap; }
 /* an h2 on Home: the class sets every font property itself, so only the UA margin needs resetting */
 .feature-title { font-family: var(--sans); font-weight: 700; font-size: 20px; letter-spacing: -.02em; margin: 0; }
+/* Home's one big picture: the whole master plan at container width, title and sentence under it */
+.feature-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 12px 48px; align-items: start; margin-top: 20px; }
+@media (max-width: 640px) { .feature-body { grid-template-columns: minmax(0, 1fr); } }
 .process-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 20px 24px; }
 .process-step { border-top: 1px solid var(--ink); padding-top: 12px; }
 .process-num { font-family: var(--mono); font-size: 11px; color: var(--faint); }
