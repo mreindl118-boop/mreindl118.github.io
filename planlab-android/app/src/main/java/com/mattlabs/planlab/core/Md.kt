@@ -102,7 +102,10 @@ object Md {
                 if (i >= 0) boxes[i] = boxes[i].copy(steps = list)
                 else boxes += Box(parent, heads[parent] ?: parent.replace('-', ' '), false, list)
             }
-            days += Day(date, head, eat, bodyLine, practice, coming, boxes)
+            // Eat is tracked, not ticked (Matt, 2026-11-04): the meals box leaves the task list and its steps become the food log's planned meals.
+            val mealsBox = boxes.firstOrNull { it.key == "meals" }
+            if (mealsBox != null) boxes.remove(mealsBox)
+            days += Day(date, head, eat, bodyLine, practice, coming, boxes, mealsBox?.steps ?: emptyList())
         }
         return Week(id, mon, phase, focus, glance, days)
     }

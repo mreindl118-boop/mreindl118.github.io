@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
+        android:shortcutId="food"
+        android:enabled="true"
+        android:icon="@drawable/ic_food"
+        android:shortcutShortLabel="@string/sc_food"
+        android:shortcutLongLabel="@string/sc_food_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.mattlabs.planlab"
+            android:targetClass="com.mattlabs.planlab.ui.MainActivity">
+            <extra android:name="food" android:value="1" />
+        </intent>
+    </shortcut>
+    <shortcut
         android:shortcutId="bug"
         android:enabled="true"
         android:icon="@drawable/ic_bug"

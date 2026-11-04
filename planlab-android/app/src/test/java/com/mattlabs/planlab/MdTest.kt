@@ -20,8 +20,8 @@ class MdTest {
         val mon = w.days[0]
         assertEquals(LocalDate.of(2030, 3, 4), mon.date)
         assertEquals("Pre-op A, 20 min", mon.body)
-        assertEquals(listOf("meals", "body", "piano", "voice", "stew-frozen", "stretch"), mon.boxes.map { it.key })
-        assertTrue(mon.boxes[1].done)
+        assertEquals(listOf("body", "piano", "voice", "stew-frozen", "stretch"), mon.boxes.map { it.key })
+        assertTrue(mon.boxes[0].done)
         assertEquals(25, mon.plannedMinutes("piano"))
         assertEquals(10, mon.plannedMinutes("voice"))
         assertEquals(160, mon.protein())
@@ -53,7 +53,7 @@ class MdTest {
         assertEquals("stretch", mon.boxes.last().label)
         assertEquals(1, mon.boxes.last().steps.size)
         val tue = plan.weeks.single().days[1]
-        assertEquals(3, tue.boxes.size)
+        assertEquals(2, tue.boxes.size)
         val body = tue.boxes.first { it.key == "body" }
         assertEquals(listOf("body-walk-to-the-test-corner", "body-stretch-5-min"), body.steps.map { it.key })
         assertEquals("stretch 5 min", body.steps[1].label)

@@ -7,6 +7,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.LocalSize
+import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
@@ -39,6 +41,7 @@ import com.mattlabs.planlab.core.LogDoc
 import com.mattlabs.planlab.data.Store
 import com.mattlabs.planlab.ui.MainActivity
 import com.mattlabs.planlab.ui.BugActivity
+import com.mattlabs.planlab.ui.FoodActivity
 import java.time.LocalDate
 
 object Widgets {
@@ -88,6 +91,19 @@ class ToggleAction : ActionCallback {
     companion object { val KEY = ActionParameters.Key<String>("key") }
 }
 
+/** One tap: the next planned meal is eaten (logged with the plan's numbers). */
+class AtePlanAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        Store.init(context)
+        Store.count("widget:food")
+        val today = LocalDate.now()
+        val day = Store.state.value.plan.day(today) ?: return
+        val step = Store.nextPlanned(today) ?: return
+        Store.logPlanned(day, step)
+        Widgets.updateAll(context)
+    }
+}
+
 class TodayWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -129,7 +145,9 @@ private fun TodayContent() {
             Text(if (st.hasKey) "Nothing planned today." else "Open planLAB to set it up.", style = TextStyle(color = WC.muted, fontSize = 14.sp))
         } else {
             val log = st.log
-            for (box in day.boxes.take(6)) {
+            // Room for more rows when Matt makes the widget bigger: about 34 dp a row after the header, Eat and buttons.
+            val rows = ((LocalSize.current.height.value - 190f) / 34f).toInt().coerceIn(2, 10)
+            for (box in day.boxes.take(rows)) {
                 val on = Store.isDone(day, box)
                 val skipped = LogDoc.skipped(log, today.toString(), box.key)
                 Row(GlanceModifier.fillMaxWidth().padding(vertical = 3.dp).clickable(actionRunCallback<ToggleAction>(actionParametersOf(ToggleAction.KEY to box.key))),
@@ -156,14 +174,40 @@ private fun TodayContent() {
                 Text("Pelvic floor  $pf/2  · tap after a set", style = TextStyle(color = WC.fg, fontSize = 15.sp), maxLines = 1)
             }
         }
+        // Eat: tracked, not ticked. Today's calories and protein, and one tap for the next planned meal.
+        val have = Store.eaten(today); val want = Store.foodTargets(today)
+        Spacer(GlanceModifier.height(6.dp))
+        Column(GlanceModifier.fillMaxWidth().clickable(actionStartActivity<FoodActivity>(actionParametersOf(FROM to "widget")))) {
+            Text("Eat  %,d / %,d kcal  ·  %d / %d g protein".format(have.kcal, want.kcal, have.protein, want.protein),
+                style = TextStyle(color = WC.fg, fontSize = 13.sp, fontWeight = FontWeight.Medium), maxLines = 1)
+            Spacer(GlanceModifier.height(3.dp))
+            LinearProgressIndicator(progress = if (want.kcal > 0) (have.kcal.toFloat() / want.kcal).coerceIn(0f, 1f) else 0f,
+                modifier = GlanceModifier.fillMaxWidth().height(5.dp), color = WC.kind("meals"), backgroundColor = WC.sunk)
+        }
+        Store.nextPlanned(today)?.let { step ->
+            val p = Store.planned(step)
+            Spacer(GlanceModifier.height(6.dp))
+            Row(GlanceModifier.fillMaxWidth().padding(vertical = 2.dp).clickable(actionRunCallback<AtePlanAction>()), verticalAlignment = Alignment.CenterVertically) {
+                Box(GlanceModifier.size(26.dp).background(WC.sunk).cornerRadius(13.dp), contentAlignment = Alignment.Center) {
+                    Text("🍴", style = TextStyle(fontSize = 12.sp))
+                }
+                Spacer(GlanceModifier.width(10.dp))
+                Text("Ate ${p.meal}: ${p.name} · tap", style = TextStyle(color = WC.kind("meals"), fontSize = 13.sp, fontWeight = FontWeight.Medium), maxLines = 1)
+            }
+        }
         Spacer(GlanceModifier.height(8.dp))
         Row(GlanceModifier.fillMaxWidth()) {
+            Box(GlanceModifier.defaultWeight().height(36.dp).background(WC.kind("meals")).cornerRadius(18.dp)
+                .clickable(actionStartActivity<FoodActivity>(actionParametersOf(FROM to "widget"))), contentAlignment = Alignment.Center) {
+                Text("Track food", style = TextStyle(color = WC.white, fontSize = 14.sp, fontWeight = FontWeight.Bold))
+            }
+            Spacer(GlanceModifier.width(8.dp))
             Box(GlanceModifier.defaultWeight().height(36.dp).background(WC.kind("clean")).cornerRadius(18.dp)
                 .clickable(actionStartActivity<BugActivity>(actionParametersOf(FROM to "widget"))), contentAlignment = Alignment.Center) {
                 Text("This bugs me", style = TextStyle(color = WC.white, fontSize = 14.sp, fontWeight = FontWeight.Bold))
             }
             Spacer(GlanceModifier.width(8.dp))
-            Box(GlanceModifier.width(64.dp).height(36.dp).background(WC.sunk).cornerRadius(18.dp)
+            Box(GlanceModifier.width(48.dp).height(36.dp).background(WC.sunk).cornerRadius(18.dp)
                 .clickable(actionStartActivity<BugActivity>(actionParametersOf(FROM to "widget", CAMERA to true))), contentAlignment = Alignment.Center) {
                 Text("📷", style = TextStyle(color = WC.fg, fontSize = 16.sp))
             }

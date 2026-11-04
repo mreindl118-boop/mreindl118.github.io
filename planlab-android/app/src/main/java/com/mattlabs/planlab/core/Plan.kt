@@ -18,6 +18,8 @@ data class Day(
     val practice: List<String>,
     val coming: List<String>,
     val boxes: List<Box>,
+    /** The day's planned meals (the "### meals" steps). Eating isn't a task: they're one-tap food log entries, not boxes. */
+    val meals: List<Box> = emptyList(),
 ) {
     /** "piano 25 min" -> 25 for key "piano". */
     fun plannedMinutes(key: String): Int = practice.firstOrNull { it.lowercase().startsWith(key) }?.let { Md.minutes(it) } ?: 0

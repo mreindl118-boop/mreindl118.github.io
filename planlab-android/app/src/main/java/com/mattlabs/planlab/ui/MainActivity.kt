@@ -84,6 +84,7 @@ class MainActivity : ComponentActivity() {
         i.getStringExtra("tab")?.let { tab = it; settings = false }
         i.getStringExtra("from")?.let { Store.count("open_from:$it"); i.removeExtra("from") }
         i.getStringExtra("bug")?.let { openBug(this, "shortcut", camera = it == "photo"); i.removeExtra("bug") }
+        i.getStringExtra("food")?.let { openFood(this, "shortcut"); i.removeExtra("food") }
         val data = i.data ?: return
         if (data.scheme == "planlab" && data.host == "key") {
             val k = data.fragment ?: data.getQueryParameter("k")

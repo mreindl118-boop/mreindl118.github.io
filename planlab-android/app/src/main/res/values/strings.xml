@@ -2,6 +2,8 @@
 <resources>
     <string name="widget_today">Today\'s checklist. Tap to tick.</string>
     <string name="widget_ready">How ready your body is today</string>
+    <string name="sc_food">Track food</string>
+    <string name="sc_food_long">Track what you ate</string>
     <string name="sc_bug">This bugs me</string>
     <string name="sc_bug_long">This bugs me: note it</string>
     <string name="sc_snap">Snap a mess</string>
