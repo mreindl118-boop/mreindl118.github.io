@@ -121,11 +121,11 @@ class TodayWidgetReceiver : GlanceAppWidgetReceiver() { override val glanceAppWi
 
 /** An area icon, tinted. */
 @Composable
-private fun Ico(key: String, color: ColorProvider, size: androidx.compose.ui.unit.Dp) =
+private fun Ico(key: String, color: androidx.glance.unit.ColorProvider, size: androidx.compose.ui.unit.Dp) =
     Image(ImageProvider(com.mattlabs.planlab.ui.areaIcon(key)), null, GlanceModifier.size(size), colorFilter = ColorFilter.tint(color))
 
 @Composable
-private fun Ico(res: Int, color: ColorProvider, size: androidx.compose.ui.unit.Dp) =
+private fun Ico(res: Int, color: androidx.glance.unit.ColorProvider, size: androidx.compose.ui.unit.Dp) =
     Image(ImageProvider(res), null, GlanceModifier.size(size), colorFilter = ColorFilter.tint(color))
 
 /** Mostly pictures: the one next thing with a big check, then an icon per area, then food and bugs buttons. */
