@@ -64,7 +64,7 @@ private object WC {
     val white = ColorProvider(day = Color.White, night = Color(0xFF06121D))
     fun kind(k: String) = when (k) {
         "meals" -> ColorProvider(day = Color(0xFFE08A1E), night = Color(0xFFF2A94A))
-        "body" -> ColorProvider(day = Color(0xFF12A383), night = Color(0xFF3FD1AE))
+        "body", "move" -> ColorProvider(day = Color(0xFF12A383), night = Color(0xFF3FD1AE))
         "piano" -> ColorProvider(day = Color(0xFF6E56CF), night = Color(0xFF9E8CFC))
         "voice" -> ColorProvider(day = Color(0xFFE5484D), night = Color(0xFFFF7A7F))
         "clean", "home", "bugs" -> ColorProvider(day = Color(0xFF0E8FB0), night = Color(0xFF4FC7E3))

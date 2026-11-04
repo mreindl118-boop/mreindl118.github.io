@@ -79,7 +79,7 @@ object Store {
     private var files: Map<String, String> = emptyMap()
 
     val MAIN = listOf("body", "piano", "voice", "clean")
-    val LABEL = mapOf("meals" to "Eat", "body" to "Body", "piano" to "Piano", "voice" to "Voice", "clean" to "Clean")
+    val LABEL = mapOf("meals" to "Eat", "body" to "Body", "piano" to "Piano", "voice" to "Voice", "clean" to "Clean", "move" to "Move")
 
     @Synchronized
     fun init(context: Context) {
