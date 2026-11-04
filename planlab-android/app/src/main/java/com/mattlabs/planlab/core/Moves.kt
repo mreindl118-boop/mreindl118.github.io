@@ -48,7 +48,7 @@ object Moves {
     /** The move for a step: its app:move/<key> link, else the longest move name the step's text starts with. */
     fun find(moves: Map<String, Move>, label: String, links: List<Link> = emptyList()): Move? {
         links.firstOrNull { it.url.startsWith("app:move/") }?.let { l -> moves[l.url.removePrefix("app:move/")]?.let { return it } }
-        val low = label.lowercase().replace(Regex("""^break \d+.*?:\s+"""), "")
+        val low = label.lowercase().replace(Regex("""^(break|check-in) \d+.*?:\s+"""), "")
         return moves.values.filter { low.startsWith(it.name.lowercase()) }.maxByOrNull { it.name.length }
     }
 
@@ -69,6 +69,7 @@ object Moves {
         val mins = Md.minutes(label).takeIf { it > 0 } ?: (SECS.find(label)?.groupValues?.get(1)?.toInt()?.let { if (it >= 60) it / 60 else 0 } ?: 0)
         return when {
             box.key == "move" || label.lowercase().startsWith("break") -> StepKind("Break", mins.takeIf { it > 0 } ?: 1, timeOf(label))
+            box.key == "mind" || label.lowercase().startsWith("check-in") -> StepKind("Check-in", mins.takeIf { it > 0 } ?: 1, timeOf(label))
             step == null && box.key == "body" -> StepKind("Session", day?.let { Md.minutes(it.body) } ?: 0, null)
             step == null -> null
             box.key == "body" -> StepKind("Exercise", mins, null)

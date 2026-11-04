@@ -18,6 +18,9 @@ object LogDoc {
 
     fun tickOp(list: String, key: String, value: Boolean): JSONObject = JSONObject().put("t", "tick").put("l", list).put("k", key).put("v", value)
     fun addOp(root: String, list: String, key: String, add: Int): JSONObject = JSONObject().put("t", "add").put("r", root).put("l", list).put("k", key).put("n", add)
+    /** A journal answer: journal[date] = {q, a}. Private, like the rest of the log. */
+    fun journalOp(date: String, q: String, a: String): JSONObject = JSONObject().put("t", "journal").put("d", date).put("q", q).put("a", a)
+    fun journal(doc: JSONObject, date: String): String? = doc.optJSONObject("journal")?.optJSONObject(date)?.optString("a")?.takeIf { it.isNotBlank() }
     fun foodOp(date: String, id: String, entry: JSONObject?): JSONObject = JSONObject().put("t", "food").put("d", date).put("k", id).put("e", entry ?: JSONObject.NULL)
 
     fun parse(s: String?): JSONObject = runCatching { JSONObject(s ?: "") }.getOrNull()?.also { d ->
@@ -36,6 +39,7 @@ object LogDoc {
                     val k = op.getString("k")
                     list.put(k, list.optInt(k, 0) + op.getInt("n"))
                 }
+                "journal" -> obj(d, "journal").put(op.getString("d"), JSONObject().put("q", op.optString("q")).put("a", op.optString("a")))
                 "food" -> obj(obj(d, "food"), op.getString("d")).put(op.getString("k"), op.opt("e") ?: JSONObject.NULL)
             }
         }

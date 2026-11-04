@@ -88,6 +88,7 @@ class MainActivity : ComponentActivity() {
         i.getStringExtra("go")?.let { t ->
             tab = Links.tabFor(t); settings = false
             if (tab == "planner") { go = t; goN++ }
+            if (t == "stretch" || t == "journal") MindSheet.forLabel(t, "", i.getStringExtra("box"), i.getStringExtra("step"))
             if (t.startsWith("move/")) MoveSheet.show(MoveSheet.Req(java.time.LocalDate.now(), i.getStringExtra("box"), i.getStringExtra("step"), t.removePrefix("move/")))
             i.removeExtra("go")
         }
@@ -133,6 +134,7 @@ class MainActivity : ComponentActivity() {
                 }
                 GainOverlay()
                 MoveSheetHost()
+                MindSheetHost()
             }
         }
     }

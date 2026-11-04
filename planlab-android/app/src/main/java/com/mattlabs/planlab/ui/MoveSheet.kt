@@ -45,7 +45,7 @@ object MoveSheet {
 
     /** "Break 1 at 10:30, 1 min: stand up, 10 squats" -> "Stand up, 10 squats". */
     fun shortLabel(label: String): String =
-        if (label.lowercase().startsWith("break") && label.contains(": ")) label.substringAfter(": ").trim().replaceFirstChar { it.uppercase() } else label
+        if ((label.lowercase().startsWith("break") || label.lowercase().startsWith("check-in")) && label.contains(": ")) label.substringAfter(": ").trim().replaceFirstChar { it.uppercase() } else label
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
