@@ -55,12 +55,30 @@ class GitHub(private val token: String) {
         return JSONObject(call("contents/$DIR/$path", "PUT", body.toString())).getJSONObject("content").getString("sha")
     }
 
+    /** Writes a binary file (a photo) on main. A file already there with that name is left alone. */
+    fun putBytes(path: String, bytes: ByteArray, message: String) {
+        val body = JSONObject().put("message", message).put("content", Base64.getEncoder().encodeToString(bytes))
+        try { call("contents/$DIR/$path", "PUT", body.toString()) } catch (e: HttpError) { if (e.code != 422) throw e }
+    }
+
+    /** Opens an issue; returns its number. */
+    fun issue(title: String, body: String): Int = JSONObject(call("issues", "POST", JSONObject().put("title", title).put("body", body).toString())).getInt("number")
+
+    /** Open "Bugs me: ..." issues, newest first: number to text. */
+    fun openBugs(): List<Pair<Int, String>> {
+        val a = JSONArray(call("issues?state=open&per_page=50&sort=created&direction=desc"))
+        return (0 until a.length()).map { a.getJSONObject(it) }
+            .filter { !it.has("pull_request") && it.optString("title").startsWith(BUG) }
+            .map { it.getInt("number") to it.getString("title").removePrefix(BUG).trim() }
+    }
+
     fun wish(text: String, today: String) {
         val body = JSONObject().put("title", "Wish: $text").put("body", "Added from the planLAB app on $today. Claude: give it a date in inbox.md, then close this.")
         call("issues", "POST", body.toString())
     }
 
     companion object {
+        const val BUG = "Bugs me:"
         const val REPO = "mreindl118-boop/GeneralStorage"
         const val DIR = "projects/planlab"
         const val KEY_URL = "https://github.com/settings/personal-access-tokens/new?name=planLAB%20Android&description=planLAB%20on%20my%20phone&target_name=mreindl118-boop&expires_in=none&contents=write&issues=write"

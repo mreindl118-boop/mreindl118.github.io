@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="bug"
+        android:enabled="true"
+        android:icon="@drawable/ic_bug"
+        android:shortcutShortLabel="@string/sc_bug"
+        android:shortcutLongLabel="@string/sc_bug_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.mattlabs.planlab"
+            android:targetClass="com.mattlabs.planlab.ui.MainActivity">
+            <extra android:name="bug" android:value="text" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="bug_photo"
+        android:enabled="true"
+        android:icon="@drawable/ic_bug"
+        android:shortcutShortLabel="@string/sc_snap"
+        android:shortcutLongLabel="@string/sc_snap_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.mattlabs.planlab"
+            android:targetClass="com.mattlabs.planlab.ui.MainActivity">
+            <extra android:name="bug" android:value="photo" />
+        </intent>
+    </shortcut>
+</shortcuts>

@@ -181,13 +181,19 @@ object Notifier {
             append(if (open.isEmpty()) "All done today" else "Today $done/${day.boxes.size}")
             b.readiness?.let { append(" · ${it.score} ${it.label.lowercase()}") }
             if (b.daysToBig != null && b.daysToBig > 0) append(" · ${b.daysToBig}d to ${b.bigName}")
+            Store.state.value.progress?.let { p -> append(" · Lv ${p.level.n}"); if (p.streak > 1) append(" 🔥${p.streak}") }
         }
         val text = if (open.isEmpty()) "Nice work." else open.joinToString("\n") { nextLabel(day, it) }
         val nb = NotificationCompat.Builder(ctx, CH_TODAY).setSmallIcon(R.drawable.ic_stat).setColor(0xFF2F7DE1.toInt())
             .setContentTitle(title).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text)).setOngoing(true).setOnlyAlertOnce(true).setSilent(true)
             .setContentIntent(openApp(ctx)).setProgress(day.boxes.size, done, false)
             .setPriority(NotificationCompat.PRIORITY_LOW).setCategory(NotificationCompat.CATEGORY_STATUS)
-        open.take(3).forEach { nb.addAction(action(ctx, "✓ " + (Store.LABEL[it.key] ?: it.label.take(14)), "step", null, it.key, notif = 0)) }
+        open.take(2).forEach { nb.addAction(action(ctx, "✓ " + (Store.LABEL[it.key] ?: it.label.take(14)), "step", null, it.key, notif = 0)) }
+        nb.addAction(NotificationCompat.Action.Builder(0, "Bugs me", bugIntent(ctx)).build())
         post(ctx, ID_TODAY, nb)
     }
+
+    fun bugIntent(ctx: Context): PendingIntent =
+        PendingIntent.getActivity(ctx, 77, Intent(ctx, com.mattlabs.planlab.ui.BugActivity::class.java).putExtra("from", "notif").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 }

@@ -38,6 +38,7 @@ import androidx.glance.text.TextStyle
 import com.mattlabs.planlab.core.LogDoc
 import com.mattlabs.planlab.data.Store
 import com.mattlabs.planlab.ui.MainActivity
+import com.mattlabs.planlab.ui.BugActivity
 import java.time.LocalDate
 
 object Widgets {
@@ -61,12 +62,14 @@ private object WC {
         "body" -> ColorProvider(day = Color(0xFF12A383), night = Color(0xFF3FD1AE))
         "piano" -> ColorProvider(day = Color(0xFF6E56CF), night = Color(0xFF9E8CFC))
         "voice" -> ColorProvider(day = Color(0xFFE5484D), night = Color(0xFFFF7A7F))
+        "clean", "home", "bugs" -> ColorProvider(day = Color(0xFF0E8FB0), night = Color(0xFF4FC7E3))
         else -> accent
     }
     fun score(s: Int) = when { s >= 80 -> ok; s >= 65 -> accent; s >= 50 -> warm; else -> ColorProvider(day = Color(0xFFC2410C), night = Color(0xFFFF8A4C)) }
 }
 
 private val FROM = ActionParameters.Key<String>("from")
+private val CAMERA = ActionParameters.Key<Boolean>("camera")
 
 class ToggleAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
@@ -108,6 +111,7 @@ private fun TodayContent() {
                 Text(if (day == null) "planLAB" else if (done == day.boxes.size) "All done" else "Today  $done/${day.boxes.size}",
                     style = TextStyle(color = WC.fg, fontSize = 18.sp, fontWeight = FontWeight.Bold))
                 val sub = buildList {
+                    st.progress?.let { p -> add("Lv ${p.level.n}" + if (p.streak > 0) " · 🔥${p.streak}" else "") }
                     if (b.daysToBig != null && b.daysToBig > 0) add("${b.daysToBig}d to ${b.bigName}")
                     if (b.daysToBig != null && b.daysToBig <= 0 && b.daysToBig > -120) add("Day ${-b.daysToBig} of recovery")
                     add(b.body.title)
@@ -125,7 +129,7 @@ private fun TodayContent() {
             Text(if (st.hasKey) "Nothing planned today." else "Open planLAB to set it up.", style = TextStyle(color = WC.muted, fontSize = 14.sp))
         } else {
             val log = st.log
-            for (box in day.boxes.take(7)) {
+            for (box in day.boxes.take(6)) {
                 val on = Store.isDone(day, box)
                 val skipped = LogDoc.skipped(log, today.toString(), box.key)
                 Row(GlanceModifier.fillMaxWidth().padding(vertical = 3.dp).clickable(actionRunCallback<ToggleAction>(actionParametersOf(ToggleAction.KEY to box.key))),
@@ -150,6 +154,18 @@ private fun TodayContent() {
                 }
                 Spacer(GlanceModifier.width(10.dp))
                 Text("Pelvic floor  $pf/2  · tap after a set", style = TextStyle(color = WC.fg, fontSize = 15.sp), maxLines = 1)
+            }
+        }
+        Spacer(GlanceModifier.height(8.dp))
+        Row(GlanceModifier.fillMaxWidth()) {
+            Box(GlanceModifier.defaultWeight().height(36.dp).background(WC.kind("clean")).cornerRadius(18.dp)
+                .clickable(actionStartActivity<BugActivity>(actionParametersOf(FROM to "widget"))), contentAlignment = Alignment.Center) {
+                Text("This bugs me", style = TextStyle(color = WC.white, fontSize = 14.sp, fontWeight = FontWeight.Bold))
+            }
+            Spacer(GlanceModifier.width(8.dp))
+            Box(GlanceModifier.width(64.dp).height(36.dp).background(WC.sunk).cornerRadius(18.dp)
+                .clickable(actionStartActivity<BugActivity>(actionParametersOf(FROM to "widget", CAMERA to true))), contentAlignment = Alignment.Center) {
+                Text("📷", style = TextStyle(color = WC.fg, fontSize = 16.sp))
             }
         }
     }

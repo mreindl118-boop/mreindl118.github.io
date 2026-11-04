@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.lifecycleScope
 import com.mattlabs.planlab.data.Store
 import com.mattlabs.planlab.notify.Alarms
+import com.mattlabs.planlab.update.AutoUpdate
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -59,7 +61,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             PlanTheme {
                 val st by Store.state.collectAsState()
-                LaunchedEffect(Unit) { Updater.check(this@MainActivity) }
+                LaunchedEffect(Unit) { AutoUpdate.checkSoon(this@MainActivity) }
                 if (!st.hasKey) SetupScreen() else if (settings) SettingsScreen(onBack = { settings = false }) else Shell(st.loading)
                 LaunchedEffect(settings) { if (settings) Store.count("screen:settings") }
             }
@@ -81,6 +83,7 @@ class MainActivity : ComponentActivity() {
         i ?: return
         i.getStringExtra("tab")?.let { tab = it; settings = false }
         i.getStringExtra("from")?.let { Store.count("open_from:$it"); i.removeExtra("from") }
+        i.getStringExtra("bug")?.let { openBug(this, "shortcut", camera = it == "photo"); i.removeExtra("bug") }
         val data = i.data ?: return
         if (data.scheme == "planlab" && data.host == "key") {
             val k = data.fragment ?: data.getQueryParameter("k")
@@ -112,10 +115,12 @@ class MainActivity : ComponentActivity() {
                             "today" -> TodayScreen(loading, onSettings = { settings = true }, onOpen = { tab = it })
                             "health" -> HealthScreen(onSettings = { settings = true })
                             "week" -> WeekScreen()
+                            "progress" -> ProgressScreen()
                             else -> PlannerScreen(onBack = back)
                         }
                     }
                 }
+                GainOverlay()
             }
         }
     }
@@ -125,6 +130,7 @@ class MainActivity : ComponentActivity() {
             Triple("today", "Today", Icons.Filled.Home),
             Triple("health", "Body", Icons.Filled.Favorite),
             Triple("week", "Week", Icons.Filled.DateRange),
+            Triple("progress", "Level", Icons.Filled.Star),
             Triple("planner", "Planner", Icons.Filled.List),
         )
     }

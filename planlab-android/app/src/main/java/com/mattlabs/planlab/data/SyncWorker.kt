@@ -15,7 +15,9 @@ import java.util.concurrent.TimeUnit
 class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
     override suspend fun doWork(): Result {
         Store.init(applicationContext)
-        Store.refresh(full = inputData.getBoolean("full", false))
+        val full = inputData.getBoolean("full", false)
+        Store.refresh(full = full)
+        if (full) runCatching { com.mattlabs.planlab.update.AutoUpdate.check(applicationContext) }
         return Result.success()
     }
 
