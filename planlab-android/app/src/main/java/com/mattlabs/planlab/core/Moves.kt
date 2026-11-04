@@ -6,7 +6,7 @@ import java.time.LocalTime
 data class Move(val key: String, val name: String, val fields: List<Pair<String, String>>, val links: List<Link>) {
     fun field(label: String): String? = fields.firstOrNull { it.first.equals(label, true) }?.second
     /** The cues, one per line ("a · b · c" or "a; b; c"). */
-    val cues: List<String> get() = field("Cues")?.split(Regex("""\s+·\s+|;\s+""").map { it.trim().trimEnd('.') }?.filter { it.isNotBlank() } ?: emptyList()
+    val cues: List<String> get() = field("Cues")?.split(Regex("""\s+·\s+|;\s+"""))?.map { it.trim().trimEnd('.') }?.filter { it.isNotBlank() } ?: emptyList()
 }
 
 /** What kind of step this is, so a 1-minute break never looks like a 20-minute workout. */
