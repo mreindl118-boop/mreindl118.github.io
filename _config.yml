@@ -5,3 +5,4 @@ exclude:
   - README.md
   - PRODUCT.md
   - DESIGN.md
+  - planlab-android

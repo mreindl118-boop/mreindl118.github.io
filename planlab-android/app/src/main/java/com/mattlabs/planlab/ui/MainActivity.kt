@@ -1,0 +1,127 @@
+package com.mattlabs.planlab.ui
+
+import android.Manifest
+import android.content.Intent
+import android.os.Build
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.lifecycleScope
+import com.mattlabs.planlab.data.Store
+import com.mattlabs.planlab.notify.Alarms
+import kotlinx.coroutines.launch
+
+class MainActivity : ComponentActivity() {
+    private var tab by mutableStateOf("today")
+    private var settings by mutableStateOf(false)
+
+    private val askNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { Alarms.scheduleAll(this) }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        Store.init(this)
+        handle(intent)
+        if (Build.VERSION.SDK_INT >= 33 && !Store.prefs().getBoolean("asked_notif", false)) {
+            Store.prefs().edit().putBoolean("asked_notif", true).apply()
+            askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        setContent {
+            PlanTheme {
+                val st by Store.state.collectAsState()
+                LaunchedEffect(Unit) { Updater.check(this@MainActivity) }
+                if (!st.hasKey) SetupScreen() else if (settings) SettingsScreen(onBack = { settings = false }) else Shell(st.loading)
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); handle(intent) }
+
+    override fun onResume() {
+        super.onResume()
+        val stale = System.currentTimeMillis() - Store.prefs().getLong("built", 0) > 5 * 60_000
+        lifecycleScope.launch { Store.refresh(full = stale) }
+    }
+
+    /** planlab://key#<key> from the web page's "Send my key to the app", and tab extras from notifications. */
+    private fun handle(i: Intent?) {
+        i ?: return
+        i.getStringExtra("tab")?.let { tab = it; settings = false }
+        val data = i.data ?: return
+        if (data.scheme == "planlab" && data.host == "key") {
+            val k = data.fragment ?: data.getQueryParameter("k")
+            if (!k.isNullOrBlank()) Store.setKey(k)
+        }
+    }
+
+    @Composable
+    private fun Shell(loading: Boolean) {
+        val tk = t()
+        val back = { tab = "today" }
+        androidx.activity.compose.BackHandler(enabled = tab != "today" && tab != "planner") { back() }
+        Scaffold(
+            containerColor = tk.bg,
+            bottomBar = {
+                NavigationBar(containerColor = tk.surface) {
+                    for ((k, label, icon) in TABS) NavigationBarItem(
+                        selected = tab == k, onClick = { tab = k },
+                        icon = { Icon(icon, null) }, label = { Text(label) },
+                        colors = NavigationBarItemDefaults.colors(selectedIconColor = tk.accent, selectedTextColor = tk.accent, indicatorColor = tk.accentSoft, unselectedIconColor = tk.muted, unselectedTextColor = tk.muted),
+                    )
+                }
+            },
+        ) { pad ->
+            Box(Modifier.fillMaxSize().background(tk.bg).padding(pad)) {
+                AnimatedContent(tab, transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "tab") { k ->
+                    Column(Modifier.fillMaxSize()) {
+                        when (k) {
+                            "today" -> TodayScreen(loading, onSettings = { settings = true }, onOpen = { tab = it })
+                            "health" -> HealthScreen(onSettings = { settings = true })
+                            "week" -> WeekScreen()
+                            else -> PlannerScreen(onBack = back)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    companion object {
+        val TABS: List<Triple<String, String, ImageVector>> = listOf(
+            Triple("today", "Today", Icons.Filled.Home),
+            Triple("health", "Body", Icons.Filled.Favorite),
+            Triple("week", "Week", Icons.Filled.DateRange),
+            Triple("planner", "Planner", Icons.Filled.List),
+        )
+    }
+}
