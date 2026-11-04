@@ -12,23 +12,26 @@ colors:
   line-mid: "#C7C1AE"
   line-dark: "#454A4D"
   pine: "#2E4A3B"
+  leaf: "#7A9A3C"
   clay: "#B4603A"
   moss: "#B7C95A"
 typography:
   display:
-    fontFamily: "'Source Serif 4', Georgia, serif"
-    fontSize: "clamp(32px, 4.4vw, 54px)"
-    fontWeight: 400
-    lineHeight: 1.16
-    letterSpacing: "-0.015em"
+    fontFamily: "'IBM Plex Sans', system-ui, sans-serif"
+    fontSize: "clamp(32px, 4.4vw, 52px)"
+    fontWeight: 600
+    lineHeight: 1.12
+    letterSpacing: "-0.025em"
   headline:
-    fontFamily: "'Source Serif 4', Georgia, serif"
-    fontWeight: 600
-    letterSpacing: "-0.01em"
+    fontFamily: "'IBM Plex Sans', system-ui, sans-serif"
+    fontWeight: 700
+    letterSpacing: "-0.02em"
   title:
-    fontFamily: "'Source Serif 4', Georgia, serif"
-    fontSize: "21px"
-    fontWeight: 600
+    fontFamily: "'IBM Plex Sans', system-ui, sans-serif"
+    fontSize: "20px"
+    fontWeight: 700
+    lineHeight: 1.25
+    letterSpacing: "-0.015em"
   body:
     fontFamily: "'IBM Plex Sans', system-ui, sans-serif"
     fontSize: "16px"
@@ -79,18 +82,20 @@ title until the owner confirms it.
 
 The site is laid out like a landscape architect's sheet set: a warm paper ground, ink linework,
 a title-block voice for labels, and drawings presented whole, the way they would be pinned up
-at a review. Serif headings give the work an editorial, award-booklet register; a plain sans
-carries the reading; a monospace small-caps voice does the annotating (sheet labels, dates,
+at a review. Headings are set in the wordmark's face, IBM Plex Sans Bold tracked tight, so the
+titles and the brand speak in one voice; the same sans at regular weight carries the reading; a
+monospace small-caps voice does the annotating (sheet labels, dates,
 figure numbers, viewer counters), the way lettering does on a drawing.
 
 Density is calm and generous. Colour is almost entirely paper and ink; pine is the working
-accent, clay marks the active and hovered state, and moss appears only on the dark footer and
-in the brand mark. Depth is flat: sheets are separated by ink rules and tonal panels, not by
-shadows.
+accent, clay marks the active and hovered state, and moss appears only on the dark footer. The
+brand mark's three arcs (pine, leaf, clay) also colour the rule motif and the current-tab marker
+on paper. Depth is flat: sheets are separated by ink rules and tonal panels, not by shadows.
 
 **Key Characteristics:**
-- Paper-and-ink palette with three plant- and soil-derived accents (pine, clay, moss).
-- The square–line–circle rule motif and brand mark, from the owner's design board.
+- Paper-and-ink palette with plant- and soil-derived accents (pine, leaf, clay, moss).
+- The square–line–circle rule motif and brand mark, from the owner's design board; on paper the
+  motif takes the mark's colours in order (pine square, leaf line, clay ring).
 - Square corners everywhere; 1px ink rules as the structural line.
 - Drawings and boards shown whole, zoomable, never cropped.
 
@@ -100,16 +105,19 @@ A warm, low-chroma paper-and-ink palette with accents taken from landscape mater
 
 ### Primary
 - **Pine Ink** (pine): links, the primary button, labels on paper, figure numbers in the
-  portfolio book, focus rings. The colour of the work's voice.
+  portfolio book, focus rings, the square of the rule motif and of the current-tab marker, and
+  the outer arc of the brand mark on paper. The colour of the work's voice.
 
 ### Secondary
-- **Fired Clay** (clay): hover and active states, the active nav indicator, the active filter
-  chip, and the centre ring of the brand mark. Signals "this is where you are / what you're
-  touching", rarely anything else.
+- **Fired Clay** (clay): hover and active states, the active filter chip, the ring of the rule
+  motif and of the current-tab marker, and the inner arc of the brand mark. Apart from those
+  marks it signals "this is where you are / what you're touching", rarely anything else.
+- **Leaf** (leaf): the brand mark's middle arc, and the line of the rule motif and of the
+  current-tab marker on paper. Decorative marks only: at 2.8:1 on paper it never carries text.
 
 ### Tertiary
-- **Spring Moss** (moss): on the dark footer only (links on hover, focus ring, the brand mark's
-  inner rings). Never on paper, where it fails contrast.
+- **Spring Moss** (moss): on the dark footer only (links on hover, focus ring, the outer arc of
+  the footer's brand mark). Never on paper, where it fails contrast.
 
 ### Neutral
 - **Drafting Paper** (paper): the page ground.
@@ -124,26 +132,39 @@ A warm, low-chroma paper-and-ink palette with accents taken from landscape mater
 **The Paper-and-Ink Rule.** At least nine-tenths of any screen is paper, ink or the work itself;
 the accents are signals, not fields.
 
-**The Clay Means Here Rule.** Clay is reserved for hover, active and current state.
+**The Clay Means Here Rule.** Clay is reserved for hover, active and current state, and for the
+logo-coloured marks (the brand mark's inner arc, the ring of the rule motif on paper and of the
+current-tab marker), where it always sits beside pine and leaf.
+
+**The Logo Colours Rule.** Pine, leaf and clay appear together, in the mark's order, only in the
+brand mark, the rule motif on paper and the current-tab marker. The dark footer's motif keeps its
+single tone. Adopted November 2026 from Sam Kremer's portfolio feedback, approved by the owner.
 
 ## Typography
 
-**Display Font:** Source Serif 4 (with Georgia, serif)
-**Body Font:** IBM Plex Sans (with system-ui, sans-serif)
+**Heading and Body Font:** IBM Plex Sans (with system-ui, sans-serif), the wordmark's face
 **Label/Mono Font:** IBM Plex Mono (with ui-monospace, monospace)
 
-**Character:** A literary serif for the work's titles, an engineered sans for reading, and a
-mono that behaves like drawing-sheet lettering.
+**Character:** One engineered sans in two registers: bold and tracked tight for titles, the way
+the wordmark sets "Understory", and regular for reading. A mono that behaves like drawing-sheet
+lettering does the annotating.
 
 ### Hierarchy
-- **Display** (400, clamp(32px, 4.4vw, 54px), 1.16): the home hero statement only.
-- **Headline** (600, 26–60px, tight): page and section titles (`.h-serif`).
-- **Title** (600, 18–21px): project card and feature titles.
+- **Display** (600, clamp(32px, 4.4vw, 52px), 1.12, -0.025em): the home hero statement only. It
+  is a full sentence, so it takes the semibold weight.
+- **Headline** (700, 24–60px, -0.02em): page and section titles (`.h-head`).
+- **Title** (700, 17–20px, -0.01 to -0.02em): project card, feature and lightbox titles. The
+  footer name (26px) and brand (18px) use the same face at -0.02em.
 - **Body** (400, 14.5–18px, ~1.6): reading text, held to about 66–68ch.
 - **Label** (400–500, 9–12px, 0.06–0.24em tracking, uppercase): the annotation voice: kickers,
   meta labels, nav links, counters, dates, captions' figure numbers.
 
 ### Named Rules
+**The Wordmark Rule.** Headings are set in the wordmark's face, IBM Plex Sans Bold at -0.02em, so
+a title and the brand read as one voice. Source Serif 4 was retired in November 2026 (Sam
+Kremer's feedback, approved by the owner) and is no longer requested from Google Fonts. Don't
+bring a serif back for headings.
+
 **The Title Block Rule.** Monospace is the annotation voice of a drawing set: labels, dates,
 counters, figure numbers. It is never used for running text or headings.
 
@@ -192,8 +213,8 @@ Diagonal hatching marks placeholders.
 
 ### Navigation
 - Wordmark left (brand mark + "Understory / Design Studio"), four mono links right; the current
-  tab carries the square–line–circle indicator in clay, which glides to the next tab on click
-  (honours reduced motion).
+  tab carries the square–line–circle indicator in the mark's colours (pine square, leaf line,
+  clay ring), which glides to the next tab on click (honours reduced motion).
 
 ### Viewers (signature component)
 Drawing set, portfolio book, capstone booklet and lightbox share one viewer: an ink-bordered
@@ -214,6 +235,6 @@ operable through a range input; mono tags name each side.
 
 ### Don't:
 - **Don't** add rounded cards, drop shadows on resting surfaces, gradients or glass panels.
-- **Don't** put moss on the paper ground.
+- **Don't** put moss on the paper ground, or set text in leaf (2.8:1 on paper).
 - **Don't** set running text or headings in monospace.
 - **Don't** crop, stretch or upscale a drawing until it blurs.

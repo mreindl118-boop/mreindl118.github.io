@@ -73,7 +73,7 @@ real-browser `inspect.mjs`) and Emil Kowalski's design-engineering skills (`emil
 `review-animations`, `break-ui`, `mobile-native`, …). Load `understory-design` first: it sets the
 order of authority (owner > this file > PRODUCT.md/DESIGN.md > the skills), lists the brand
 devices that override the skills' house rules (mono annotation labels, the rule motif and 1px
-ink rules, the paper/pine/clay/moss palette), and the run commands for this container.
+ink rules, the paper/pine/leaf/clay/moss palette), and the run commands for this container.
 `PRODUCT.md` and `DESIGN.md` at the root are the product brief and the design system (both
 excluded from the served site in `_config.yml`). Skill findings are proposals: the change-
 approval rule below still applies to every edit they suggest.
@@ -97,9 +97,9 @@ About (carries contact at `#contact`; contact.html redirects), Experience
 `portfolio.html` is a booklet-style spread viewer (like the capstone
 booklet) over `assets/portfolio/spread-NN.webp`, with
 `assets/Matthew_Reindl_Portfolio.pdf` built from the same 35 pages as the
-download. Spread 0 is the cover; spread k shows pages 2k and 2k+1, and both
-viewers count book pages ("PP. 12-13 / 35"). A page facing a blank page is
-published alone and centred ("P. 22"); the viewers read
+download. Spread 0 is the cover; spread k shows pages 2k and 2k+1, and the
+viewer counts book pages ("PP. 12-13 / 35"). A page facing a blank page is
+published alone and centred ("P. 22"); the viewer reads
 `assets/portfolio/spreads.json` (written by the pipeline) for the spread list,
 page labels and captions. The export's false page-curl bevel (an 80 px shadow
 at every page's spine edge) is divided out at load; the PDF keeps its blank
@@ -109,8 +109,10 @@ and Hyundai's two pages were moved across the spine (gutter shading mirrored,
 running-header labels swapped). Pages 18-19 are the Weaver laser-cut model
 spread. The Contents page numbers are re-set to match (Proctor 03,
 Buttes-Chaumont 12, West End 14, Weaver 16, CRC 20, Lunkenheimer 22,
-Hyundai 24, Evans 27, Green Roof 30). Projects-page tags hold each project's
-first/last page and open its title spread.
+Hyundai 24, Evans 27, Green Roof 30). The Projects page no longer embeds the
+book or its per-project tags (removed November 2026, Sam Kremer's feedback); it
+links to portfolio.html from its header and from the Portfolio Book band after
+the grid.
 
 The owner's export clips every bottom caption at the page edge. Each page is
 extended 110 px and the clipped captions are re-set in place exactly in the
@@ -121,7 +123,10 @@ contents numbers, pagination, Hyundai swap, model spread, cover headshot,
 colophon closer, spreads, PDF) is `_drafts/tools/rebuild_portfolio.py`, run
 on the export's half pages rendered at 200 dpi. A re-export goes through the
 privacy pass first, then this script (update its transcriptions if captions
-change). Portfolio spreads also feed the project pages
+change). The script also writes `assets/portfolio/cover-thumb.webp` (the
+Portfolio Book band's cover, spread 0 at 560 px wide; work.html hard-codes
+560x761) but not the "(16 MB)" label beside that band's PDF link in work.html;
+fix that label by hand when the PDF size changes. Portfolio spreads also feed the project pages
 (`content/projects/<slug>/pf-NN.webp`), and the Projects-page blowouts use
 individual figures cut from the boards (`content/projects/<slug>/g-*.webp`,
 `gallery` + `focus` in each JSON).

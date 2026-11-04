@@ -35,9 +35,10 @@ raise them as findings at most, and only change them after the owner says so.
 | Skill rule | On this site | Why |
 | --- | --- | --- |
 | taste: no monospace; impeccable: "monospace as costume" | **Kept** for labels, dates, counters, nav and figure numbers (DESIGN.md, the Title Block Rule). Never for running text or headings. | It is drawing-sheet lettering, the site's annotation voice. |
+| impeccable: IBM Plex as a default face to avoid | **Kept**: headings are IBM Plex Sans Bold, the wordmark's face (DESIGN.md, the Wordmark Rule). Don't propose a serif or another display face for headings. | The owner adopted it from Sam Kremer's feedback (Nov 2026). |
 | taste: no tiny uppercase tracked labels; no eyebrows. impeccable: kicker/eyebrow is a ban | **Open to change.** The eyebrows above headings (`.kicker`, `.feature-tag`) may be proposed for removal or rewriting, with a before/after for approval. Labels that annotate data (`.meta-label`, dates, counters, figure numbers) stay under the Title Block Rule. | The owner chose to let the skills propose changes here (Nov 2026). |
 | taste: no thin rules, no 1px boxes | **Kept**: 1px ink rules and the square–line–circle motif are the structural language. | From the owner's design board. |
-| taste: "assistant palette" (cream ground with terracotta/rust) | **Kept**: paper, ink, pine, clay and moss are the brand palette. | Landscape-material colours chosen by the owner. |
+| taste: "assistant palette" (cream ground with terracotta/rust) | **Kept**: paper, ink, pine, leaf, clay and moss are the brand palette. On paper the rule motif and the current-tab marker take the brand mark's pine, leaf and clay. | Landscape-material colours chosen by the owner; the motif colours follow the logo (Nov 2026). |
 | taste/impeccable: no index numbering | **Allowed only for real sequences**: the six practice phases, project numbers in the portfolio book. | The order is information. |
 | taste: floor of four or more real pictures per page, motion floor of eight moving elements | **Not enforced as a gate.** The work is the imagery; motion stays restrained (see below). | A portfolio in Experience mode. |
 

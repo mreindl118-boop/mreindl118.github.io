@@ -48,8 +48,9 @@ The award-recognised capstone (Proctor Landing Park) leads the work.
 
 ## Capabilities and Constraints
 
-- Four tabs: Home, Projects (work.html + the portfolio viewer), About (with contact at
-  `#contact`), Experience (résumé, with skills at `#skills`).
+- Four tabs: Home, Projects (work.html: the project grid, with links to the portfolio viewer
+  at portfolio.html and the PDF), About (with contact at `#contact`), Experience (résumé,
+  with skills at `#skills`).
 - Ten project records; `hidden: true` unlists one while its URL keeps working.
 - The portfolio book is rebuilt by `_drafts/tools/rebuild_portfolio.py`; never hand-edit
   spreads.

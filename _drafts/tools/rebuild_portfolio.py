@@ -413,6 +413,11 @@ def main():
     with open(f'{REPO}/assets/portfolio/spreads.json', 'w') as fh:
         json.dump({'pages': n, 'spreads': manifest}, fh, indent=1)
         fh.write('\n')
+    # Projects-page Portfolio Book band: spread 0 at 560 px wide (work.html hard-codes 560x761)
+    cov = Image.open(f'{REPO}/assets/portfolio/spread-00.webp').convert('RGB')
+    th = round(560 * cov.height / cov.width)
+    cov.resize((560, th), Image.LANCZOS).save(f'{REPO}/assets/portfolio/cover-thumb.webp', quality=84, method=6)
+    REPORT.append(('cover-thumb', 560, th, 'OK' if th == 761 else 'update work.html height attr'))
     # project pages reuse their portfolio spreads
     for slug, k in PROJECT_SPREADS:
         shutil.copyfile(f'{REPO}/assets/portfolio/spread-{k:02d}.webp', f'{REPO}/content/projects/{slug}/pf-{k:02d}.webp')

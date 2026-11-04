@@ -1,4 +1,4 @@
-# Needs: npm i axe-core@4 @fontsource/source-serif-4 @fontsource/ibm-plex-sans @fontsource/ibm-plex-mono (next to this file)
+# Needs: npm i axe-core@4 @fontsource/ibm-plex-sans @fontsource/ibm-plex-mono (next to this file)
 """Site audit: screenshots (desktop + phone, real fonts), axe-core, image/crop/overflow checks.
 Usage: python3 audit.py <label> [base_url]"""
 import asyncio, json, os, sys, glob
@@ -13,8 +13,7 @@ REPO = '/home/user/mreindl118.github.io'
 AXE = open(os.path.join(HERE, 'node_modules/axe-core/axe.min.js')).read()
 FS = os.path.join(HERE, 'node_modules/@fontsource')
 
-FACES = [('Source Serif 4', 'source-serif-4', w) for w in (400, 600, 700)] + \
-        [('IBM Plex Sans', 'ibm-plex-sans', w) for w in (400, 500, 600, 700)] + \
+FACES = [('IBM Plex Sans', 'ibm-plex-sans', w) for w in (400, 500, 600, 700)] + \
         [('IBM Plex Mono', 'ibm-plex-mono', w) for w in (400, 500)]
 CSS = ''
 for fam, pkg, w in FACES:
