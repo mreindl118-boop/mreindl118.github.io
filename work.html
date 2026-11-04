@@ -36,37 +36,31 @@
 
 <div class="wrap" style="padding-top:56px; padding-bottom:88px">
   <div class="kicker" style="margin-bottom:14px">Work</div>
-  <h1 class="h-head" style="font-size:clamp(38px,5.5vw,60px); line-height:1.05; margin:0 0 10px">Projects</h1>
-
-  <div style="display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; margin-top:8px">
-    <div class="kicker" style="font-size:11px; letter-spacing:.12em">Portfolio &middot; Selected Work 2022&ndash;2026</div>
-    <a class="link-mono" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf">Download PDF &darr;</a>
-  </div>
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:14px">
-    <div class="vgroup">
-      <button class="vbtn" id="pf-prev" title="Previous spread">&larr;</button>
-      <button class="vbtn" id="pf-next" title="Next spread">&rarr;</button>
-      <span class="vcount"><span id="pf-num">P. 01</span> / <span id="pf-total">35</span></span>
-    </div>
-    <div class="vgroup">
-      <button class="vbtn" id="pf-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
-      <button class="vbtn" id="pf-zin" title="Zoom in"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
-      <button class="vbtn vbtn-wide" id="pf-fit">FIT</button>
+  <h1 class="h-head" style="font-size:clamp(38px,5.5vw,60px); line-height:1.05; margin:0 0 12px">Projects</h1>
+  <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px 28px; flex-wrap:wrap; margin:0 0 22px">
+    <p class="mono-note" id="count" style="margin:0"></p>
+    <div style="display:flex; gap:10px 26px; flex-wrap:wrap">
+      <a class="link-mono" href="portfolio.html">Portfolio book &rarr;</a>
+      <a class="link-mono" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf">Download PDF &darr;</a>
     </div>
   </div>
-  <div id="pf-stage" style="position:relative; height:min(74vh,680px); overflow:hidden; margin-top:8px; touch-action:none">
-    <div class="vsurface" id="pf-surface" style="border:none; background:transparent"></div>
-    <div class="vbadge" id="pf-badge">100% &middot; drag to pan</div>
-  </div>
-  <div class="thumbs" id="pf-tags" style="margin-top:10px"></div>
-
-  <div class="rule-motif" style="margin:56px 0 26px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
-  <h2 class="h-head" style="font-size:30px; margin:0 0 6px">Individual Projects</h2>
-  <p class="mono-note" id="count" style="margin:0 0 22px"></p>
 
   <div class="chips" id="chips"></div>
 
   <div id="grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:36px 28px"></div>
+
+  <div class="rule-motif" style="margin:72px 0 28px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
+  <section class="pf-band" aria-labelledby="pf-band-title">
+    <a class="pf-band-cover" href="portfolio.html" tabindex="-1" aria-hidden="true"><img src="assets/portfolio/cover-thumb.webp" alt="" width="560" height="761" loading="lazy"></a>
+    <div>
+      <h2 class="h-head" id="pf-band-title" style="font-size:30px; margin:0 0 10px">Portfolio Book</h2>
+      <p style="font-size:16px; line-height:1.6; color:var(--muted); max-width:50ch; margin:0">The same work as a 35-page book, laid out in spreads like the printed copy. Flip through it here, or take the PDF.</p>
+      <div style="display:flex; gap:10px 26px; flex-wrap:wrap; margin-top:20px">
+        <a class="link-mono" href="portfolio.html">Flip through the book &rarr;</a>
+        <a class="link-mono" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf">Download PDF &darr; <span style="color:var(--faint)">(16&nbsp;MB)</span></a>
+      </div>
+    </div>
+  </section>
 
 </div>
 
@@ -100,64 +94,6 @@
 </footer>
 
 <script src="assets/js/site.js"></script>
-<script>
-(function () {
-  var N = 0, idx = 0, picked = null, PF = null;
-  var $ = function (id) { return document.getElementById(id); };
-  // [label, first page, last page] in book pages. Spreads come from the portfolio manifest
-  // (assets/portfolio/spreads.json): pages 2k and 2k+1 sit on spread k, the cover alone on
-  // spread 0, and a page facing a blank (pp. 23, 26) is shown alone, centred.
-  var TAGS = [['Cover',1,1],['Contents',2,2],['01 Proctor',3,11],['02 Buttes-Chaumont',12,13],
-    ['03 West End',14,15],['04 Weaver',16,19],['05 CRC',20,21],['06 Lunkenheimer',22,22],
-    ['07 Hyundai',24,25],['08 Evans',27,29],['09 Green Roof',30,31],['Other Work',32,33],['Colophon',34,35]];
-  var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));
-  $('pf-tags').innerHTML = TAGS.map(function (t, i) {
-    return '<button class="thumbbtn" data-i="' + i + '">' + t[0] + '</button>';
-  }).join('');
-  function show(k) {
-    if (!PF) return;
-    idx = Math.min(Math.max(k, 0), N - 1);
-    var img = document.createElement('img');
-    img.src = PF.src(idx);
-    img.alt = 'Portfolio, ' + (idx === 0 ? 'cover' : PF.label(idx).replace('PP.', 'pages').replace('P.', 'page'));
-    img.draggable = false;
-    img.style.cssText = 'max-width:100%; max-height:100%; width:auto; height:auto; display:block; background:#FFF; user-select:none; visibility:hidden';
-    var sf = $('pf-surface');
-    sf.innerHTML = '<span style="position:absolute; font-family:var(--mono); font-size:12px; color:var(--faint)">Loading spread\u2026</span>';
-    sf.appendChild(img);
-    var want = idx;
-    img.onload = function () {
-      if (want !== idx) return;
-      if (sf.firstChild && sf.firstChild.tagName === 'SPAN') sf.firstChild.remove();
-      img.style.visibility = 'visible';
-      pz.fit();
-    };
-    pz.fit();
-    var pp = PF.range(idx);
-    $('pf-num').textContent = PF.label(idx);
-    Array.prototype.forEach.call($('pf-tags').children, function (b, i) {
-      var onScreen = TAGS[i][1] <= pp[1] && TAGS[i][2] >= pp[0];
-      b.classList.toggle('active', picked === null ? onScreen : i === picked);
-    });
-    picked = null;
-    [idx + 1, idx - 1].forEach(function (n) { if (n >= 0 && n < N) { var p = new Image(); p.src = PF.src(n); } });
-  }
-  $('pf-tags').addEventListener('click', function (e) {
-    var b = e.target.closest('.thumbbtn');
-    if (!b) return;
-    picked = parseInt(b.getAttribute('data-i'), 10);
-    show(PF.spreadOf(TAGS[picked][1]));
-  });
-  $('pf-prev').onclick = function () { show(idx - 1); };
-  $('pf-next').onclick = function () { show(idx + 1); };
-  $('pf-zin').onclick = pz.zoomIn; $('pf-zout').onclick = pz.zoomOut; $('pf-fit').onclick = pz.fit;
-  US.loadPortfolio().then(function (m) {
-    PF = m; N = m.spreads.length;
-    $('pf-total').textContent = m.pages;
-    show(0);
-  });
-})();
-</script>
 <script>
 (function () {
   var all = [], active = 'All';

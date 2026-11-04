@@ -160,6 +160,8 @@ main .rule-motif .ci { border-color: var(--clay); }
   border-bottom: 2px solid transparent; color: var(--muted);
 }
 .chip.active { color: var(--ink); border-bottom-color: var(--clay); }
+/* phones: the filter rows sit tight so the first project shows sooner (36px targets) */
+@media (max-width: 640px) { .chips { gap: 0 18px; margin-bottom: 28px; } .chip { min-height: 36px; } }
 
 /* ---------- Section headers ---------- */
 /* Headings are set in the wordmark's face: IBM Plex Sans Bold, tracked tight like "Understory" */
@@ -432,3 +434,9 @@ main:focus { outline: none; }
   }
 }
 @media (max-width: 640px) { input[type="range"] { min-height: 28px; } }
+
+/* ---------- Portfolio band (Projects page, after the grid) ---------- */
+.pf-band { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 20px 40px; align-items: center; }
+.pf-band-cover { display: block; border: 1px solid var(--line); background: #FFF; }
+.pf-band-cover img { display: block; width: 100%; height: auto; }
+@media (max-width: 640px) { .pf-band { grid-template-columns: minmax(0, 140px) minmax(0, 1fr); gap: 16px 20px; align-items: start; } }
