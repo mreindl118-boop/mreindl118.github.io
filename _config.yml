@@ -1,4 +1,7 @@
 # Keep repo meta-files out of the served site.
+# (Dot-directories such as .claude/ are excluded by Jekyll's defaults.)
 exclude:
   - CLAUDE.md
   - README.md
+  - PRODUCT.md
+  - DESIGN.md

@@ -64,6 +64,20 @@ comparisons, ask, then fast-forward only the approved commits. The audit
 harness (axe-core + full-page screenshots + crop/tap-target checks) lives in
 the session scratchpad; rebuild it from `_drafts/tools/` notes if needed.
 
+## Design skills
+
+`.claude/skills/` vendors three design skill sets (provenance in `.claude/skills/VENDORED.md`):
+Impeccable (`impeccable`: audit, critique, polish, typeset, layout, colorize, …), the taste skill
+(`design-taste-frontend`: art direction from 247 award-gallery sites, `lint.mjs` and the
+real-browser `inspect.mjs`) and Emil Kowalski's design-engineering skills (`emil-design-eng`,
+`review-animations`, `break-ui`, `mobile-native`, …). Load `understory-design` first: it sets the
+order of authority (owner > this file > PRODUCT.md/DESIGN.md > the skills), lists the brand
+devices that override the skills' house rules (mono annotation labels, the rule motif and 1px
+ink rules, the paper/pine/clay/moss palette), and the run commands for this container.
+`PRODUCT.md` and `DESIGN.md` at the root are the product brief and the design system (both
+excluded from the served site in `_config.yml`). Skill findings are proposals: the change-
+approval rule below still applies to every edit they suggest.
+
 ## Privacy rules (standing, non-negotiable)
 
 - No personal phone number anywhere on the site or in hosted PDFs. Any phone
