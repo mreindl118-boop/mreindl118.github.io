@@ -90,7 +90,7 @@ fun LinkChips(links: List<com.mattlabs.planlab.core.Link>, stepLabel: String, co
         links.take(3).forEachIndexed { i, l ->
             val ext = !l.url.startsWith("app:")
             Text(Links.name(l, stepLabel) + if (ext) " ↗" else " ›",
-                Modifier.clip(CircleShape).background(if (i == 0) color else tk.sunk).clickable { Links.open(ctx, l, "step") }.padding(horizontal = 12.dp, vertical = 7.dp),
+                Modifier.clip(CircleShape).background(if (i == 0) color else tk.sunk).clickable { Links.open(ctx, l, "step", stepLabel) }.padding(horizontal = 12.dp, vertical = 7.dp),
                 color = if (i == 0) androidx.compose.ui.graphics.Color.White else color, fontWeight = FontWeight.Bold, fontSize = 13.sp)
         }
     }
@@ -98,7 +98,7 @@ fun LinkChips(links: List<com.mattlabs.planlab.core.Link>, stepLabel: String, co
 
 /** Tap to start a countdown; at zero it buzzes and ticks the step. Tap again to stop. */
 @Composable
-fun StepTimer(minutes: Int, color: androidx.compose.ui.graphics.Color, onDone: () -> Unit) {
+fun StepTimer(minutes: Int, color: androidx.compose.ui.graphics.Color, seconds: Int = minutes * 60, onDone: () -> Unit) {
     val tk = t()
     val haptic = LocalHapticFeedback.current
     var endAt by remember { mutableLongStateOf(0L) }
@@ -115,8 +115,8 @@ fun StepTimer(minutes: Int, color: androidx.compose.ui.graphics.Color, onDone: (
     }
     val running = endAt > 0
     val left = ((endAt - now) / 1000).coerceAtLeast(0)
-    Text(if (running) "%d:%02d".format(left / 60, left % 60) else "▶ $minutes:00",
-        Modifier.clip(CircleShape).background(if (running) color else tk.sunk).clickable { if (!running) Store.count("timer"); endAt = if (running) 0 else System.currentTimeMillis() + minutes * 60_000L }
+    Text(if (running) "%d:%02d".format(left / 60, left % 60) else "▶ %d:%02d".format(seconds / 60, seconds % 60),
+        Modifier.clip(CircleShape).background(if (running) color else tk.sunk).clickable { if (!running) Store.count("timer"); endAt = if (running) 0 else System.currentTimeMillis() + seconds * 1000L }
             .padding(horizontal = 10.dp, vertical = 5.dp),
         color = if (running) androidx.compose.ui.graphics.Color.White else color, fontWeight = FontWeight.Bold, fontSize = 13.sp)
 }

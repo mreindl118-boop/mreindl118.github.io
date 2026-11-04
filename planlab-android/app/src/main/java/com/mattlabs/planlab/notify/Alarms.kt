@@ -32,10 +32,16 @@ enum class Slot(val label: String, val time: LocalTime, val notifId: Int) {
     // Movement breaks: the time comes from the day's "### move" steps ("Break 1 at 10:30, 1 min: …").
     MOVE_1("Move breaks", LocalTime.of(10, 30), 21),
     MOVE_2("Move breaks", LocalTime.of(13, 30), 22),
-    MOVE_3("Move breaks", LocalTime.of(15, 30), 23);
+    MOVE_3("Move breaks", LocalTime.of(15, 30), 23),
+    // Mindful check-ins: times from the day's "### mind" steps ("Check-in 1 at 11:45, 1 min: …").
+    MIND_1("Check-ins", LocalTime.of(11, 45), 24),
+    MIND_2("Check-ins", LocalTime.of(16, 30), 25),
+    MIND_3("Check-ins", LocalTime.of(20, 30), 26);
 
-    /** 0-based break number for MOVE_n, else -1. */
-    val breakIndex: Int get() = if (name.startsWith("MOVE_")) name.removePrefix("MOVE_").toInt() - 1 else -1
+    /** The box whose timed steps this slot follows ("move" or "mind"), else null. */
+    val group: String? get() = when { name.startsWith("MOVE_") -> "move"; name.startsWith("MIND_") -> "mind"; else -> null }
+    /** 0-based step number for MOVE_n / MIND_n, else -1. */
+    val breakIndex: Int get() = if (group != null) name.substringAfter('_').toInt() - 1 else -1
 
     fun enabled(): Boolean = Store.prefs().getBoolean("slot_$name", true)
 }
@@ -54,7 +60,7 @@ object Alarms {
     /** The slot's time on [date]: a break's own time from that day's plan when it has one. */
     private fun timeOn(slot: Slot, date: LocalDate): LocalTime {
         if (slot.breakIndex < 0) return slot.time
-        val step = Store.state.value.plan.day(date)?.boxes?.firstOrNull { it.key == "move" }?.steps?.getOrNull(slot.breakIndex)
+        val step = Store.state.value.plan.day(date)?.boxes?.firstOrNull { it.key == slot.group }?.steps?.getOrNull(slot.breakIndex)
         return step?.let { com.mattlabs.planlab.core.Moves.timeOf(it.label) } ?: slot.time
     }
 
@@ -122,6 +128,7 @@ class ActionReceiver : BroadcastReceiver() {
             "skip" -> Store.skip(date, key)
             "pelvic" -> Store.pelvicSet(date)
             "elevate" -> Store.addCount(date, "elevate")
+            "mind" -> Store.addCount(date, "mind")
             "ateplan" -> { val day = Store.state.value.plan.day(date); val step = Store.nextPlanned(date); if (day != null && step != null) Store.logPlanned(day, step) }
             "snooze" -> slot?.let { Alarms.snooze(ctx, it, if (min > 0) min else 60) }
         }

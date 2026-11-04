@@ -45,4 +45,16 @@ class TodayPickTest {
         assertEquals(0 to 7, TodayPick.count(day, { false }, { false }))
         assertEquals(3 to 7, TodayPick.count(day, { it.key == "p1" }, { it.key == "body" }))
     }
+
+    @Test fun wordsKeepsItShort() {
+        assertEquals("Play test scale slowly", TodayPick.words("Play test scale slowly with both hands", 4))
+        assertEquals("Test bug", TodayPick.words("Test bug — 3 × 10 each side", 4))
+        assertEquals("Clear the desk", TodayPick.words("Clear the desk, then the shelf", 4))
+    }
+
+    @Test fun aDueCheckInWinsToo() {
+        val d = day.copy(boxes = day.boxes + Box("mind", "Check-ins", false, listOf(s("c1", "Check-in 1 at 11:45, 1 min: 3 test breaths"))))
+        assertEquals("c1", TodayPick.next(d, LocalTime.of(11, 40), { false }, { true })!!.step!!.key)
+        assertEquals(listOf("body", "piano", "water", "move", "mind"), TodayPick.rest(d, { false }, { true }).map { it.box.key })
+    }
 }

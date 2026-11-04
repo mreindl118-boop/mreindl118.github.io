@@ -24,6 +24,11 @@ object Notifier {
     const val CH_BRIEF = "brief"
     const val CH_TODAY = "today"
     const val CH_BREAK = "breaks"
+    const val CH_MIND = "mind"
+    /** Check-ins buzz in their own pattern (short, short, long) so they feel different from everything else. */
+    val MIND_BUZZ = longArrayOf(0, 90, 140, 90, 140, 500)
+    /** Used until the plan has a "### mind" box. */
+    private val MIND_FALLBACK = listOf("3 slow breaths", "Drop your shoulders", "Feel your feet", "Unclench your jaw", "Look far away")
     const val ID_TODAY = 1
 
     fun channels(ctx: Context) {
@@ -31,6 +36,9 @@ object Notifier {
         nm.createNotificationChannel(NotificationChannel(CH_BRIEF, "Morning plan", NotificationManager.IMPORTANCE_HIGH).apply { description = "Your day and how ready your body is, each morning" })
         nm.createNotificationChannel(NotificationChannel(CH_NUDGE, "Reminders", NotificationManager.IMPORTANCE_HIGH).apply { description = "Body, practice, meals and recovery, with buttons to answer" })
         nm.createNotificationChannel(NotificationChannel(CH_BREAK, "Move breaks", NotificationManager.IMPORTANCE_DEFAULT).apply { description = "A gentle nudge to get up and move for a minute" })
+        nm.createNotificationChannel(NotificationChannel(CH_MIND, "Check-ins", NotificationManager.IMPORTANCE_HIGH).apply {
+            description = "A one-minute pause, with its own buzz"; enableVibration(true); vibrationPattern = MIND_BUZZ
+        })
         nm.createNotificationChannel(NotificationChannel(CH_TODAY, "Today card", NotificationManager.IMPORTANCE_LOW).apply { description = "A pinned card with what's left today"; setShowBadge(false) })
     }
 
@@ -84,21 +92,17 @@ object Notifier {
         when (slot) {
             Slot.BRIEF -> {
                 val r = b.readiness
-                val title = if (r != null) "${r.score} · ${r.label}" else "Your plan today"
-                val lines = buildList {
-                    add(b.body.title + if (b.body.easier) " (eased)" else "")
-                    b.piano?.let { add(it.title) }
-                    if (b.daysToBig != null && b.daysToBig > 0) add("${b.daysToBig} days to ${b.bigName}")
-                    b.nudges.firstOrNull()?.let { add(it.title) }
-                }
-                post(ctx, id, base(ctx, CH_BRIEF, title, lines.joinToString("\n"))
-                    .addAction(NotificationCompat.Action.Builder(0, "Open plan", openApp(ctx)).build())
+                val title = if (r != null) "${r.score} ready" else "Today"
+                val first = day?.let { com.mattlabs.planlab.ui.TodayData.next(it) }
+                val line = first?.let { n -> n.step?.let { com.mattlabs.planlab.ui.TodayData.short(it) } ?: com.mattlabs.planlab.ui.TodayData.label(n.box) } ?: "Nothing planned"
+                post(ctx, id, base(ctx, CH_BRIEF, title, "First: $line")
+                    .addAction(NotificationCompat.Action.Builder(0, "Open", openApp(ctx)).build())
                     .addAction(action(ctx, "Snooze 1h", "snooze", slot, minutes = 60, notif = id)))
             }
             Slot.PELVIC_AM, Slot.PELVIC_PM -> {
                 val n = LogDoc.pelvic(log, today.toString())
                 if (n >= 2 || (slot == Slot.PELVIC_AM && n >= 1)) return false
-                post(ctx, id, base(ctx, CH_NUDGE, "Pelvic floor, set ${n + 1} of 2", "10 slow holds, 10 quick ones. Seated is fine.")
+                post(ctx, id, base(ctx, CH_NUDGE, "Pelvic floor ${n + 1}/2", "10 slow, 10 quick")
                     .addAction(action(ctx, "Done", "pelvic", slot, notif = id))
                     .addAction(action(ctx, "In 30 min", "snooze", slot, minutes = 30, notif = id)))
             }
@@ -122,11 +126,11 @@ object Notifier {
                 if (food.any { it.meal == "dinner" }) return false
                 val have = Store.eaten(today); val want = Store.foodTargets(today)
                 val next = Store.nextPlanned(today)?.let { Store.planned(it) }?.takeIf { it.meal == "dinner" }
-                val nb = base(ctx, CH_NUDGE, if (next != null) "Dinner: ${next.name}?" else "What was dinner?",
-                    "Today so far: %,d of %,d kcal, %d of %d g protein.".format(have.kcal, want.kcal, have.protein, want.protein))
+                val nb = base(ctx, CH_NUDGE, if (next != null) "Dinner: ${next.name}?" else "Dinner?",
+                    "%d / %d g protein".format(have.protein, want.protein))
                     .setContentIntent(foodIntent(ctx))
-                if (next != null) nb.addAction(action(ctx, "Ate the plan", "ateplan", slot, notif = id))
-                nb.addAction(NotificationCompat.Action.Builder(0, if (next != null) "Something else" else "Track food", foodIntent(ctx)).build())
+                if (next != null) nb.addAction(action(ctx, "✓ Ate it", "ateplan", slot, notif = id))
+                nb.addAction(NotificationCompat.Action.Builder(0, if (next != null) "Other" else "Track", foodIntent(ctx)).build())
                 nb.addAction(action(ctx, "In 1 hour", "snooze", slot, minutes = 60, notif = id))
                 post(ctx, id, nb)
             }
@@ -142,10 +146,39 @@ object Notifier {
                 if (Store.stepDone(day, step) || LogDoc.skipped(log, today.toString(), "move")) return false
                 val kind = com.mattlabs.planlab.core.Moves.kindOf(box, step, day)
                 val nb = NotificationCompat.Builder(ctx, CH_BREAK).setSmallIcon(R.drawable.ic_stat).setColor(0xFF0E8FB0.toInt())
-                    .setContentTitle("Break · ${kind?.minutes ?: 1} min").setContentText(com.mattlabs.planlab.ui.MoveSheet.shortLabel(step.label))
+                    .setContentTitle(com.mattlabs.planlab.ui.TodayData.short(step)).setContentText("Break · ${kind?.minutes ?: 1} min")
                     .setContentIntent(moveIntent(ctx, box.key, step)).setAutoCancel(true).setCategory(NotificationCompat.CATEGORY_REMINDER)
                     .addAction(action(ctx, "✓ Done", "step", slot, box.key, notif = id, step = step.key))
-                    .addAction(NotificationCompat.Action.Builder(0, "How to", moveIntent(ctx, box.key, step)).build())
+                    .also { nb ->
+                        val pick = step.links.firstOrNull { it.url == "app:stretch" }
+                        nb.addAction(if (pick != null) NotificationCompat.Action.Builder(0, "Where am I?", sheetIntent(ctx, "stretch", box.key, step)).build()
+                            else NotificationCompat.Action.Builder(0, "How to", moveIntent(ctx, box.key, step)).build())
+                    }
+                    .addAction(action(ctx, "In 15 min", "snooze", slot, minutes = 15, notif = id))
+                post(ctx, id, nb)
+            }
+            Slot.MIND_1, Slot.MIND_2, Slot.MIND_3 -> {
+                val box = day?.boxes?.firstOrNull { it.key == "mind" }
+                val step = box?.steps?.getOrNull(slot.breakIndex)
+                val nb = NotificationCompat.Builder(ctx, CH_MIND).setSmallIcon(R.drawable.ic_stat).setColor(0xFF12A383.toInt())
+                    .setAutoCancel(true).setCategory(NotificationCompat.CATEGORY_REMINDER).setPriority(NotificationCompat.PRIORITY_HIGH).setVibrate(MIND_BUZZ)
+                if (day == null || box == null || step == null) {
+                    // No "### mind" box in the plan yet: two built-in check-ins a day.
+                    if (slot == Slot.MIND_3 || (day != null && day.boxes.any { it.key == "mind" })) return false
+                    val p = MIND_FALLBACK[(today.dayOfYear * 2 + slot.breakIndex) % MIND_FALLBACK.size]
+                    nb.setContentTitle(p).setContentText("1 min").setContentIntent(openApp(ctx))
+                        .addAction(action(ctx, "✓ Done", "mind", slot, notif = id))
+                        .addAction(action(ctx, "In 15 min", "snooze", slot, minutes = 15, notif = id))
+                    post(ctx, id, nb)
+                    return true
+                }
+                if (Store.stepDone(day, step) || LogDoc.skipped(log, today.toString(), "mind")) return false
+                val journal = step.links.any { it.url == "app:journal" }
+                val q = com.mattlabs.planlab.ui.MindSheet.question(step.label)
+                val title = q ?: com.mattlabs.planlab.core.TodayPick.words(com.mattlabs.planlab.ui.MoveSheet.shortLabel(step.label), 4)
+                val open = if (journal) sheetIntent(ctx, "journal", box.key, step) else moveIntent(ctx, box.key, step)
+                nb.setContentTitle(title).setContentText(if (journal) "Journal" else "1 min").setContentIntent(open)
+                    .addAction(if (journal) NotificationCompat.Action.Builder(0, "Write", open).build() else action(ctx, "✓ Done", "step", slot, box.key, notif = id, step = step.key))
                     .addAction(action(ctx, "In 15 min", "snooze", slot, minutes = 15, notif = id))
                 post(ctx, id, nb)
             }
@@ -154,7 +187,7 @@ object Notifier {
                 val open = day.boxes.filter { !Store.isDone(day, it) && !LogDoc.skipped(log, today.toString(), it.key) }
                 if (open.isEmpty()) return false
                 val done = day.boxes.size - open.size
-                val nb = base(ctx, CH_NUDGE, "$done of ${day.boxes.size} done today", "Still open:\n" + open.joinToString("\n") { nextLabel(day, it) })
+                val nb = base(ctx, CH_NUDGE, "$done/${day.boxes.size} done", open.joinToString("\n") { nextLabel(day, it) })
                 open.take(3).forEach { nb.addAction(action(ctx, "✓ " + (Store.LABEL[it.key] ?: it.label.take(14)), "step", slot, it.key, notif = id)) }
                 post(ctx, id, nb)
             }
@@ -173,7 +206,7 @@ object Notifier {
         val next = Store.nextStep(day, box)
         val nb = if (next != null) {
             val n = Store.stepsDone(day, box)
-            base(ctx, CH_NUDGE, "${Store.LABEL[key] ?: box.label} · step ${n + 1} of ${box.steps.size}", next.label + if (n == 0 && title.isNotBlank()) "\n$title" else "")
+            base(ctx, CH_NUDGE, com.mattlabs.planlab.ui.TodayData.short(next), "${Store.LABEL[key] ?: box.label} ${n + 1}/${box.steps.size}")
                 .addAction(action(ctx, "✓ Done", "step", slot, key, notif = id, step = next.key))
                 .also { nb -> next.links.firstOrNull()?.let { l -> nb.addAction(NotificationCompat.Action.Builder(0, com.mattlabs.planlab.ui.Links.name(l, next.label).take(16), linkIntent(ctx, l.url)).build()) } }
         } else {
@@ -189,7 +222,7 @@ object Notifier {
     private fun nextLabel(day: com.mattlabs.planlab.core.Day, box: com.mattlabs.planlab.core.Box): String {
         val name = Store.LABEL[box.key] ?: box.label.replaceFirstChar { it.uppercase() }
         val next = Store.nextStep(day, box) ?: return name
-        return "$name: ${next.label}"
+        return "$name: ${com.mattlabs.planlab.ui.TodayData.short(next)}"
     }
 
     /** The pinned card: progress and one-tap buttons for what's left. */
@@ -204,12 +237,11 @@ object Notifier {
         val open = day.boxes.filter { !Store.isDone(day, it) && !LogDoc.skipped(log, today.toString(), it.key) }
         val done = day.boxes.size - open.size
         val title = buildString {
-            append(if (open.isEmpty()) "All done today" else "Today $done/${day.boxes.size}")
-            b.readiness?.let { append(" · ${it.score} ${it.label.lowercase()}") }
-            if (b.daysToBig != null && b.daysToBig > 0) append(" · ${b.daysToBig}d to ${b.bigName}")
-            Store.state.value.progress?.let { p -> append(" · Lv ${p.level.n}"); if (p.streak > 1) append(" 🔥${p.streak}") }
+            append(if (open.isEmpty()) "All done" else "$done/${day.boxes.size}")
+            b.readiness?.let { append(" · ${it.score}") }
+            Store.state.value.progress?.let { p -> if (p.streak > 1) append(" · 🔥${p.streak}") }
         }
-        val text = if (open.isEmpty()) "Nice work." else open.joinToString("\n") { nextLabel(day, it) }
+        val text = com.mattlabs.planlab.ui.TodayData.next(day)?.let { n -> "Next: " + (n.step?.let { com.mattlabs.planlab.ui.TodayData.short(it) } ?: com.mattlabs.planlab.ui.TodayData.label(n.box)) } ?: "✓"
         val nb = NotificationCompat.Builder(ctx, CH_TODAY).setSmallIcon(R.drawable.ic_stat).setColor(0xFF2F7DE1.toInt())
             .setContentTitle(title).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text)).setOngoing(true).setOnlyAlertOnce(true).setSilent(true)
             .setContentIntent(openApp(ctx)).setProgress(day.boxes.size, done, false)
@@ -230,6 +262,13 @@ object Notifier {
         val i = Intent(ctx, MainActivity::class.java).putExtra("go", key).putExtra("box", boxKey).putExtra("step", step.key).putExtra("from", "notif")
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         return PendingIntent.getActivity(ctx, step.key.hashCode(), i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
+    /** Opens the stretch picker or the journal box for this step. */
+    fun sheetIntent(ctx: Context, kind: String, boxKey: String, step: com.mattlabs.planlab.core.Box): PendingIntent {
+        val i = Intent(ctx, MainActivity::class.java).putExtra("go", kind).putExtra("box", boxKey).putExtra("step", step.key).putExtra("from", "notif")
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        return PendingIntent.getActivity(ctx, (kind + step.key).hashCode(), i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     fun linkIntent(ctx: Context, url: String): PendingIntent =

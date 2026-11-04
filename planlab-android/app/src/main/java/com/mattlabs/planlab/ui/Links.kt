@@ -21,15 +21,16 @@ object Links {
         else -> Intent(Intent.ACTION_VIEW, Uri.parse(url))
     }.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-    fun open(ctx: Context, link: Link, from: String) {
+    fun open(ctx: Context, link: Link, from: String, label: String = "") {
         Store.count(if (link.url.startsWith("app:")) "link:${link.url.removePrefix("app:").substringBefore('/')}" else "link:web")
         if (link.url.startsWith("app:move/") && from == "step") { MoveSheet.show(MoveSheet.Req(java.time.LocalDate.now(), null, null, link.url.removePrefix("app:move/"))); return }
+        if (link.url == "app:stretch" || link.url == "app:journal") { MindSheet.forLabel(link.url.removePrefix("app:"), label); return }
         runCatching { ctx.startActivity(intent(ctx, link.url, from)) }
     }
 
     /** Which tab an in-app target opens; anything else opens the planner at that view. */
     fun tabFor(target: String): String = when {
-        target == "wish" || target.startsWith("move/") -> "today"
+        target == "wish" || target == "stretch" || target == "journal" || target.startsWith("move/") -> "today"
         target in TABS -> target
         else -> "planner"
     }

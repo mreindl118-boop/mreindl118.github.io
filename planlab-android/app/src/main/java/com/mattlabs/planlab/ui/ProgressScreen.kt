@@ -122,7 +122,7 @@ fun ProgressScreen() {
     val today = LocalDate.now()
     LazyColumn(Modifier.fillMaxWidth().statusBarsPadding(), contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 32.dp)) {
         item {
-            Text("${p.xp} XP all time", color = tk.muted, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+            Text("${p.xp} XP", color = tk.muted, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
             Text("Progress", style = MaterialTheme.typography.displaySmall, color = tk.fg)
             Spacer(Modifier.height(14.dp))
             LevelCard(p)
@@ -177,7 +177,6 @@ fun ProgressScreen() {
                     "Fix a bugs me" to r.bugFixed, "A habit kept 7 days" to r.habit, "A wish done" to r.wish)) {
                     RowItem(title = what) { Text("+$n", color = tk.accent, fontWeight = FontWeight.Bold) }
                 }
-                Text("A day counts for your streak when one area is finished. One missed day a week is shielded. XP never goes down.", Modifier.padding(vertical = 8.dp), color = tk.muted, fontSize = 13.sp)
             }
         }
     }

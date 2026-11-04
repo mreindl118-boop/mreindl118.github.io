@@ -22,7 +22,7 @@ data class Tokens(
     val accent: Color, val accentSoft: Color, val ok: Color, val okSoft: Color, val warn: Color, val warnSoft: Color, val bad: Color,
     val eat: Color, val body: Color, val piano: Color, val voice: Color, val home: Color, val dark: Boolean,
 ) {
-    fun kind(k: String): Color = when (k) { "meals" -> eat; "body", "move" -> body; "piano" -> piano; "voice" -> voice; "clean", "home", "bugs" -> home; else -> accent }
+    fun kind(k: String): Color = when (k) { "meals" -> eat; "body", "move", "mind" -> body; "piano" -> piano; "voice" -> voice; "clean", "home", "bugs" -> home; else -> accent }
     fun score(s: Int): Color = when { s >= 80 -> ok; s >= 65 -> accent; s >= 50 -> warn; else -> bad }
 }
 

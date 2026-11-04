@@ -99,7 +99,7 @@ object Areas {
     fun of(key: String): String {
         val k = key.lowercase().split('/', '-', ' ', ':').firstOrNull() ?: ""
         return when {
-            k in setOf("body", "stretch", "pt", "rehab", "elevate", "walk", "strength", "mobility", "pf", "pelvic", "workout", "move") -> "Body"
+            k in setOf("body", "stretch", "pt", "rehab", "elevate", "walk", "strength", "mobility", "pf", "pelvic", "workout", "move", "mind") -> "Body"
             k in setOf("piano", "voice", "guitar", "music", "sing", "singing", "practice") -> "Music"
             k in setOf("clean", "home", "bug", "bugs", "tidy", "laundry", "chores", "house") -> "Home"
             k in setOf("elizabeth", "date", "partner", "social", "liz", "us") -> "Elizabeth"

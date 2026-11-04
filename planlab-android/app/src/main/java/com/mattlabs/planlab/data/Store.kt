@@ -79,7 +79,7 @@ object Store {
     private var files: Map<String, String> = emptyMap()
 
     val MAIN = listOf("body", "piano", "voice", "clean")
-    val LABEL = mapOf("meals" to "Eat", "body" to "Body", "piano" to "Piano", "voice" to "Voice", "clean" to "Clean", "move" to "Move")
+    val LABEL = mapOf("meals" to "Eat", "body" to "Body", "piano" to "Piano", "voice" to "Voice", "clean" to "Clean", "move" to "Move", "mind" to "Mind")
 
     @Synchronized
     fun init(context: Context) {
@@ -275,6 +275,9 @@ object Store {
 
     fun tick(list: String, key: String, value: Boolean) { if (value) count("tick"); addOps(LogDoc.tickOp(list, key, value)) }
     fun addMinutes(date: LocalDate, key: String, n: Int) = addOps(LogDoc.addOp("mins", date.toString(), key, n))
+    fun journal(date: LocalDate, q: String, a: String) { count("journal"); addOps(LogDoc.journalOp(date.toString(), q, a)) }
+    /** A plan file as last pulled (e.g. "mind/anywhere.md"). */
+    fun file(path: String): String? = files[path]
     fun pelvicSet(date: LocalDate) = addOps(LogDoc.addOp("ticks", "pf-$date", "n", 1))
     fun skip(date: LocalDate, key: String) = addOps(LogDoc.tickOp("skip-$date", key, true))
     fun addCount(date: LocalDate, name: String) = addOps(LogDoc.addOp("ticks", "$name-$date", "n", 1))
@@ -447,7 +450,7 @@ object Store {
 
     private fun pullPlan(gh: GitHub) {
         val out = mutableMapOf<String, String>()
-        for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md", "rewards.md", "meals/foods.md", "body/moves.md")) gh.file(n)?.let { out[n] = it }
+        for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md", "rewards.md", "meals/foods.md", "body/moves.md", "mind/anywhere.md")) gh.file(n)?.let { out[n] = it }
         runCatching { gh.file("log/insights.json") }.getOrNull()?.let { out["log/insights.json"] = it }
         val today = LocalDate.now()
         // Only the weeks that matter now: last week, this week and anything ahead.

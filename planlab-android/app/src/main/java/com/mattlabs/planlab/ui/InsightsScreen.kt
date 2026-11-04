@@ -56,7 +56,7 @@ fun FeelRow(date: LocalDate) {
     val haptic = LocalHapticFeedback.current
     val picked = Store.feel(st.log, date)
     PCard(pad = PaddingValues(14.dp)) {
-        Text("How do you feel?", style = MaterialTheme.typography.titleMedium, color = tk.fg)
+        Text("Feel?", style = MaterialTheme.typography.titleMedium, color = tk.fg)
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             FEEL.forEachIndexed { i, label ->
@@ -103,7 +103,6 @@ fun InsightsScreen(onBack: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onBack) { Icon(Icons.Filled.KeyboardArrowLeft, "Back", tint = tk.fg) }
                 Column(Modifier.weight(1f)) {
-                    Text("Patterns in your own days", color = tk.muted, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                     Text("Insights", style = MaterialTheme.typography.displaySmall, color = tk.fg)
                 }
             }
@@ -112,7 +111,7 @@ fun InsightsScreen(onBack: () -> Unit) {
             Spacer(Modifier.height(10.dp))
         }
         if (ins == null) {
-            item { PCard { Text("Insights arrive after the first nightly run. They come from your ticks, check-ins and health data.", color = tk.muted) } }
+            item { PCard { Text("Soon", color = tk.muted, fontSize = 18.sp, fontWeight = FontWeight.Bold) } }
             return@LazyColumn
         }
         item { InsightHead(null) }
@@ -170,12 +169,9 @@ fun InsightsScreen(onBack: () -> Unit) {
                         Bar(have.toDouble() / (have + need).coerceAtLeast(1), tk.accent)
                         Text("$need more day${if (need == 1) "" else "s"}", fontSize = 12.sp, color = tk.muted)
                     }
-                    if (c != null) Text("${c.optInt("planner_days")} planner days · ${c.optInt("sleep_days")} nights of sleep · ${c.optInt("feel_days")} check-ins",
-                        Modifier.padding(vertical = 8.dp), fontSize = 12.sp, color = tk.muted)
                 }
             }
         }
-        item { Text(ins.optString("note"), Modifier.padding(top = 14.dp), fontSize = 12.sp, color = tk.muted) }
     }
 }
 
