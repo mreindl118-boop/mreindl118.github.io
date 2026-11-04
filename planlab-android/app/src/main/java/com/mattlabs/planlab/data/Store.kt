@@ -167,7 +167,7 @@ object Store {
     // ---------- engagement: counts only (what got used, what got ignored), so Claude can make planLAB easier to use
     @Synchronized
     fun count(event: String, date: LocalDate = LocalDate.now()) {
-        if (!::prefs.isInitialized) return
+        if (!::app.isInitialized) return
         val o = runCatching { JSONObject(prefs.getString("eng", "{}")) }.getOrDefault(JSONObject())
         val d = o.optJSONObject(date.toString()) ?: JSONObject().also { o.put(date.toString(), it) }
         d.put(event, d.optInt(event, 0) + 1)
