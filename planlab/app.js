@@ -688,6 +688,11 @@ function openKind(kind) {
 function render() {
   const app = document.getElementById("app"), tabs = document.querySelector(".tabs");
   if (!S.token || (S.badKey && !S.plan)) { app.innerHTML = `<div class="wrap">${viewSetup()}</div>`; tabs.hidden = true; return; }
+  // The Android app's setup opens #app: one tap hands this phone's key to the app (planlab://key), never to a server.
+  if (location.hash === "#app") { app.innerHTML = `<div class="wrap"><section class="setup"><div class="setup-mark">${IC.today}</div><h1>planLAB app</h1>
+    <p class="lead">Tap below and pick planLAB. Your key goes straight to the app on this phone.</p>
+    <a class="btn" href="planlab://key#${encodeURIComponent(S.token)}">${IC.key} Send my key to the app</a>
+    <p class="tip"><a href="#today">Back to the planner</a></p></section></div>`; tabs.hidden = true; return; }
   tabs.hidden = false;
   const view = { today: viewToday, week: viewWeek, soon: viewSoon, food: viewFood, you: viewYou }[S.tab];
   const draft = document.getElementById("capture-text")?.value;
