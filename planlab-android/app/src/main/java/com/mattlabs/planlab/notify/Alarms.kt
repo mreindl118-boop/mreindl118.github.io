@@ -100,6 +100,8 @@ class ActionReceiver : BroadcastReceiver() {
         val notif = intent.getIntExtra("notif", 0)
         val slot = intent.getStringExtra("slot")?.let { n -> Slot.entries.firstOrNull { it.name == n } }
         val date = runCatching { LocalDate.parse(intent.getStringExtra("date")) }.getOrDefault(LocalDate.now())
+        Store.count(if (act == "dismiss") "notif_dismissed:${slot?.name}" else "notif_action:${slot?.name ?: "PINNED"}:$act")
+        if (act == "dismiss") return
         when (act) {
             "done" -> Store.done(date, key, min.takeIf { it > 0 })
             "step" -> Store.doNextStep(date, key, intent.getStringExtra("step")?.takeIf { it.isNotEmpty() })

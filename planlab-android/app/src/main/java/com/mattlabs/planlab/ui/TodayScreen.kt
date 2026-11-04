@@ -269,6 +269,7 @@ private fun Wish() {
             Text(msg.ifEmpty { "Claude gives it a date tomorrow morning." }, Modifier.weight(1f), color = tk.muted, fontSize = 13.sp)
             PButton("Add") {
                 val w = text.trim(); if (w.isEmpty()) return@PButton
+                Store.count("wish")
                 Store.sendWish(w) { ok -> msg = if (ok) "Added \"$w\"." else "Couldn't add it. Try again online."; if (ok) text = "" }
             }
         }

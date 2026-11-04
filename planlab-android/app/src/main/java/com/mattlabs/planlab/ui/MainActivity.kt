@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
                 val st by Store.state.collectAsState()
                 LaunchedEffect(Unit) { Updater.check(this@MainActivity) }
                 if (!st.hasKey) SetupScreen() else if (settings) SettingsScreen(onBack = { settings = false }) else Shell(st.loading)
+                LaunchedEffect(settings) { if (settings) Store.count("screen:settings") }
             }
         }
     }
@@ -69,6 +70,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        Store.count("app_open")
+        Store.count("screen:${if (settings) "settings" else tab}")
         val stale = System.currentTimeMillis() - Store.prefs().getLong("built", 0) > 5 * 60_000
         lifecycleScope.launch { Store.refresh(full = stale) }
     }
@@ -77,6 +80,7 @@ class MainActivity : ComponentActivity() {
     private fun handle(i: Intent?) {
         i ?: return
         i.getStringExtra("tab")?.let { tab = it; settings = false }
+        i.getStringExtra("from")?.let { Store.count("open_from:$it"); i.removeExtra("from") }
         val data = i.data ?: return
         if (data.scheme == "planlab" && data.host == "key") {
             val k = data.fragment ?: data.getQueryParameter("k")
@@ -94,7 +98,7 @@ class MainActivity : ComponentActivity() {
             bottomBar = {
                 NavigationBar(containerColor = tk.surface) {
                     for ((k, label, icon) in TABS) NavigationBarItem(
-                        selected = tab == k, onClick = { tab = k },
+                        selected = tab == k, onClick = { if (tab != k) Store.count("screen:$k"); tab = k },
                         icon = { Icon(icon, null) }, label = { Text(label) },
                         colors = NavigationBarItemDefaults.colors(selectedIconColor = tk.accent, selectedTextColor = tk.accent, indicatorColor = tk.accentSoft, unselectedIconColor = tk.muted, unselectedTextColor = tk.muted),
                     )

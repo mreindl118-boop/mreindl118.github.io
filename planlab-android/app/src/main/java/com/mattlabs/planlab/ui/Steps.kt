@@ -93,7 +93,7 @@ fun StepTimer(minutes: Int, color: androidx.compose.ui.graphics.Color, onDone: (
     val running = endAt > 0
     val left = ((endAt - now) / 1000).coerceAtLeast(0)
     Text(if (running) "%d:%02d".format(left / 60, left % 60) else "▶ $minutes:00",
-        Modifier.clip(CircleShape).background(if (running) color else tk.sunk).clickable { endAt = if (running) 0 else System.currentTimeMillis() + minutes * 60_000L }
+        Modifier.clip(CircleShape).background(if (running) color else tk.sunk).clickable { if (!running) Store.count("timer"); endAt = if (running) 0 else System.currentTimeMillis() + minutes * 60_000L }
             .padding(horizontal = 10.dp, vertical = 5.dp),
         color = if (running) androidx.compose.ui.graphics.Color.White else color, fontWeight = FontWeight.Bold, fontSize = 13.sp)
 }

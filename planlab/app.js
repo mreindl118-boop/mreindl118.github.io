@@ -274,6 +274,21 @@ async function pushLog(retry = true) {
   }
   pushing = false;
 }
+// ---------- usage counts (log/engagement.json, shared with the Android app): what gets used, so Claude can make it easier
+const ENG_PATH = `${DIR}/log/engagement.json`;
+function eng(name) { const d = todayIso(), e = store.json("planlab-eng", {}); e[d] = e[d] || {}; e[d][name] = (e[d][name] || 0) + 1; store.set("planlab-eng", JSON.stringify(e)); }
+async function pushEng() {
+  const e = store.json("planlab-eng", {}); if (!S.token || S.sync === "off" || !Object.keys(e).length) return;
+  store.set("planlab-eng", "{}");
+  try {
+    let doc = { v: 1, days: {} }, sha = null;
+    try { const f = await gh(`contents/${ENG_PATH}`); sha = f.sha; doc = JSON.parse(b64d(f.content)); doc.days = doc.days || {}; } catch (x) { if (x.status !== 404) throw x; }
+    for (const [d, ev] of Object.entries(e)) { doc.days[d] = doc.days[d] || {}; for (const [k, n] of Object.entries(ev)) doc.days[d][k] = (doc.days[d][k] || 0) + n; }
+    const cut = addDays(todayIso(), -60); for (const d of Object.keys(doc.days)) if (d < cut) delete doc.days[d];
+    doc.updated = Date.now();
+    await gh(`contents/${ENG_PATH}`, { method: "PUT", body: JSON.stringify({ message: `planLAB: usage ${todayIso()}`, content: b64e(JSON.stringify(doc, null, 1)), ...(sha ? { sha } : {}) }) });
+  } catch { const now = store.json("planlab-eng", {}); for (const [d, ev] of Object.entries(e)) { now[d] = now[d] || {}; for (const [k, n] of Object.entries(ev)) now[d][k] = (now[d][k] || 0) + n; } store.set("planlab-eng", JSON.stringify(now)); }
+}
 function touch() { S.log.updated = Date.now(); saveLocal(); schedulePush(); }
 
 // ---------- plan helpers
@@ -286,7 +301,7 @@ function tickGet(list, item) { const t = S.log.ticks[list]; if (t && typeof t[it
 const withSteps = items => items.flatMap(i => [i, ...(i.steps || [])]);
 const stepsDone = (list, item) => (item.steps || []).filter(x => tickGet(list, x)).length;
 function tickPut(list, key, v) { S.log.ticks[list] = { ...(S.log.ticks[list] || {}), [key]: v }; touch(); }
-function tickSet(list, item) { tickPut(list, item.key, !tickGet(list, item)); render(); }
+function tickSet(list, item) { if (!tickGet(list, item)) eng("web_tick"); tickPut(list, item.key, !tickGet(list, item)); render(); }
 const dayCount = d => ({ n: d.boxes.length, done: d.boxes.filter(b => tickGet(d.date, b)).length });
 const inboxItems = () => (S.plan?.inbox || []).flatMap(g => g.items.map(i => ({ ...i, group: g.name })));
 const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
@@ -611,7 +626,7 @@ function sessionTick() {
   const br = document.getElementById("breath"); if (br) { const st = SES.steps[SES.i]; const cyc = st.inn + st.out, ph = ((st.sec - left) % cyc + cyc) % cyc; const inh = ph < st.inn; br.dataset.phase = inh ? "in" : "out"; br.querySelector("b").textContent = inh ? "In" : "Out"; br.style.transform = `scale(${inh ? 0.6 + 0.4 * (ph / st.inn) : 1 - 0.4 * ((ph - st.inn) / st.out)})`; }
   if (left <= 0) { beep(2); nextStep(); }
 }
-function startSession(kind, steps) { unlockAudio(); keepAwake(true); Object.assign(SES, { on: true, kind, steps, i: 0, paused: 0, started: Date.now(), elapsed: 0 }); SES.end = Date.now() + steps[0].sec * 1000; clearInterval(SES.timer); SES.timer = setInterval(sessionTick, 200); refreshSheet(); }
+function startSession(kind, steps) { eng("web_session:" + kind); unlockAudio(); keepAwake(true); Object.assign(SES, { on: true, kind, steps, i: 0, paused: 0, started: Date.now(), elapsed: 0 }); SES.end = Date.now() + steps[0].sec * 1000; clearInterval(SES.timer); SES.timer = setInterval(sessionTick, 200); refreshSheet(); }
 function nextStep() {
   SES.elapsed += SES.steps[SES.i].sec - Math.max(0, (SES.end - Date.now()) / 1000);
   SES.i++;
@@ -730,7 +745,7 @@ const VALID = TABS.map(t => t[0]);
 const fromHash = () => { const h = location.hash.slice(1); if (VALID.includes(h)) S.tab = h; };
 fromHash();
 addEventListener("hashchange", () => { fromHash(); render(); });
-const goTab = k => { S.tab = k; history.replaceState(null, "", "#" + k); render(); scrollTo({ top: 0 }); };
+const goTab = k => { if (S.tab !== k) eng("web_tab:" + k); S.tab = k; history.replaceState(null, "", "#" + k); render(); scrollTo({ top: 0 }); };
 
 document.addEventListener("click", async e => {
   const q = s => e.target.closest(s);
@@ -793,11 +808,13 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet()
 let lastToday = todayIso();
 setInterval(() => { const t = todayIso(); if (t !== lastToday) { if (S.day === lastToday) S.day = t; lastToday = t; load(); } }, 60000);
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") { clearTimeout(pushTimer); pushLog(); }
-  else if (S.token && (!S.plan || Date.now() - new Date(S.plan.built) > 15 * 60000)) load();
+  if (document.visibilityState === "hidden") { clearTimeout(pushTimer); pushLog(); pushEng(); return; }
+  eng("web_open");
+  if (S.token && (!S.plan || Date.now() - new Date(S.plan.built) > 15 * 60000)) load();
 });
 
 if (S.plan && S.plan.v !== 2) S.plan = null;
+eng("web_open");
 render();
 load();
 })();

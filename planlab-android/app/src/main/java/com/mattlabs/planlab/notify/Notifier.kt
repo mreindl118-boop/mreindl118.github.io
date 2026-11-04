@@ -36,7 +36,7 @@ object Notifier {
         Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
     fun openApp(ctx: Context, tab: String = "today"): PendingIntent =
-        PendingIntent.getActivity(ctx, tab.hashCode(), Intent(ctx, MainActivity::class.java).putExtra("tab", tab).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+        PendingIntent.getActivity(ctx, tab.hashCode(), Intent(ctx, MainActivity::class.java).putExtra("tab", tab).putExtra("from", "notif").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
     /** A button that runs [ActionReceiver] with these extras. */
@@ -50,6 +50,11 @@ object Notifier {
 
     private fun post(ctx: Context, id: Int, b: NotificationCompat.Builder) {
         if (!allowed(ctx)) return
+        Slot.entries.firstOrNull { it.notifId == id }?.let { slot ->
+            Store.count("notif_shown:${slot.name}")
+            val i = Intent(ctx, ActionReceiver::class.java).setAction("planlab.dismiss.${slot.name}").putExtra("act", "dismiss").putExtra("slot", slot.name)
+            b.setDeleteIntent(PendingIntent.getBroadcast(ctx, 500 + slot.ordinal, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+        }
         try { NotificationManagerCompat.from(ctx).notify(id, b.build()) } catch (_: SecurityException) {}
     }
 

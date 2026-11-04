@@ -66,10 +66,13 @@ private object WC {
     fun score(s: Int) = when { s >= 80 -> ok; s >= 65 -> accent; s >= 50 -> warm; else -> ColorProvider(day = Color(0xFFC2410C), night = Color(0xFFFF8A4C)) }
 }
 
+private val FROM = ActionParameters.Key<String>("from")
+
 class ToggleAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         Store.init(context)
         val key = parameters[KEY] ?: return
+        Store.count("widget:tick")
         val today = LocalDate.now()
         if (key == "pf") Store.pelvicSet(today) else {
             val day = Store.state.value.plan.day(today) ?: return
@@ -99,7 +102,7 @@ private fun TodayContent() {
     val day = st.plan.day(today)
     val b = Store.brief(today)
     Column(GlanceModifier.fillMaxSize().background(WC.bg).cornerRadius(24.dp).padding(14.dp)) {
-        Row(GlanceModifier.fillMaxWidth().clickable(actionStartActivity<MainActivity>()), verticalAlignment = Alignment.CenterVertically) {
+        Row(GlanceModifier.fillMaxWidth().clickable(actionStartActivity<MainActivity>(actionParametersOf(FROM to "widget"))), verticalAlignment = Alignment.CenterVertically) {
             Column(GlanceModifier.defaultWeight()) {
                 val done = day?.boxes?.count { Store.isDone(day, it) } ?: 0
                 Text(if (day == null) "planLAB" else if (done == day.boxes.size) "All done" else "Today  $done/${day.boxes.size}",
@@ -167,7 +170,7 @@ private fun ReadyContent() {
     val today = LocalDate.now()
     val b = Store.brief(today)
     val r = b.readiness
-    Column(GlanceModifier.fillMaxSize().background(WC.bg).cornerRadius(24.dp).padding(14.dp).clickable(actionStartActivity<MainActivity>())) {
+    Column(GlanceModifier.fillMaxSize().background(WC.bg).cornerRadius(24.dp).padding(14.dp).clickable(actionStartActivity<MainActivity>(actionParametersOf(FROM to "widget")))) {
         Text(r?.let { "${it.score}" } ?: "–", style = TextStyle(color = r?.let { WC.score(it.score) } ?: WC.muted, fontSize = 40.sp, fontWeight = FontWeight.Bold))
         Text(r?.label ?: "Connect health", style = TextStyle(color = WC.fg, fontSize = 14.sp, fontWeight = FontWeight.Bold), maxLines = 1)
         Spacer(GlanceModifier.height(6.dp))
