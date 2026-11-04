@@ -57,6 +57,8 @@ android {
         compose = true
         buildConfig = true
     }
+    // The food table is shared with the web page: planlab/data/foods.json ships inside the app (and refreshes from the site).
+    sourceSets["main"].assets.srcDir("../../planlab/data")
     testOptions {
         unitTests.isReturnDefaultValues = true
     }

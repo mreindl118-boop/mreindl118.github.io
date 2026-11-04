@@ -26,7 +26,7 @@ enum class Slot(val label: String, val time: LocalTime, val notifId: Int) {
     VOICE("Voice", LocalTime.of(18, 30), 15),
     ELEVATE_3("Elevate (recovery)", LocalTime.of(19, 0), 16),
     PIANO("Piano", LocalTime.of(19, 30), 17),
-    MEALS("Meals check", LocalTime.of(20, 0), 18),
+    MEALS("Food check", LocalTime.of(20, 0), 18),
     PELVIC_PM("Pelvic floor, evening", LocalTime.of(20, 30), 19),
     EVENING("Evening check-in", LocalTime.of(21, 30), 20);
 
@@ -108,6 +108,7 @@ class ActionReceiver : BroadcastReceiver() {
             "skip" -> Store.skip(date, key)
             "pelvic" -> Store.pelvicSet(date)
             "elevate" -> Store.addCount(date, "elevate")
+            "ateplan" -> { val day = Store.state.value.plan.day(date); val step = Store.nextPlanned(date); if (day != null && step != null) Store.logPlanned(day, step) }
             "snooze" -> slot?.let { Alarms.snooze(ctx, it, if (min > 0) min else 60) }
         }
         if (notif != 0) Notifier.cancel(ctx, notif)

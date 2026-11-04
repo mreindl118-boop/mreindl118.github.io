@@ -86,6 +86,7 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
         item { Label("Your call") ; CallCard(b) }
         item { Label("Check off"); Tiles(day, b) }
         if (date == today) item { Spacer(Modifier.height(12.dp)); FeelRow(date); Spacer(Modifier.height(10.dp)); InsightHead { onOpen("insights") } }
+        item { Label("Eat"); EatCard(day, date) }
         val stepped = day.boxes.filter { it.steps.isNotEmpty() }.sortedBy { Store.MAIN.indexOf(it.key).let { i -> if (i < 0) 99 else i } }
         if (stepped.isNotEmpty()) {
             item { Label("Step by step") }
@@ -122,7 +123,7 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
                 for (n in b.nudges) RowItem(lead = { Dot(if (n.warn) tk.bad else tk.accent) }, title = n.title, sub = n.detail)
             }
         }
-        if (day.eat.isNotEmpty()) item {
+        if (day.meals.isEmpty() && day.eat.isNotEmpty()) item {
             Label("Meals")
             PCard(pad = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 6.dp)) {
                 val names = listOf("Breakfast", "Lunch", "Dinner", "Also")
@@ -207,7 +208,8 @@ private fun CallCard(b: Coach.Brief) {
         if (b.body.detail.isNotBlank()) Text(b.body.detail, Modifier.padding(start = 20.dp, top = 2.dp), color = tk.muted, style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Stat("Protein", "${b.protein} g", b.proteinEaten?.let { "$it eaten" }, tk.eat, Modifier.weight(1f))
+            val eaten = Store.eaten(b.date).protein
+            Stat("Protein", "${b.protein} g", if (eaten > 0) "$eaten eaten" else b.proteinEaten?.let { "$it eaten" }, tk.eat, Modifier.weight(1f))
             Stat("Water", "${b.waterL} L", null, tk.accent, Modifier.weight(1f))
             b.steps?.let { Stat("Steps", it.title, null, tk.body, Modifier.weight(1f)) }
         }

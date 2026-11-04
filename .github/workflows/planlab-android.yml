@@ -13,9 +13,9 @@ name: planlab-android
 on:
   push:
     branches: [main]
-    paths: ['planlab-android/**', '.github/workflows/planlab-android.yml']
+    paths: ['planlab-android/**', 'planlab/data/**', '.github/workflows/planlab-android.yml']
   pull_request:
-    paths: ['planlab-android/**', '.github/workflows/planlab-android.yml']
+    paths: ['planlab-android/**', 'planlab/data/**', '.github/workflows/planlab-android.yml']
   workflow_dispatch: {}
   schedule:
     - cron: '41 9 * * 1'
@@ -41,6 +41,8 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 21 }
       - uses: gradle/actions/setup-gradle@v4
+      - name: Food lookup tests (the web page's copy; FoodTest.kt checks the same cases)
+        run: node --test ../planlab/test/food.test.cjs
       - name: Unit tests and a debug build
         run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
       - uses: actions/upload-artifact@v4

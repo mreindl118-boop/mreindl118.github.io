@@ -72,6 +72,8 @@ function parseWeek(id, text) {
       if (k === "eat") d.eat = parts; else if (k === "body") d.body = stripMd(v); else if (k === "practice") d.practice = parts; else if (k === "coming up") d.coming = parts;
     }
     for (const [k, list] of Object.entries(steps)) { const b = d.boxes.find(x => x.key === k); if (b) b.steps = list; else d.boxes.push({ key: k, label: heads[k] || k.replace(/-/g, " "), done: false, steps: list }); }
+    // Eat is tracked, not ticked (Matt, 2026-11-04): the meals box leaves the task list; its steps are planned meals.
+    const mi = d.boxes.findIndex(b => b.key === "meals"); d.meals = mi >= 0 ? (d.boxes.splice(mi, 1)[0].steps || []) : [];
     w.days.push(d);
   }
   return w;
@@ -217,7 +219,9 @@ const KEY_RW = KEY_URL.replace("contents=read", "contents=write");
 const LOG_PATH = `${DIR}/log/app.json`;
 const S = { tab: "today", food: "list", setupStep: 1, day: todayIso(), plan: store.json("planlab-cache", null), loading: false, error: "", token: store.get("planlab-key"), msg: "", sync: store.get("planlab-sync") || "unknown" };
 S.log = store.json("planlab-log", null) || { v: 1, updated: 0, ticks: store.json("planlab-ticks", {}), mins: {}, freezer: {} };
-for (const k of ["ticks", "mins", "freezer"]) S.log[k] = S.log[k] || {};
+for (const k of ["ticks", "mins", "freezer", "food"]) S.log[k] = S.log[k] || {};
+// Food entries merge by id from both sides (the Android app logs too); a deleted entry is null and stays null.
+function mergeFood(a, b) { const out = JSON.parse(JSON.stringify(a || {})); for (const [d, ids] of Object.entries(b || {})) { out[d] = out[d] || {}; for (const [id, e] of Object.entries(ids || {})) if (!(id in out[d]) || e === null) out[d][id] = e; } return out; }
 const saveLocal = () => store.set("planlab-log", JSON.stringify(S.log));
 
 // ---------- GitHub
@@ -236,7 +240,7 @@ async function load() {
   if (!S.token) return;
   S.loading = true; render();
   try {
-    const names = ["social/calendar.md", "inbox.md", "me/recovery.md", "body/program.md", "music/piano.md", "music/voice.md", "music/guitar.md", "meals/freezer.md", "social/ideas.md", "social/trips.md", "me/profile.md"];
+    const names = ["social/calendar.md", "inbox.md", "me/recovery.md", "body/program.md", "music/piano.md", "music/voice.md", "music/guitar.md", "meals/freezer.md", "social/ideas.md", "social/trips.md", "me/profile.md", "meals/foods.md"];
     const [weekIds, groceryIds, recipeIds, ...txt] = await Promise.all([listDir("weeks"), listDir("groceries"), listDir("meals/recipes"), ...names.map(file)]);
     const T = Object.fromEntries(names.map((n, i) => [n, txt[i]]));
     const weeks = await Promise.all(weekIds.sort().map(async id => parseWeek(id, await file(`weeks/${id}.md`))));
@@ -246,7 +250,7 @@ async function load() {
     const setup = parseChecklists(T["me/recovery.md"])[0];
     S.plan = { v: 2, built: new Date().toISOString(), weeks, calendar: c.events, watching: c.watching, inbox: parseInbox(T["inbox.md"]), setup: setup ? setup.items : [], groceries, recipes,
       program: parseProgram(T["body/program.md"]), piano: parseMusic(T["music/piano.md"]), voice: parseMusic(T["music/voice.md"]), guitar: parseMusic(T["music/guitar.md"]),
-      freezer: parseFreezer(T["meals/freezer.md"]), recovery: parseRecovery(T["me/recovery.md"]), ideas: parseIdeas(T["social/ideas.md"]), trips: parseTrips(T["social/trips.md"]), profile: parseProfile(T["me/profile.md"]) };
+      freezer: parseFreezer(T["meals/freezer.md"]), recovery: parseRecovery(T["me/recovery.md"]), ideas: parseIdeas(T["social/ideas.md"]), trips: parseTrips(T["social/trips.md"]), profile: parseProfile(T["me/profile.md"]), profileMd: T["me/profile.md"], foodsMd: T["meals/foods.md"] };
     store.set("planlab-cache", JSON.stringify(S.plan));
     S.error = "";
     pullLog();
@@ -266,7 +270,8 @@ async function pullLog() {
     const f = await gh(`contents/${LOG_PATH}`);
     logSha = f.sha;
     const remote = JSON.parse(b64d(f.content));
-    if ((remote.updated || 0) > (S.log.updated || 0)) { S.log = { ...S.log, ...remote }; saveLocal(); render(); }
+    if ((remote.updated || 0) > (S.log.updated || 0)) { const food = mergeFood(remote.food, S.log.food); S.log = { ...S.log, ...remote, food }; saveLocal(); render(); }
+    else if (remote.food) { S.log.food = mergeFood(S.log.food, remote.food); saveLocal(); }
     else if ((S.log.updated || 0) > (remote.updated || 0)) schedulePush(0);
     if (S.sync === "unknown") setSync("on");
   } catch (e) { if (e.status === 404 || e.status === 403) setSync("off"); }
@@ -276,6 +281,7 @@ async function pushLog(retry = true) {
   if (!S.token || S.sync === "off" || pushing) return;
   pushing = true;
   try {
+    try { const f = await gh(`contents/${LOG_PATH}`); logSha = f.sha; const remote = JSON.parse(b64d(f.content)); S.log.food = mergeFood(S.log.food, remote.food); saveLocal(); } catch {}
     const body = JSON.stringify({ message: `planLAB: Matt's ticks ${todayIso()}`, content: b64e(JSON.stringify(S.log, null, 1)), ...(logSha ? { sha: logSha } : {}) });
     const r = await gh(`contents/${LOG_PATH}`, { method: "PUT", body });
     logSha = r.content.sha; setSync("on");
@@ -406,7 +412,7 @@ const IC = {
   map: I('<path d="M9 4L3.5 6v14L9 18l6 2 5.5-2V4L15 6zM9 4v14M15 6v14"/>'),
 };
 const TABS = [["today", "Today"], ["week", "Week"], ["soon", "Coming up"], ["food", "Food"], ["you", "You"]];
-const KIND = { meals: "Eat", body: "Body", piano: "Piano", voice: "Voice" };
+const KIND = { body: "Body", piano: "Piano", voice: "Voice" };
 
 // ---------- small pieces
 const ring = (done, n, size = 64) => {
@@ -518,7 +524,8 @@ function viewToday() {
   if (plain.length) h += `<div class="card list">${plain.map(b => checkRow(`data-list="${date}" data-item="${b.key}"`, tickGet(date, b), recipeLinks(cap(b.label)), "")).join("")}</div>`;
   const pf = S.plan?.program?.daily;
   if (pf) h += `<button class="card strip-card" data-open="pelvic"><span class="tag-ic">${IC.heart}</span><span class="rt"><span class="rl">${esc(cap(pf.title.replace(/\s*\(.*\)/, "")))}</span><span class="rs">Twice a day · ${pf.reps.map(r => `${r.n} ${r.name}`).join(", ")}</span></span>${pill(`${(S.log.ticks["pf-" + date] || {}).n || 0}/2`, ((S.log.ticks["pf-" + date] || {}).n || 0) >= 2 ? "ok" : "soft")}</button>`;
-  if (day.eat.length) h += `<section class="sec">${lab("Meals")}<div class="card list">${day.eat.map((m, i) => `<div class="row"><span class="tag">${MEAL[Math.min(i, 3)]}</span><span class="rt"><span class="rl n">${recipeLinks(m.replace(/\s*\(~?\d+ g protein\)/, ""))}</span></span></div>`).join("")}</div></section>`;
+  h += viewEat(day, date);
+  if (!day.meals?.length && day.eat.length) h += `<section class="sec">${lab("Meals")}<div class="card list">${day.eat.map((m, i) => `<div class="row"><span class="tag">${MEAL[Math.min(i, 3)]}</span><span class="rt"><span class="rl n">${recipeLinks(m.replace(/\s*\(~?\d+ g protein\)/, ""))}</span></span></div>`).join("")}</div></section>`;
   const extra = day.practice.filter(p => !day.boxes.some(b => p.toLowerCase().startsWith(b.key)));
   const radar = [...day.coming, ...extra.map(x => cap(x) + " (if you feel like it)")];
   const due = inboxItems().filter(i => i.date === date);
@@ -530,6 +537,74 @@ function viewToday() {
       ${radar.map(x => `<div class="row"><span class="dot"></span><span class="rt"><span class="rl n">${recipeLinks(cap(x))}</span></span></div>`).join("")}</div></section>`;
   }
   return h;
+}
+
+// ---------- Eat: tracked, not ticked. Planned meals are one tap; anything else is typed and looked up on the spot.
+let FOODDB = null;
+fetch("data/foods.json").then(r => r.json()).then(j => { FOODDB = PlanFood.table(j); if (S.tab === "today") render(); }).catch(() => {});
+const mineFoods = () => { const t = S.plan?.foodsMd || ""; if (mineFoods.t !== t) { mineFoods.t = t; mineFoods.v = PlanFood.mine(t); } return mineFoods.v; };
+const foodOn = date => Object.entries(S.log.food[date] || {}).filter(([, e]) => e).map(([id, e]) => ({ id, ...e })).sort((a, b) => (a.at + a.id).localeCompare(b.at + b.id));
+const foodTargets = () => PlanFood.targets(S.plan?.profileMd, S.plan?.profile?.protein);
+const fmtN = n => Math.round(n).toLocaleString("en-US");
+const nowAt = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const newId = () => Date.now().toString(36) + Math.floor(1000 + Math.random() * 9000);
+function putFood(date, id, e) { S.log.food[date] = { ...(S.log.food[date] || {}), [id]: e }; touch(); }
+const plannedOf = step => PlanFood.planned(step.label, FOODDB, mineFoods());
+function macroBar(label, have, want, unit, tone) { const f = want ? Math.min(1, have / want) : 0; return `<div class="mac"><span class="mac-l ${tone}">${label}</span><span class="mac-n">${fmtN(have)} / ${fmtN(want)} ${unit}</span><div class="bar"><i class="${tone}" style="width:${(f * 100).toFixed(1)}%"></i></div></div>`; }
+function eatTotals(date) {
+  const have = PlanFood.totals(foodOn(date)), want = foodTargets();
+  return `<div class="eat-top"><div class="hero-ring eat-ring">${ring(have.kcal, want.kcal, 88)}<span class="ring-n">${fmtN(have.kcal)}<small>of ${fmtN(want.kcal)}</small></span></div>
+    <div class="macs">${macroBar("Protein", have.protein_g, want.protein_g, "g", "t-eat")}${macroBar("Carbs", have.carbs_g, want.carbs_g, "g", "t-acc")}${macroBar("Fat", have.fat_g, want.fat_g, "g", "t-fat")}</div></div>`;
+}
+function viewEat(day, date) {
+  const list = foodOn(date);
+  const planned = (day.meals || []).map(x => {
+    const p = plannedOf(x);
+    if (!p.meal) return checkRow(`data-list="${date}" data-item="${x.key}"`, tickGet(date, x), esc(cap(x.label)), "");
+    const on = list.some(e => e.plan === x.key);
+    return checkRow(`data-ate="${esc(x.key)}"`, on, `${cap(p.meal)} · ${esc(p.name)}`, `${p.protein_g} g protein · ${p.src === "plan-est" ? "~" : ""}${fmtN(p.kcal)} kcal${on ? " · logged" : " · tap when eaten"}`);
+  }).join("");
+  const extra = list.filter(e => !e.plan).map(e => `<div class="row has-tail"><span class="dot eat"></span><span class="rt"><span class="rl">${esc(e.name)}${e.qty !== 1 ? ` ×${+(+e.qty).toFixed(2)}` : ""}</span><span class="rs">${esc(e.at)} · ${fmtN(e.kcal)} kcal · ${e.protein_g} g protein${e.src === "guess" ? " · not found, Claude checks it" : ""}</span></span><button class="tailbtn" data-delfood="${esc(e.id)}" aria-label="Remove">${IC.close}</button></div>`).join("");
+  return `<section class="sec">${lab("Eat")}<div class="card eat">${eatTotals(date)}
+    ${planned || extra ? `<div class="list compact">${planned}${extra}</div>` : ""}
+    <form id="foodform" class="foodform"><input id="food-text" autocomplete="off" placeholder="What did you eat? e.g. skyline 3-way, 2 coneys" aria-label="What did you eat?"><div id="food-preview"></div></form></div></section>`;
+}
+let FOODROWS = [], foodTimer = null;
+const OFF = {};
+function foodPreview() {
+  const box = document.getElementById("food-preview"), inp = document.getElementById("food-text"); if (!box || !inp) return;
+  const text = inp.value.trim();
+  if (!text || !FOODDB) { FOODROWS = []; box.innerHTML = text && !FOODDB ? `<p class="rs">Loading the food table…</p>` : ""; return; }
+  FOODROWS = PlanFood.lookup(text, FOODDB, mineFoods()).map(r => !r.food && OFF[r.text]?.length ? { ...r, food: OFF[r.text][0], alts: OFF[r.text], scale: r.qty } : r);
+  redrawRows();
+  // Anything the tables don't know: ask Open Food Facts once typing pauses.
+  clearTimeout(foodTimer);
+  const missing = FOODROWS.filter(r => !r.food && OFF[r.text] === undefined);
+  if (missing.length) foodTimer = setTimeout(async () => { for (const r of missing) OFF[r.text] = await PlanFood.openFoodFacts(r.text).catch(() => []); foodPreview(); }, 900);
+}
+function redrawRows() {
+  const box = document.getElementById("food-preview"); if (!box) return;
+  const tot = FOODROWS.reduce((t, r) => (r.food ? { k: t.k + r.food.kcal * r.scale, p: t.p + r.food.p * r.scale } : t), { k: 0, p: 0 });
+  box.innerHTML = FOODROWS.map((r, i) => { const f = r.food;
+    return `<div class="row frow"><button class="rt fpick" data-falt="${i}" ${r.alts.length > 1 ? "" : "disabled"}><span class="rl${f ? "" : " warnc"}">${esc(f ? (f.brand ? f.brand + " " : "") + f.name : r.text)}</span>
+      <span class="rs">${f ? `${fmtN(f.kcal * r.scale)} kcal · ${Math.round(f.p * r.scale)} g protein · ${+r.scale.toFixed(2)} × ${esc(f.serving)}${r.alts.length > 1 ? " · tap for others" : ""}` : OFF[r.text] === undefined ? "Looking it up…" : "Not found. Logged as a guess; Claude fills it in tomorrow."}</span></button>
+      ${f ? `<button class="stp" data-fq="${i}" data-d="-1" aria-label="Less">−</button><span class="fq">${+r.scale.toFixed(2)}</span><button class="stp" data-fq="${i}" data-d="1" aria-label="More">+</button>` : ""}</div>`; }).join("")
+    + (FOODROWS.length ? `<button class="btn wide eatbtn" form="foodform">Log it · ${fmtN(tot.k)} kcal · ${Math.round(tot.p)} g protein</button>` : "");
+}
+document.addEventListener("input", e => { if (e.target.id === "food-text") foodPreview(); });
+function logFood() {
+  const date = S.day, meal = PlanFood.mealNow(new Date()), at = nowAt();
+  if (!FOODROWS.length) return;
+  for (const r of FOODROWS) { const id = newId() + Math.floor(Math.random() * 10); putFood(date, id, PlanFood.entryOf(r, { at, meal, plan: "" })); }
+  eng("web_food"); FOODROWS = []; const inp = document.getElementById("food-text"); if (inp) inp.value = ""; render();
+}
+function atePlanned(key) {
+  const date = S.day, day = findDay(date), step = day?.meals?.find(x => x.key === key); if (!step) return;
+  const had = foodOn(date).find(e => e.plan === key);
+  if (had) { putFood(date, had.id, null); tickPut(date, key, false); render(); return; }
+  const p = plannedOf(step);
+  putFood(date, newId(), { at: nowAt(), text: step.label, name: p.name, qty: 1, kcal: p.kcal, protein_g: p.protein_g, carbs_g: p.carbs_g, fat_g: p.fat_g, src: p.src, meal: p.meal || PlanFood.mealNow(new Date()), plan: key });
+  eng("web_food:plan"); tickPut(date, key, true); render();
 }
 
 function viewWeek() {
@@ -777,13 +852,14 @@ function render() {
     <p class="tip"><a href="#today">Back to the planner</a></p></section></div>`; tabs.hidden = true; return; }
   tabs.hidden = false;
   const view = { today: viewToday, week: viewWeek, soon: viewSoon, food: viewFood, you: viewYou }[S.tab];
-  const draft = document.getElementById("capture-text")?.value;
+  const draft = document.getElementById("capture-text")?.value, foodDraft = document.getElementById("food-text")?.value, foodFocus = document.activeElement?.id === "food-text";
   const when = S.plan?.built ? new Date(S.plan.built).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
   const anim = S.lastTab !== S.tab ? " anim" : ""; S.lastTab = S.tab;
   app.innerHTML = `<div class="wrap v-${S.tab}${anim}">${view()}
     ${S.error ? `<p class="toast-inline" role="status">${esc(S.error)}${S.badKey ? ` <button class="link" id="reset-key">Set up a new key</button>` : ""}</p>` : ""}
     <p class="foot">${S.loading ? "Updating…" : when ? `Updated ${when}` : ""}${S.sync === "on" ? " · synced" : ""} <button class="link" id="refresh" aria-label="Refresh">${IC.refresh}</button></p></div>`;
   const ci = document.getElementById("capture-text"); if (ci && draft) ci.value = draft;
+  const fi = document.getElementById("food-text"); if (fi && foodDraft) { fi.value = foodDraft; const rows = FOODROWS; foodPreview(); if (rows.length === FOODROWS.length) { FOODROWS = rows; redrawRows(); } } if (fi && foodFocus) fi.focus();
   document.getElementById("tabs").innerHTML = TABS.map(([k, l]) => `<button data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ""}>${IC[k]}<span>${l}</span></button>`).join("");
   if (SH.kind) refreshSheet();
   drawTimers();
@@ -838,6 +914,10 @@ document.addEventListener("click", async e => {
   if ((el = q("[data-tab]"))) { if (el.dataset.tab === "today") S.day = todayIso(); goTab(el.dataset.tab); return; }
   if ((el = q("[data-food]"))) { S.food = el.dataset.food; render(); return; }
   if ((el = q("[data-go]"))) { S.day = addDays(S.day, +el.dataset.go); render(); return; }
+  if ((el = q("[data-ate]"))) { try { navigator.vibrate && navigator.vibrate(8); } catch {} atePlanned(el.dataset.ate); return; }
+  if ((el = q("[data-delfood]"))) { putFood(S.day, el.dataset.delfood, null); render(); return; }
+  if ((el = q("[data-falt]"))) { const r = FOODROWS[+el.dataset.falt]; if (r?.alts.length > 1) { const j = (r.alts.indexOf(r.food) + 1) % r.alts.length; r.food = r.alts[j]; r.scale = r.qty; redrawRows(); } return; }
+  if ((el = q("[data-fq]"))) { const r = FOODROWS[+el.dataset.fq]; if (r) { const s = r.scale; r.scale = +el.dataset.d > 0 ? (s < 1 ? s * 2 : s + 1) : (s > 1 ? s - 1 : Math.max(0.25, s / 2)); redrawRows(); } return; }
   if ((el = q("[data-pick]"))) { S.day = el.dataset.pick; render(); return; }
   if ((el = q("[data-jump]"))) { S.day = el.dataset.jump; goTab("today"); return; }
   if ((el = q("[data-list]"))) {
@@ -855,6 +935,7 @@ document.addEventListener("submit", async e => {
     const v = document.getElementById("key-input").value.trim(); if (!v) { document.getElementById("key-input").focus(); return; }
     S.token = v; S.badKey = false; S.error = ""; setSync("unknown"); store.set("planlab-key", v); render(); load(); return;
   }
+  if (e.target.id === "foodform") { logFood(); return; }
   if (e.target.id !== "capture") return;
   const inp = document.getElementById("capture-text"), text = inp.value.trim(); if (!text) { inp.focus(); return; }
   const btn = document.getElementById("capture-btn"); btn.disabled = true;
@@ -874,7 +955,7 @@ document.addEventListener("visibilitychange", () => {
   if (S.token && (!S.plan || Date.now() - new Date(S.plan.built) > 15 * 60000)) load();
 });
 
-if (S.plan && S.plan.v !== 2) S.plan = null;
+if (S.plan && (S.plan.v !== 2 || !S.plan.weeks?.[0]?.days?.[0]?.meals)) S.plan = null;
 eng("web_open");
 render();
 load();

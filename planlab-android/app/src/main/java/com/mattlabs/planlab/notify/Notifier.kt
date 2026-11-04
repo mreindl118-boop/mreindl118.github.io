@@ -115,9 +115,18 @@ object Notifier {
                 return area(ctx, slot, day!!, "piano", b.piano?.title ?: "Piano, $m min", b.piano?.detail ?: "", listOf("In 1 hour" to 60), "Did $m min" to m)
             }
             Slot.MEALS -> {
-                if (!boxOpen("meals")) return false
-                val target = b.protein
-                return area(ctx, slot, day!!, "meals", "Ate the plan today?", day.eat.lastOrNull()?.let { "Dinner: $it · aim for $target g protein" } ?: "Aim for $target g protein", emptyList(), "Yes" to 0)
+                // Eat is tracked, not ticked: one nudge in the evening if dinner isn't logged yet.
+                val food = Store.foodOn(today)
+                if (food.any { it.meal == "dinner" }) return false
+                val have = Store.eaten(today); val want = Store.foodTargets(today)
+                val next = Store.nextPlanned(today)?.let { Store.planned(it) }?.takeIf { it.meal == "dinner" }
+                val nb = base(ctx, CH_NUDGE, if (next != null) "Dinner: ${next.name}?" else "What was dinner?",
+                    "Today so far: %,d of %,d kcal, %d of %d g protein.".format(have.kcal, want.kcal, have.protein, want.protein))
+                    .setContentIntent(foodIntent(ctx))
+                if (next != null) nb.addAction(action(ctx, "Ate the plan", "ateplan", slot, notif = id))
+                nb.addAction(NotificationCompat.Action.Builder(0, if (next != null) "Something else" else "Track food", foodIntent(ctx)).build())
+                nb.addAction(action(ctx, "In 1 hour", "snooze", slot, minutes = 60, notif = id))
+                post(ctx, id, nb)
             }
             Slot.ELEVATE_1, Slot.ELEVATE_2, Slot.ELEVATE_3 -> {
                 if (b.phase != Phase.NWB) return false
@@ -190,10 +199,15 @@ object Notifier {
             .setContentTitle(title).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text)).setOngoing(true).setOnlyAlertOnce(true).setSilent(true)
             .setContentIntent(openApp(ctx)).setProgress(day.boxes.size, done, false)
             .setPriority(NotificationCompat.PRIORITY_LOW).setCategory(NotificationCompat.CATEGORY_STATUS)
-        open.take(2).forEach { nb.addAction(action(ctx, "✓ " + (Store.LABEL[it.key] ?: it.label.take(14)), "step", null, it.key, notif = 0)) }
+        open.take(1).forEach { nb.addAction(action(ctx, "✓ " + (Store.LABEL[it.key] ?: it.label.take(14)), "step", null, it.key, notif = 0)) }
+        nb.addAction(NotificationCompat.Action.Builder(0, "Food", foodIntent(ctx)).build())
         nb.addAction(NotificationCompat.Action.Builder(0, "Bugs me", bugIntent(ctx)).build())
         post(ctx, ID_TODAY, nb)
     }
+
+    fun foodIntent(ctx: Context): PendingIntent =
+        PendingIntent.getActivity(ctx, 78, Intent(ctx, com.mattlabs.planlab.ui.FoodActivity::class.java).putExtra("from", "notif").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
     fun linkIntent(ctx: Context, url: String): PendingIntent =
         PendingIntent.getActivity(ctx, url.hashCode(), com.mattlabs.planlab.ui.Links.intent(ctx, url, "notif"), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)

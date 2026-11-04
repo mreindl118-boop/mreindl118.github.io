@@ -144,7 +144,8 @@ object ProgressCalc {
     fun earned(plan: Plan, log: JSONObject, r: Rewards): Map<String, Pair<Earned, Boolean>> {
         val out = mutableMapOf<String, Pair<Earned, Boolean>>()
         val ticks = log.optJSONObject("ticks") ?: JSONObject()
-        val dates = (ticks.keys().asSequence().filter { DATE.matches(it) } + plan.weeks.flatMap { w -> w.days.map { it.date.toString() } }).toSet()
+        val foodDates = log.optJSONObject("food")?.keys()?.asSequence()?.filter { DATE.matches(it) }?.toList() ?: emptyList()
+        val dates = (ticks.keys().asSequence().filter { DATE.matches(it) } + plan.weeks.flatMap { w -> w.days.map { it.date.toString() } } + foodDates).toSet()
         for (date in dates) {
             val d = runCatching { LocalDate.parse(date) }.getOrNull() ?: continue
             val day = plan.day(d)
@@ -166,11 +167,13 @@ object ProgressCalc {
                 if (day.boxes.isNotEmpty() && fin.size == day.boxes.size) { xp += r.day; area["Life"] = (area["Life"] ?: 0) + r.day }
             } else {
                 // A day the phone no longer has the plan for: count what the log says.
-                val l = ticks.optJSONObject(date) ?: continue
+                val l = ticks.optJSONObject(date) ?: JSONObject()
                 for (k in l.keys()) if (l.opt(k) == true) {
                     if (k in AREA_KEYS) { add(k, r.area); fin += k } else { add(k, r.step); k.indexOf("habit-").takeIf { it >= 0 }?.let { hab += k.substring(it) } }
                 }
             }
+            // Eating is tracked, not ticked: each food logged earns a step, up to 5 a day.
+            add("meals", LogDoc.food(log, date).size.coerceAtMost(5) * r.step)
             val pf = LogDoc.pelvic(log, date).coerceAtMost(2)
             add("pelvic", pf * r.step)
             val el = ticks.optJSONObject("elevate-$date")?.optInt("n", 0)?.coerceAtMost(3) ?: 0

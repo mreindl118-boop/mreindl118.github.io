@@ -88,6 +88,7 @@ class MainActivity : ComponentActivity() {
         i.getStringExtra("go")?.let { t -> tab = Links.tabFor(t); settings = false; if (tab == "planner") { go = t; goN++ }; i.removeExtra("go") }
         i.getStringExtra("from")?.let { Store.count("open_from:$it"); i.removeExtra("from") }
         i.getStringExtra("bug")?.let { openBug(this, "shortcut", camera = it == "photo"); i.removeExtra("bug") }
+        i.getStringExtra("food")?.let { openFood(this, "shortcut"); i.removeExtra("food") }
         val data = i.data ?: return
         if (data.scheme == "planlab" && data.host == "key") {
             val k = data.fragment ?: data.getQueryParameter("k")

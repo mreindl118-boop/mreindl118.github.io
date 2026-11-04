@@ -15,6 +15,13 @@ import com.mattlabs.planlab.core.LogDoc
 import com.mattlabs.planlab.core.Md
 import com.mattlabs.planlab.core.Plan
 import com.mattlabs.planlab.core.Earned
+import com.mattlabs.planlab.core.Food
+import com.mattlabs.planlab.core.FoodDb
+import com.mattlabs.planlab.core.FoodEntry
+import com.mattlabs.planlab.core.FoodRow
+import com.mattlabs.planlab.core.Foods
+import com.mattlabs.planlab.core.Macros
+import com.mattlabs.planlab.core.Planned
 import com.mattlabs.planlab.core.Level
 import com.mattlabs.planlab.core.Progress
 import com.mattlabs.planlab.core.ProgressCalc
@@ -56,6 +63,9 @@ data class UiState(
     val gain: Int = 0,
     val gainAt: Long = 0,
     val levelUp: Level? = null,
+    /** The food table (built in, refreshed from the site) and Matt's own foods (meals/foods.md). */
+    val foods: FoodDb = FoodDb.EMPTY,
+    val mine: List<Food> = emptyList(),
 )
 
 /** One place for the plan, Matt's taps and his health numbers. Screens, widgets and notifications all read it. */
@@ -68,7 +78,7 @@ object Store {
     val state: StateFlow<UiState> get() = _state
     private var files: Map<String, String> = emptyMap()
 
-    val MAIN = listOf("meals", "body", "piano", "voice", "clean")
+    val MAIN = listOf("body", "piano", "voice", "clean")
     val LABEL = mapOf("meals" to "Eat", "body" to "Body", "piano" to "Piano", "voice" to "Voice", "clean" to "Clean")
 
     @Synchronized
@@ -85,8 +95,81 @@ object Store {
         val rewards = Rewards.parse(files["rewards.md"], LocalDate.now())
         val log = view()
         _state.value = UiState(hasKey = token() != null, plan = plan, log = log, health = health, synced = prefs.getBoolean("synced", false), pending = ops().length(),
-            rewards = rewards, progress = progressOf(plan, log, rewards), bugs = bugsShown(log))
+            rewards = rewards, progress = progressOf(plan, log, rewards), bugs = bugsShown(log), foods = loadFoods(), mine = Foods.mine(files["meals/foods.md"]))
     }
+
+    // ---------- food: tracked, not ticked. Entries go to log/app.json food[date][id] and, if allowed, Health Connect.
+    private const val FOODS_URL = "https://www.understorydesignstudio.com/planlab/data/foods.json"
+
+    private fun loadFoods(): FoodDb {
+        val cached = File(app.filesDir, "foods.json").takeIf { it.exists() }?.let { FoodDb.parse(it.readText()) }
+        if (cached != null && cached.foods.isNotEmpty()) return cached
+        return FoodDb.parse(runCatching { app.assets.open("foods.json").bufferedReader().use { it.readText() } }.getOrNull())
+    }
+
+    /** Once a day, the newest food table from the site (new chains and fixes land without an app update). */
+    private fun refreshFoods() {
+        val today = LocalDate.now().toString()
+        if (prefs.getString("foods_day", "") == today) return
+        val c = java.net.URL(FOODS_URL).openConnection() as java.net.HttpURLConnection
+        c.connectTimeout = 10000; c.readTimeout = 15000; c.setRequestProperty("User-Agent", "planLAB-Android")
+        val text = try { if (c.responseCode == 200) c.inputStream.use { it.readBytes().toString(Charsets.UTF_8) } else null } finally { c.disconnect() }
+        val db = FoodDb.parse(text)
+        if (db.foods.size >= 50) {
+            File(app.filesDir, "foods.json").writeText(text!!)
+            prefs.edit().putString("foods_day", today).apply()
+            _state.value = _state.value.copy(foods = db)
+        }
+    }
+
+    fun lookup(text: String): List<FoodRow> = Foods.lookup(text, _state.value.foods, _state.value.mine)
+    fun foodOn(date: LocalDate): List<FoodEntry> = LogDoc.food(_state.value.log, date.toString())
+    fun eaten(date: LocalDate): Macros = Foods.totals(foodOn(date))
+    fun foodTargets(date: LocalDate = LocalDate.now()): Macros = Foods.targets(files["me/profile.md"], brief(date).protein)
+    fun planned(step: Box): Planned = Foods.planned(step.label, _state.value.foods, _state.value.mine)
+
+    private fun newId(): String = java.lang.Long.toString(System.currentTimeMillis(), 36) + (1000..9999).random()
+    private fun nowAt(): String = LocalTime.now().withSecond(0).withNano(0).toString().take(5)
+
+    /** Logs what Matt typed, already looked up (and maybe adjusted) on screen. */
+    fun addFood(date: LocalDate, rows: List<FoodRow>) {
+        if (rows.isEmpty()) return
+        val meal = Foods.mealNow(); val at = nowAt()
+        rows.forEach { count("food") }
+        addOps(*rows.map { r -> val e = Foods.entryOf(r, newId(), at, meal); LogDoc.foodOp(date.toString(), e.id, e.toJson()) }.toTypedArray())
+        syncNutritionSoon()
+    }
+
+    /** One tap on a planned meal: logs it with the plan's numbers and ticks its step (the morning run reads the tick). */
+    fun logPlanned(day: Day, step: Box) {
+        val d = day.date.toString()
+        val existing = foodOn(day.date).firstOrNull { it.plan == step.key }
+        if (existing != null) { deleteFood(day.date, existing.id); return }
+        val p = planned(step)
+        count("food"); count("food:plan")
+        val e = FoodEntry(newId(), nowAt(), step.label, p.name, 1.0, p.m.kcal, p.m.protein, p.m.carbs, p.m.fat, p.src, p.meal.ifEmpty { Foods.mealNow() }, step.key)
+        addOps(LogDoc.foodOp(d, e.id, e.toJson()), LogDoc.tickOp(d, step.key, true))
+        syncNutritionSoon()
+    }
+
+    fun deleteFood(date: LocalDate, id: String) {
+        val e = foodOn(date).firstOrNull { it.id == id }
+        val ops = mutableListOf(LogDoc.foodOp(date.toString(), id, null))
+        if (e != null && e.plan.isNotEmpty()) ops += LogDoc.tickOp(date.toString(), e.plan, false)
+        addOps(*ops.toTypedArray())
+        syncNutritionSoon()
+    }
+
+    /** The next planned meal not logged yet today (for the widget and the dinner reminder). */
+    fun nextPlanned(date: LocalDate = LocalDate.now()): Box? {
+        val day = _state.value.plan.day(date) ?: return null
+        val logged = foodOn(date).map { it.plan }.toSet()
+        val open = day.meals.filter { it.key !in logged && !LogDoc.ticked(_state.value.log, date.toString(), it.key, it.done) && planned(it).meal.isNotEmpty() }
+        val now = Foods.mealNow()
+        return open.firstOrNull { planned(it).meal == now } ?: open.firstOrNull()
+    }
+
+    private fun syncNutritionSoon() { scope.launch { runCatching { com.mattlabs.planlab.health.FoodWriter(app).sync(_state.value.log) } } }
 
     // ---------- XP and levels, worked out from the log. Days the phone no longer has the plan for keep what they earned.
     @Synchronized
@@ -338,7 +421,9 @@ object Store {
             runCatching { pushBugs(gh) }
             if (full) runCatching { pullBugs(gh) }
         }
+        runCatching { refreshFoods() }
         runCatching { readHealth() }
+        runCatching { com.mattlabs.planlab.health.FoodWriter(app).sync(_state.value.log) }
         if (k != null) runCatching { pushHealth(GitHub(k)) }
         _state.value = _state.value.copy(loading = false, error = err)
         publish()
@@ -360,7 +445,7 @@ object Store {
 
     private fun pullPlan(gh: GitHub) {
         val out = mutableMapOf<String, String>()
-        for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md", "rewards.md")) gh.file(n)?.let { out[n] = it }
+        for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md", "rewards.md", "meals/foods.md")) gh.file(n)?.let { out[n] = it }
         runCatching { gh.file("log/insights.json") }.getOrNull()?.let { out["log/insights.json"] = it }
         val today = LocalDate.now()
         // Only the weeks that matter now: last week, this week and anything ahead.
@@ -370,7 +455,7 @@ object Store {
         val now = System.currentTimeMillis()
         File(app.filesDir, "plan_files.json").writeText(JSONObject(out as Map<*, *>).toString())
         prefs.edit().putLong("built", now).apply()
-        _state.value = _state.value.copy(plan = Md.plan(out, today, now), rewards = Rewards.parse(out["rewards.md"], today))
+        _state.value = _state.value.copy(plan = Md.plan(out, today, now), rewards = Rewards.parse(out["rewards.md"], today), mine = Foods.mine(out["meals/foods.md"]))
     }
 
     private suspend fun pushLog(gh: GitHub) = syncLock.withLock {
