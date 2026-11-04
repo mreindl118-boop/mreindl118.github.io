@@ -146,12 +146,13 @@ private fun TodayContent() {
                         val next = if (on) null else Store.nextStep(day, box)
                         if (next != null) Text("Next: ${next.label} · tap when done", style = TextStyle(color = WC.kind(box.key), fontSize = 12.sp), maxLines = 1)
                     }
-                    val link = next?.links?.firstOrNull()
-                    if (link != null) {
+                    val nextStep = if (on) null else Store.nextStep(day, box)
+                    val link = nextStep?.links?.firstOrNull()
+                    if (nextStep != null && link != null) {
                         Spacer(GlanceModifier.width(6.dp))
                         Box(GlanceModifier.height(30.dp).padding(horizontal = 10.dp).background(WC.kind(box.key)).cornerRadius(15.dp)
                             .clickable(actionStartActivity(com.mattlabs.planlab.ui.Links.intent(LocalContext.current, link.url, "widget"))), contentAlignment = Alignment.Center) {
-                            Text(com.mattlabs.planlab.ui.Links.name(link, next.label).take(10) + if (link.url.startsWith("app:")) " ›" else " ↗", style = TextStyle(color = WC.white, fontSize = 12.sp, fontWeight = FontWeight.Bold), maxLines = 1)
+                            Text(com.mattlabs.planlab.ui.Links.name(link, nextStep.label).take(10) + if (link.url.startsWith("app:")) " ›" else " ↗", style = TextStyle(color = WC.white, fontSize = 12.sp, fontWeight = FontWeight.Bold), maxLines = 1)
                         }
                     }
                 }
