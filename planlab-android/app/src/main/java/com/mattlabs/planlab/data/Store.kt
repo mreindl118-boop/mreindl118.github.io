@@ -14,6 +14,11 @@ import com.mattlabs.planlab.core.HealthData
 import com.mattlabs.planlab.core.LogDoc
 import com.mattlabs.planlab.core.Md
 import com.mattlabs.planlab.core.Plan
+import com.mattlabs.planlab.core.Earned
+import com.mattlabs.planlab.core.Level
+import com.mattlabs.planlab.core.Progress
+import com.mattlabs.planlab.core.ProgressCalc
+import com.mattlabs.planlab.core.Rewards
 import com.mattlabs.planlab.health.HealthReader
 import com.mattlabs.planlab.notify.Notifier
 import com.mattlabs.planlab.widget.Widgets
@@ -43,6 +48,14 @@ data class UiState(
     val synced: Boolean = false,
     val pending: Int = 0,
     val version: Long = 0,
+    val rewards: Rewards = Rewards(),
+    val progress: Progress? = null,
+    /** Open "bugs me" captures: issue number to text (0 = not sent yet). */
+    val bugs: List<Pair<Int, String>> = emptyList(),
+    /** The last XP gain, for the "+5" that pops up, and a level just reached. */
+    val gain: Int = 0,
+    val gainAt: Long = 0,
+    val levelUp: Level? = null,
 )
 
 /** One place for the plan, Matt's taps and his health numbers. Screens, widgets and notifications all read it. */
@@ -55,8 +68,8 @@ object Store {
     val state: StateFlow<UiState> get() = _state
     private var files: Map<String, String> = emptyMap()
 
-    val MAIN = listOf("meals", "body", "piano", "voice")
-    val LABEL = mapOf("meals" to "Eat", "body" to "Body", "piano" to "Piano", "voice" to "Voice")
+    val MAIN = listOf("meals", "body", "piano", "voice", "clean")
+    val LABEL = mapOf("meals" to "Eat", "body" to "Body", "piano" to "Piano", "voice" to "Voice", "clean" to "Clean")
 
     @Synchronized
     fun init(context: Context) {
@@ -69,7 +82,85 @@ object Store {
         }.getOrDefault(emptyMap())
         val health = HealthData.fromJson(runCatching { File(app.filesDir, "health.json").readText() }.getOrNull())
         val plan = Md.plan(files, LocalDate.now(), prefs.getLong("built", 0))
-        _state.value = UiState(hasKey = token() != null, plan = plan, log = view(), health = health, synced = prefs.getBoolean("synced", false), pending = ops().length())
+        val rewards = Rewards.parse(files["rewards.md"], LocalDate.now())
+        val log = view()
+        _state.value = UiState(hasKey = token() != null, plan = plan, log = log, health = health, synced = prefs.getBoolean("synced", false), pending = ops().length(),
+            rewards = rewards, progress = progressOf(plan, log, rewards), bugs = bugsShown(log))
+    }
+
+    // ---------- XP and levels, worked out from the log. Days the phone no longer has the plan for keep what they earned.
+    @Synchronized
+    private fun progressOf(plan: Plan, log: JSONObject, r: Rewards): Progress {
+        val cache = runCatching { JSONObject(prefs.getString("xp_cache", "{}")) }.getOrDefault(JSONObject())
+        val all = mutableMapOf<String, Earned>()
+        for (k in cache.keys()) runCatching { all[k] = Earned.fromJson(cache.getJSONObject(k)) }
+        for ((k, v) in ProgressCalc.earned(plan, log, r)) if (v.second || k !in all) { all[k] = v.first; cache.put(k, v.first.toJson()) }
+        prefs.edit().putString("xp_cache", cache.toString()).apply()
+        return ProgressCalc.progress(all, r, log, LocalDate.now())
+    }
+
+    fun milestone(key: String, value: Boolean) { if (value) count("milestone"); addOps(LogDoc.tickOp("milestones", key, value)) }
+
+    // ---------- "this bugs me": queued on the phone, sent as an issue (plus an optional photo) when online
+    private fun bugQueue(): JSONArray = runCatching { JSONArray(prefs.getString("bug_q", "[]")) }.getOrDefault(JSONArray())
+    private fun bugsShown(log: JSONObject = _state.value.log): List<Pair<Int, String>> {
+        val fixed = log.optJSONObject("ticks")?.optJSONObject("bugs")
+        val q = bugQueue()
+        val queued = (0 until q.length()).map { 0 to q.getJSONObject(it).optString("text").ifBlank { "Photo" } }
+        val open = runCatching { JSONArray(prefs.getString("bugs_open", "[]")) }.getOrDefault(JSONArray())
+        val sent = (0 until open.length()).map { open.getJSONArray(it).let { a -> a.getInt(0) to a.getString(1) } }.filter { fixed?.opt(it.first.toString()) != true }
+        return queued + sent
+    }
+
+    fun addBug(text: String, photo: File?) {
+        count("bug")
+        val now = java.time.LocalDateTime.now()
+        synchronized(this) {
+            val q = bugQueue()
+            q.put(JSONObject().put("text", text.trim()).put("at", now.withNano(0).toString()).put("photo", photo?.absolutePath ?: ""))
+            prefs.edit().putString("bug_q", q.toString()).apply()
+        }
+        addCount(now.toLocalDate(), "bug")
+        _state.value = _state.value.copy(bugs = bugsShown())
+        scope.launch { token()?.let { k -> runCatching { pushBugs(GitHub(k)) } }; _state.value = _state.value.copy(bugs = bugsShown()) }
+    }
+
+    fun fixBug(number: Int) {
+        if (number <= 0) return
+        count("bug_fixed")
+        addOps(LogDoc.tickOp("bugs", number.toString(), true))
+    }
+
+    private suspend fun pushBugs(gh: GitHub) = syncLock.withLock {
+        while (true) {
+            val item = synchronized(this) { bugQueue().optJSONObject(0) } ?: break
+            val at = item.getString("at")
+            val stamp = at.replace("-", "").replace(":", "").replace("T", "-").take(15)
+            val text = item.optString("text").ifBlank { "(photo)" }
+            var photoPath = ""
+            item.optString("photo").takeIf { it.isNotBlank() }?.let { File(it) }?.takeIf { it.exists() }?.let { f ->
+                photoPath = "bugs/$stamp.jpg"
+                gh.putBytes(photoPath, Photos.shrink(f), "planLAB app: bugs-me photo $stamp")
+            }
+            val body = buildString {
+                append("Captured in the planLAB app at ${at.replace('T', ' ')}.\n\n")
+                if (photoPath.isNotEmpty()) append("Photo: [${photoPath}](https://github.com/${GitHub.REPO}/blob/main/${GitHub.DIR}/$photoPath)\n\n")
+                append("Claude: turn this into steps (home/bugs-me.md and the week's ### clean), and a habit if it keeps coming back. Close it once Matt marks it fixed in the app (log/app.json ticks.bugs).")
+            }
+            val n = gh.issue("${GitHub.BUG} ${text.take(80)}", body)
+            synchronized(this) {
+                val q = bugQueue(); val rest = JSONArray(); for (i in 1 until q.length()) rest.put(q.get(i))
+                val open = runCatching { JSONArray(prefs.getString("bugs_open", "[]")) }.getOrDefault(JSONArray())
+                open.put(JSONArray().put(n).put(text))
+                prefs.edit().putString("bug_q", rest.toString()).putString("bugs_open", open.toString()).apply()
+            }
+            item.optString("photo").takeIf { it.isNotBlank() }?.let { runCatching { File(it).delete() } }
+        }
+    }
+
+    private fun pullBugs(gh: GitHub) {
+        val open = gh.openBugs()
+        prefs.edit().putString("bugs_open", JSONArray(open.map { JSONArray().put(it.first).put(it.second) }).toString()).apply()
     }
 
     fun token(): String? = prefs.getString("key", null)?.takeIf { it.isNotBlank() }
@@ -157,7 +248,14 @@ object Store {
 
     /** Re-emits state and redraws everything that shows it. */
     private fun publish() {
-        _state.value = _state.value.copy(log = view(), pending = ops().length(), version = _state.value.version + 1)
+        val s = _state.value
+        val log = view()
+        val p = progressOf(s.plan, log, s.rewards)
+        val old = s.progress
+        val gained = if (old != null && p.xp > old.xp) p.xp - old.xp else 0
+        _state.value = s.copy(log = log, pending = ops().length(), version = s.version + 1, progress = p, bugs = bugsShown(log),
+            gain = if (gained > 0) gained else s.gain, gainAt = if (gained > 0) System.currentTimeMillis() else s.gainAt,
+            levelUp = if (old != null && p.level.n > old.level.n) p.level else s.levelUp)
         scope.launch {
             runCatching { Widgets.updateAll(app) }
             runCatching { Notifier.refreshPinned(app) }
@@ -221,6 +319,8 @@ object Store {
             if (full) err = runCatching { pullPlan(gh) }.exceptionOrNull()?.let(::describe) ?: ""
             runCatching { pushLog(gh) }.exceptionOrNull()?.let { if (err.isEmpty()) err = describe(it) }
             runCatching { pushEngagement(gh) }
+            runCatching { pushBugs(gh) }
+            if (full) runCatching { pullBugs(gh) }
         }
         runCatching { readHealth() }
         if (k != null) runCatching { pushHealth(GitHub(k)) }
@@ -244,7 +344,7 @@ object Store {
 
     private fun pullPlan(gh: GitHub) {
         val out = mutableMapOf<String, String>()
-        for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md")) gh.file(n)?.let { out[n] = it }
+        for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md", "rewards.md")) gh.file(n)?.let { out[n] = it }
         val today = LocalDate.now()
         // Only the weeks that matter now: last week, this week and anything ahead.
         val thisWeek = today.minusWeeks(1).let { "%d-W%02d".format(it.get(java.time.temporal.IsoFields.WEEK_BASED_YEAR), it.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR)) }
@@ -253,7 +353,7 @@ object Store {
         val now = System.currentTimeMillis()
         File(app.filesDir, "plan_files.json").writeText(JSONObject(out as Map<*, *>).toString())
         prefs.edit().putLong("built", now).apply()
-        _state.value = _state.value.copy(plan = Md.plan(out, today, now))
+        _state.value = _state.value.copy(plan = Md.plan(out, today, now), rewards = Rewards.parse(out["rewards.md"], today))
     }
 
     private suspend fun pushLog(gh: GitHub) = syncLock.withLock {
@@ -296,6 +396,8 @@ object Store {
         gh.put("log/health.json", doc.toString(1), sha, "planLAB app: health summary $today")
         prefs.edit().putString("health_pushed", slot).apply()
     }
+
+    fun clearLevelUp() { _state.value = _state.value.copy(levelUp = null) }
 
     fun sendWish(text: String, done: (Boolean) -> Unit) {
         val k = token() ?: return done(false)

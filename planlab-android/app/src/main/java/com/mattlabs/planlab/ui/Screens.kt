@@ -12,6 +12,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import kotlinx.coroutines.launch
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -186,9 +187,18 @@ fun SettingsScreen(onBack: () -> Unit) {
         item {
             Label("App")
             PCard {
+                val scope = androidx.compose.runtime.rememberCoroutineScope()
+                var upd by remember { mutableStateOf("Updates install on their own.") }
                 Text("planLAB ${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.titleMedium, color = tk.fg)
+                Text(upd, color = tk.muted, fontSize = 13.sp)
                 Spacer(Modifier.height(10.dp))
-                PButton("Get the newest version", Modifier.fillMaxWidth(), tk.sunk, tk.fg) { open(ctx, Updater.APK) }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PButton("Check now", Modifier.weight(1f), tk.sunk, tk.fg) {
+                        upd = "Checking…"
+                        scope.launch { upd = com.mattlabs.planlab.update.AutoUpdate.check(ctx, 0)?.let { "Installing $it…" } ?: "You have the newest version." }
+                    }
+                    PButton("Download", Modifier.weight(1f), tk.sunk, tk.fg) { open(ctx, com.mattlabs.planlab.update.AutoUpdate.APK) }
+                }
             }
         }
     }

@@ -74,6 +74,7 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
             if (st.error.isNotEmpty()) Text(st.error, Modifier.padding(top = 8.dp), color = tk.warn, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(14.dp))
             Hero(b, day, onOpen)
+            st.progress?.let { Spacer(Modifier.height(10.dp)); LevelCard(it) { onOpen("progress") } }
         }
         if (day == null) {
             item {
@@ -148,6 +149,7 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
                 for (x in extra) RowItem(lead = { Dot(tk.line) }, title = x.replaceFirstChar { it.uppercase() }, sub = "If you feel like it")
             }
         }
+        item { Label("Bugs me"); BugsCard() }
         item { Label("Want to do something?"); Wish() }
     }
 }
