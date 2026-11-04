@@ -196,5 +196,4 @@ object Notifier {
     fun bugIntent(ctx: Context): PendingIntent =
         PendingIntent.getActivity(ctx, 77, Intent(ctx, com.mattlabs.planlab.ui.BugActivity::class.java).putExtra("from", "notif").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-    }
 }
