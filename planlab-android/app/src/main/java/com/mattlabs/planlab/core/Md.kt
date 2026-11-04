@@ -186,6 +186,7 @@ object Md {
             setup = setup,
             proteinTarget = proteinTarget(files["me/profile.md"] ?: ""),
             builtAt = builtAt,
+            moves = Moves.parse(files["body/moves.md"]),
         )
     }
 }

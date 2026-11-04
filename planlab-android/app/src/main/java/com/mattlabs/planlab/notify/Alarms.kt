@@ -28,7 +28,14 @@ enum class Slot(val label: String, val time: LocalTime, val notifId: Int) {
     PIANO("Piano", LocalTime.of(19, 30), 17),
     MEALS("Food check", LocalTime.of(20, 0), 18),
     PELVIC_PM("Pelvic floor, evening", LocalTime.of(20, 30), 19),
-    EVENING("Evening check-in", LocalTime.of(21, 30), 20);
+    EVENING("Evening check-in", LocalTime.of(21, 30), 20),
+    // Movement breaks: the time comes from the day's "### move" steps ("Break 1 at 10:30, 1 min: …").
+    MOVE_1("Move breaks", LocalTime.of(10, 30), 21),
+    MOVE_2("Move breaks", LocalTime.of(13, 30), 22),
+    MOVE_3("Move breaks", LocalTime.of(15, 30), 23);
+
+    /** 0-based break number for MOVE_n, else -1. */
+    val breakIndex: Int get() = if (name.startsWith("MOVE_")) name.removePrefix("MOVE_").toInt() - 1 else -1
 
     fun enabled(): Boolean = Store.prefs().getBoolean("slot_$name", true)
 }
@@ -44,9 +51,16 @@ object Alarms {
         am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, millis, p)
     }
 
+    /** The slot's time on [date]: a break's own time from that day's plan when it has one. */
+    private fun timeOn(slot: Slot, date: LocalDate): LocalTime {
+        if (slot.breakIndex < 0) return slot.time
+        val step = Store.state.value.plan.day(date)?.boxes?.firstOrNull { it.key == "move" }?.steps?.getOrNull(slot.breakIndex)
+        return step?.let { com.mattlabs.planlab.core.Moves.timeOf(it.label) } ?: slot.time
+    }
+
     fun next(slot: Slot, now: LocalDateTime = LocalDateTime.now()): LocalDateTime {
-        val t = LocalDate.now().atTime(slot.time)
-        return if (t.isAfter(now.plusSeconds(30))) t else t.plusDays(1)
+        val t = LocalDate.now().atTime(timeOn(slot, LocalDate.now()))
+        return if (t.isAfter(now.plusSeconds(30))) t else LocalDate.now().plusDays(1).atTime(timeOn(slot, LocalDate.now().plusDays(1)))
     }
 
     fun scheduleAll(ctx: Context) {

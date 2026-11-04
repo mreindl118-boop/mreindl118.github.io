@@ -42,6 +42,7 @@ data class Plan(
     val setup: List<Item>,
     val proteinTarget: Int,
     val builtAt: Long,
+    val moves: Map<String, Move> = emptyMap(),
 ) {
     fun day(date: LocalDate): Day? = weeks.asSequence().flatMap { it.days.asSequence() }.firstOrNull { it.date == date }
     fun weekOf(date: LocalDate): Week? = weeks.firstOrNull { !date.isBefore(it.start) && !date.isAfter(it.start.plusDays(6)) }

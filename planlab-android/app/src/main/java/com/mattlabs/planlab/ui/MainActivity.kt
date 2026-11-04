@@ -85,7 +85,12 @@ class MainActivity : ComponentActivity() {
     private fun handle(i: Intent?) {
         i ?: return
         i.getStringExtra("tab")?.let { tab = it; settings = false }
-        i.getStringExtra("go")?.let { t -> tab = Links.tabFor(t); settings = false; if (tab == "planner") { go = t; goN++ }; i.removeExtra("go") }
+        i.getStringExtra("go")?.let { t ->
+            tab = Links.tabFor(t); settings = false
+            if (tab == "planner") { go = t; goN++ }
+            if (t.startsWith("move/")) MoveSheet.show(MoveSheet.Req(java.time.LocalDate.now(), i.getStringExtra("box"), i.getStringExtra("step"), t.removePrefix("move/")))
+            i.removeExtra("go")
+        }
         i.getStringExtra("from")?.let { Store.count("open_from:$it"); i.removeExtra("from") }
         i.getStringExtra("bug")?.let { openBug(this, "shortcut", camera = it == "photo"); i.removeExtra("bug") }
         i.getStringExtra("food")?.let { openFood(this, "shortcut"); i.removeExtra("food") }
@@ -127,6 +132,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 GainOverlay()
+                MoveSheetHost()
             }
         }
     }

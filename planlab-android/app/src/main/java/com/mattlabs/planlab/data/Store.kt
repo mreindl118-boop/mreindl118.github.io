@@ -416,6 +416,8 @@ object Store {
         if (k != null) {
             val gh = GitHub(k)
             if (full) err = runCatching { pullPlan(gh) }.exceptionOrNull()?.let(::describe) ?: ""
+            // Break times come from the plan, so re-set the alarms once it's fresh.
+            if (full) runCatching { com.mattlabs.planlab.notify.Alarms.scheduleAll(app) }
             runCatching { pushLog(gh) }.exceptionOrNull()?.let { if (err.isEmpty()) err = describe(it) }
             runCatching { pushEngagement(gh) }
             runCatching { pushBugs(gh) }
@@ -445,7 +447,7 @@ object Store {
 
     private fun pullPlan(gh: GitHub) {
         val out = mutableMapOf<String, String>()
-        for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md", "rewards.md", "meals/foods.md")) gh.file(n)?.let { out[n] = it }
+        for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md", "rewards.md", "meals/foods.md", "body/moves.md")) gh.file(n)?.let { out[n] = it }
         runCatching { gh.file("log/insights.json") }.getOrNull()?.let { out["log/insights.json"] = it }
         val today = LocalDate.now()
         // Only the weeks that matter now: last week, this week and anything ahead.
