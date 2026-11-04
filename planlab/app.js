@@ -73,10 +73,12 @@ function parseTable(text) {
 }
 function parseCalendar(text) {
   const y = new Date().getFullYear(), events = [];
-  for (const row of parseTable(text.split("## Work and friends")[0])) {
-    const m = (row[0] || "").match(/(\d{4}-)?(\d\d)-(\d\d)/); if (!m || row.length < 2) continue;
-    events.push({ date: guessDate(m[1] ? +m[1].slice(0, 4) : y, +m[2], +m[3], !!m[1]), approx: row[0].startsWith("~"), what: row[1], who: row[2] || "", notes: row[3] || "" });
-  }
+  const raw = text.split("## Work and friends")[0].split("\n").filter(l => /^\|/.test(l.trim()) && !/^\|[\s\-|]+\|$/.test(l.trim())).slice(1);
+  parseTable(text.split("## Work and friends")[0]).forEach((row, i) => {
+    const m = (row[0] || "").match(/(\d{4}-)?(\d\d)-(\d\d)/); if (!m || row.length < 2) return;
+    // A bold row in calendar.md is the big date the app counts down to.
+    events.push({ date: guessDate(m[1] ? +m[1].slice(0, 4) : y, +m[2], +m[3], !!m[1]), approx: row[0].startsWith("~"), what: row[1], who: row[2] || "", notes: row[3] || "", big: /\*\*/.test((raw[i] || "").split("|")[2] || "") });
+  });
   const watching = [];
   if (text.includes("## Watching for")) for (const l of text.split("## Watching for")[1].split("\n")) if (l.trim().startsWith("- ")) watching.push(stripMd(l.trim().slice(2)));
   return { events, watching };
@@ -141,7 +143,8 @@ async function load() {
 function allDays() { return (S.plan?.weeks || []).flatMap(w => w.days); }
 const findDay = date => allDays().find(d => d.date === date);
 const weekOf = date => (S.plan?.weeks || []).find(w => date >= w.start && date <= addDays(w.start, 6));
-const surgery = () => (S.plan?.calendar || []).find(e => /surgery/i.test(e.what));
+const bigDay = () => (S.plan?.calendar || []).find(e => e.big && daysBetween(todayIso(), e.date) > -60);
+const bigName = e => e.what.replace(/\s*\(.*\)$/, "").toLowerCase();
 function tickGet(list, item) { const t = S.ticks[list]; return t && typeof t[item.key] === "boolean" ? t[item.key] : !!item.done; }
 function tickSet(list, item) { S.ticks[list] = { ...(S.ticks[list] || {}), [item.key]: !tickGet(list, item) }; store.set("planlab-ticks", JSON.stringify(S.ticks)); render(); }
 const dayCount = d => ({ n: d.boxes.length, done: d.boxes.filter(b => tickGet(d.date, b)).length });
@@ -168,13 +171,13 @@ const TITLES = { meals: "Eat", body: "Body", piano: "Piano", voice: "Voice", gro
 // ---------- views
 const checkRow = (attrs, checked, label, detail) => `<button class="check" role="checkbox" aria-checked="${checked}" ${attrs}><span class="box">${ICON.check}</span><span class="txt"><span class="label">${label}</span>${detail ? `<span class="detail">${detail}</span>` : ""}</span></button>`;
 const head2 = (title, right) => `<div class="h2row"><h2>${title}</h2>${right ? `<span class="note">${right}</span>` : ""}</div>`;
-function surgeryChip(date) {
-  const s = surgery(); if (!s) return "";
-  const n = daysBetween(date, s.date);
-  if (n > 1) return `<span class="chip">${n} days to surgery</span>`;
-  if (n === 1) return `<span class="chip">Surgery tomorrow</span>`;
-  if (n === 0) return `<span class="chip">Surgery day</span>`;
-  return `<span class="chip blue">Recovery day ${-n}</span>`;
+function bigChip(date) {
+  const s = bigDay(); if (!s) return "";
+  const n = daysBetween(date, s.date), name = bigName(s);
+  if (n > 1) return `<span class="chip">${n} days to ${esc(name)}</span>`;
+  if (n === 1) return `<span class="chip">${esc(cap(name))} tomorrow</span>`;
+  if (n === 0) return `<span class="chip">${esc(cap(name))} today</span>`;
+  return `<span class="chip blue">Day ${-n} after ${esc(name)}</span>`;
 }
 
 function viewSetup() {
@@ -192,7 +195,7 @@ function viewToday() {
   const date = S.day, day = findDay(date), t = todayIso();
   const title = date === t ? "Today" : date === addDays(t, 1) ? "Tomorrow" : date === addDays(t, -1) ? "Yesterday" : nice(date, { weekday: "long" });
   let h = `<header class="top"><button class="navbtn" data-go="-1" aria-label="Previous day">${ICON.left}</button>
-    <div class="t"><h1>${title}</h1><div class="sub">${nice(date, { weekday: "long", month: "long", day: "numeric" })} ${surgeryChip(date)}</div></div>
+    <div class="t"><h1>${title}</h1><div class="sub">${nice(date, { weekday: "long", month: "long", day: "numeric" })} ${bigChip(date)}</div></div>
     <button class="navbtn" data-go="1" aria-label="Next day">${ICON.right}</button></header>`;
   if (date !== t) h += `<p><button class="btn small" data-jump="${t}">Back to today</button></p>`;
   if (!day) {
@@ -228,16 +231,16 @@ function viewWeek() {
 }
 
 function viewSoon() {
-  const t = todayIso(), s = surgery(), n = s ? daysBetween(t, s.date) : -1;
+  const t = todayIso(), s = bigDay(), n = s ? daysBetween(t, s.date) : -1;
   let h = `<header class="top"><div class="t"><h1>Coming up</h1></div></header>`;
-  if (s && n >= 0) h += `<div class="hero"><div class="big">${n}</div><p><strong>${n === 0 ? "Surgery is today" : n === 1 ? "day until surgery" : "days until surgery"}</strong>${esc(nice(s.date, { weekday: "short", month: "short", day: "numeric" }))}${s.notes ? ` · ${esc(s.notes)}` : ""}</p></div>`;
+  if (s && n >= 0) h += `<div class="hero"><div class="big">${n}</div><p><strong>${n === 0 ? esc(cap(bigName(s))) + " is today" : (n === 1 ? "day until " : "days until ") + esc(bigName(s))}</strong>${esc(nice(s.date, { weekday: "short", month: "short", day: "numeric" }))}${s.notes ? ` · ${esc(s.notes)}` : ""}</p></div>`;
   h += `<section class="section">${head2("Want to do something?")}<form class="capture" id="capture"><input id="capture-text" placeholder="See Goose in the spring" autocomplete="off" aria-label="Something you want to do"><button class="btn" id="capture-btn">Add</button></form>
     <p class="note">${S.msg ? esc(S.msg) : "Claude gives it a date the next morning and puts it in your plan."}</p></section>`;
   const before = inboxItems().filter(i => /^before/i.test(i.group));
   const setup = S.plan?.setup || [];
   if (n >= 0 && (before.length || setup.length)) {
     const all = [...before.map(i => ["inbox", i, i.what, i.when]), ...setup.map(i => ["setup", i, i.text, ""])];
-    h += `<section class="section">${head2(s ? "Before surgery" : "Before then", `${all.filter(([l, i]) => tickGet(l, i)).length} of ${all.length} done`)}
+    h += `<section class="section">${head2(s ? "Before " + esc(bigName(s)) : "Before then", `${all.filter(([l, i]) => tickGet(l, i)).length} of ${all.length} done`)}
       <div class="list">${all.map(([l, i, text, when]) => checkRow(`data-list="${l}" data-item="${i.key}"`, tickGet(l, i), esc(text), esc(when))).join("")}</div></section>`;
   }
   const ev = (S.plan?.calendar || []).filter(e => e.date >= t);
