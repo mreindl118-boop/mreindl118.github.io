@@ -26,6 +26,15 @@ function stripMd(s) {
   return String(s).replace(/\*\*(.+?)\*\*/g, "$1").replace(/`([^`]+)`/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\s*\(?\b[\w./-]+\.md\)?/g, "").trim();
 }
+// Links on a step: "text · [Practice](app:piano) · [Tutorial](https://…)", a step whose text is itself a link, or a bare
+// URL at the end. The key comes from the text before the first " · [", so adding or changing links never loses a tick.
+function splitLinks(s) {
+  s = String(s);
+  const links = [...s.matchAll(/\[([^\]]+)\]\(([^)\s]+)\)/g)].map(m => ({ label: stripMd(m[1]), url: m[2] }));
+  let t = s; const i = t.indexOf(" · ["); if (i >= 0) t = t.slice(0, i);
+  const bare = t.match(/\s+(https?:\/\/\S+)\s*$/); if (bare) { links.push({ label: "Open", url: bare[1] }); t = t.slice(0, bare.index); }
+  return { text: t, links };
+}
 const keyOf = s => stripMd(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
 function isoMonday(id) { const [y, w] = id.split("-W").map(Number); const j4 = new Date(y, 0, 4); const d = new Date(j4); d.setDate(j4.getDate() - ((j4.getDay() + 6) % 7) + (w - 1) * 7); return d; }
 function guessDate(y, m, d, explicit) { let s = `${y}-${pad(m)}-${pad(d)}`; if (!explicit && daysBetween(s, todayIso()) > 120) s = `${y+1}-${pad(m)}-${pad(d)}`; return s; }
@@ -51,9 +60,10 @@ function parseWeek(id, text) {
       const t = raw.trim();
       if (t.startsWith("### ")) { area = keyOf(t.slice(4)); heads[area] = stripMd(t.slice(4)); continue; }
       const one = raw.match(/^\s*- \[( |x|X)\]\s*(.+)/);
-      if (one && area) { const label = stripMd(one[2]); (steps[area] = steps[area] || []).push({ key: `${area}/${keyOf(label)}`, label, done: one[1].toLowerCase() === "x" }); continue; }
-      if (one && /^\s/.test(raw)) { const full = stripMd(one[2]), c = full.indexOf(":"); const parent = c > 0 ? keyOf(full.slice(0, c)) : d.boxes.at(-1)?.key; if (!parent) continue;
-        (steps[parent] = steps[parent] || []).push({ key: keyOf(full), label: c > 0 ? full.slice(c + 1).trim() : full, done: one[1].toLowerCase() === "x" }); continue; }
+      const sp = one ? splitLinks(one[2]) : null;
+      if (one && area) { const label = stripMd(sp.text); (steps[area] = steps[area] || []).push({ key: `${area}/${keyOf(label)}`, label, done: one[1].toLowerCase() === "x", links: sp.links }); continue; }
+      if (one && /^\s/.test(raw)) { const full = stripMd(sp.text), c = full.indexOf(":"); const parent = c > 0 ? keyOf(full.slice(0, c)) : d.boxes.at(-1)?.key; if (!parent) continue;
+        (steps[parent] = steps[parent] || []).push({ key: keyOf(full), label: c > 0 ? full.slice(c + 1).trim() : full, done: one[1].toLowerCase() === "x", links: sp.links }); continue; }
       let line = t; if (!line.startsWith("- ")) continue; line = line.slice(2);
       if (line.startsWith("[")) { for (const b of line.matchAll(/\[( |x|X)\]\s*([^\[]+)/g)) { const label = b[2].trim(); d.boxes.push({ key: keyOf(label), label, done: b[1].toLowerCase() === "x" }); } continue; }
       const c = line.indexOf(":"); if (c < 0) continue;
@@ -89,7 +99,7 @@ function parseChecklists(text) {
   const out = [];
   for (const [head, body] of sections(text)) {
     const items = [];
-    for (const line of body.split("\n")) { const m = line.match(/^\s*- \[( |x|X)\]\s*(.+)/); if (!m) continue; const t = stripMd(m[2]), it = { key: keyOf(t), text: t, done: m[1].toLowerCase() === "x" };
+    for (const line of body.split("\n")) { const m = line.match(/^\s*- \[( |x|X)\]\s*(.+)/); if (!m) continue; const sp = splitLinks(m[2]), t = stripMd(sp.text), it = { key: keyOf(t), text: t, done: m[1].toLowerCase() === "x", links: sp.links };
       // An indented box is a step of the box above it.
       if (/^(  |\t)/.test(line) && items.length) (items.at(-1).steps = items.at(-1).steps || []).push(it); else items.push(it); }
     if (items.length) out.push({ name: stripMd(head), items });
@@ -244,6 +254,7 @@ async function load() {
     store.set("planlab-cache", JSON.stringify(S.plan));
     S.error = "";
     pullLog();
+    file("log/insights.json").then(t => { if (t) { S.ins = JSON.parse(t); store.set("planlab-ins", t); render(); } }).catch(() => {});
   } catch (e) {
     S.error = e.message === "key" || e.status === 403 ? "Your GitHub key didn't work. It may have expired or not include GeneralStorage." : "Couldn't reach GitHub. Showing the last copy you loaded.";
     if (e.message === "key" || e.status === 403) S.badKey = true;
@@ -420,6 +431,11 @@ function bigPill(date) {
   return pill(`Day ${-n} after ${esc(name)}`, "soft");
 }
 const checkRow = (attrs, checked, label, sub, tail = "") => `<div class="row has-tail"><button class="check rowbtn" role="checkbox" aria-checked="${checked}" ${attrs}><span class="box">${IC.check}</span><span class="rt"><span class="rl">${label}</span>${sub ? `<span class="rs">${sub}</span>` : ""}</span></button>${tail}</div>`;
+// A step's links as small buttons: app: links open a planLAB view, the rest open in a new tab.
+const linkBtns = it => (it.links || []).length ? `<span class="lbtns">${it.links.slice(0, 3).map(l => {
+  const name = esc(l.label === (it.label || it.text) ? "Open" : l.label);
+  return l.url.startsWith("app:") ? `<a class="lbtn" href="#go/${esc(l.url.slice(4))}" data-go="${esc(l.url.slice(4))}">${name}</a>` : `<a class="lbtn" href="${esc(l.url)}" target="_blank" rel="noopener" data-ext="1">${name} ↗</a>`;
+}).join("")}</span>` : "";
 const unset = v => !v || /^\(.*\)$/.test(v) || /\?\)?$/.test(v);
 function tileDetail(day, key) {
   const sb = day.boxes.find(b => b.key === key);
@@ -430,6 +446,36 @@ function tileDetail(day, key) {
   return done ? `${done} of ${plan || "?"} min` : plan ? `${plan} min · tap to start` : "";
 }
 const MEAL = ["Breakfast", "Lunch", "Dinner", "Also"];
+
+// ---------- insights (log/insights.json, written by tools/insights.py in the private repo)
+S.ins = store.json("planlab-ins", null);
+const FEEL = ["Rough", "Low", "OK", "Good", "Great"];
+const feelOf = d => { const o = S.log.ticks["feel-" + d] || {}; return +(Object.keys(o).find(k => o[k] === true) || 0); };
+function feelRow(date) {
+  const f = feelOf(date);
+  return `<div class="card feel"><span class="rl">How do you feel?</span><div class="feel-b">${FEEL.map((l, i) => `<button data-feel="${i + 1}" aria-pressed="${f === i + 1}" aria-label="${l}"${f === i + 1 ? ' class="on"' : ""}><b>${i + 1}</b><span>${l}</span></button>`).join("")}</div></div>`;
+}
+function insightCard() {
+  const h = S.ins?.headline; if (!h) return "";
+  return `<button class="card ins-head" data-tab="you"><span class="eyebrow">${h.kind === "waiting" ? "Learning you" : h.kind === "likely" ? "This week's insight" : h.kind === "hint" ? "An early hint" : "This week"}</span><span class="rl">${esc(h.text)}</span>${h.try ? `<span class="rs">${esc(h.try)}</span>` : ""}</button>`;
+}
+function spark(vals, cls) {
+  const pts = vals.map((v, i) => [i, v]).filter(p => p[1] != null); if (pts.length < 2) return "";
+  const lo = Math.min(...pts.map(p => p[1])), hi = Math.max(...pts.map(p => p[1])), sp = hi - lo || 1, W = 120, H = 32, n = vals.length - 1 || 1;
+  const xy = ([i, v]) => `${(i / n * W).toFixed(1)},${(H - 3 - (v - lo) / sp * (H - 6)).toFixed(1)}`;
+  return `<svg class="spark ${cls}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts.map(xy).join(" ")}"/></svg>`;
+}
+function viewInsights() {
+  const I = S.ins; if (!I) return `<section class="sec">${lab("What we're learning")}<div class="card list"><div class="row"><span class="rt"><span class="rl">Insights arrive after the first nightly run.</span><span class="rs">They come from your ticks, check-ins and health data.</span></span></div></div></section>`;
+  const c = I.counts || {};
+  let h = `<section class="sec">${lab("What we're learning")}${insightCard().replace('data-tab="you"', "")}</section>`;
+  if (I.findings?.length) h += `<section class="sec">${lab("Patterns in your days")}<div class="card list">${I.findings.slice(0, 5).map(f => `<div class="row"><span class="rt"><span class="rl">${esc(f.text)}</span>${f.groups?.length === 2 && f.id.includes("~did:") ? `<span class="bars">${f.groups.map((g, i) => `<span class="bar${i ? " b" : ""}"><i style="width:${Math.round(g.value * 100)}%"></i></span>`).join("")}</span>` : ""}${f.try ? `<span class="rs">${esc(f.try)}</span>` : ""}</span>${pill(f.kind_of === "likely" ? "Likely" : "Hint", f.kind_of === "likely" ? "ok" : "soft")}</div>`).join("")}</div></section>`;
+  const sr = I.series || {}, tr = (I.trends || []).filter(t => t.text);
+  if (tr.length) h += `<section class="sec">${lab("This week vs your usual")}<div class="card list">${tr.map(t => `<div class="row"><span class="rt"><span class="rl">${esc(t.text)}</span></span>${spark((sr[t.key] || []).slice(-28), t.good === true ? "up" : t.good === false ? "down" : "")}</div>`).join("")}</div></section>`;
+  if (I.waiting?.length) h += `<section class="sec"><div class="labrow">${lab("Coming soon")}<span class="rs">${c.planner_days || 0} planner days · ${c.sleep_days || 0} nights of sleep</span></div><div class="card list">${I.waiting.slice(0, 4).map(w => `<div class="row"><span class="rt"><span class="rl">${esc(w.label)}</span><span class="prog"><i style="width:${Math.round(100 * w.have / (w.have + w.need || 1))}%"></i></span><span class="rs">${w.need} more day${w.need === 1 ? "" : "s"}${w.short_side ? ` (needs more ${esc(w.short_side)})` : ""}</span></span></div>`).join("")}</div></section>`;
+  if (I.note) h += `<p class="rs legend">${esc(I.note)}</p>`;
+  return h;
+}
 
 // ---------- views
 function viewSetup() {
@@ -470,9 +516,10 @@ function viewToday() {
     return `<div class="tile k-${b.key}${on ? " on" : ""}"><button class="tile-main" data-open="${b.key}" aria-label="Open ${KIND[b.key]}">
       <span class="tile-ic">${IC[b.key]}</span><span class="tile-name">${KIND[b.key]}</span><span class="tile-sub">${tileDetail(day, b.key)}</span></button>
       <button class="tile-check" role="checkbox" aria-checked="${on}" aria-label="${KIND[b.key]} done" data-list="${date}" data-item="${b.key}"><span class="box">${IC.check}</span></button></div>`; }).join("")}</div>`;
+  if (date === t) h += feelRow(date) + insightCard();
   const stepped = day.boxes.filter(b => b.steps?.length);
   for (const b of stepped) { const n = stepsDone(date, b);
-    h += `<section class="sec">${lab(`${esc(KIND[b.key] || cap(b.label))} <span class="cnt">${n === b.steps.length ? "done" : `${n} of ${b.steps.length}`}</span>`)}<div class="card list compact">${b.steps.map(x => checkRow(`data-list="${date}" data-item="${x.key}"`, tickGet(date, x), recipeLinks(cap(x.label)), "")).join("")}</div></section>`; }
+    h += `<section class="sec">${lab(`${esc(KIND[b.key] || cap(b.label))} <span class="cnt">${n === b.steps.length ? "done" : `${n} of ${b.steps.length}`}</span>`)}<div class="card list compact">${b.steps.map(x => checkRow(`data-list="${date}" data-item="${x.key}"`, tickGet(date, x), recipeLinks(cap(x.label)), "", linkBtns(x))).join("")}</div></section>`; }
   const plain = other.filter(b => !b.steps?.length);
   if (plain.length) h += `<div class="card list">${plain.map(b => checkRow(`data-list="${date}" data-item="${b.key}"`, tickGet(date, b), recipeLinks(cap(b.label)), "")).join("")}</div>`;
   const pf = S.plan?.program?.daily;
@@ -486,7 +533,7 @@ function viewToday() {
   if (due.length || radar.length || ev.length) {
     h += `<section class="sec">${lab("On your radar")}<div class="card list">
       ${ev.map(e => `<div class="row"><span class="dot warm"></span><span class="rt"><span class="rl">${esc(e.what)}</span>${e.notes ? `<span class="rs">${esc(e.notes)}</span>` : ""}</span></div>`).join("")}
-      ${due.map(i => checkRow(`data-list="inbox" data-item="${i.key}"`, tickGet("inbox", i), esc(i.what), i.steps?.length ? `Due today · ${stepsDone("inbox", i)} of ${i.steps.length} steps` : "Due today") + (i.steps || []).map(x => checkRow(`data-list="inbox" data-item="${x.key}"`, tickGet("inbox", x), "↳ " + esc(x.text), "")).join("")).join("")}
+      ${due.map(i => checkRow(`data-list="inbox" data-item="${i.key}"`, tickGet("inbox", i), esc(i.what), i.steps?.length ? `Due today · ${stepsDone("inbox", i)} of ${i.steps.length} steps` : "Due today") + (i.steps || []).map(x => checkRow(`data-list="inbox" data-item="${x.key}"`, tickGet("inbox", x), "↳ " + esc(x.text), "", linkBtns(x))).join("")).join("")}
       ${radar.map(x => `<div class="row"><span class="dot"></span><span class="rt"><span class="rl n">${recipeLinks(cap(x))}</span></span></div>`).join("")}</div></section>`;
   }
   return h;
@@ -640,7 +687,7 @@ function viewFood() {
 
 function viewYou() {
   const P = S.plan; if (!P) return hero("", "You") + `<div class="empty">${IC.you}<p>Loading…</p></div>`;
-  let h = hero("Progress and the long game", "You");
+  let h = hero("Progress and the long game", "You") + viewInsights();
   h += `<section class="sec">${lab("Streaks")}<div class="tiles four">${Object.entries(KIND).map(([k, l]) => { const n = streak(k); return `<div class="card streak${n ? " hot" : ""}"><span class="st-ic">${n ? IC.flame : IC[k]}</span><b>${n}</b><span>${l}${n === 1 ? " · 1 day" : n ? ` · ${n} days` : ""}</span></div>`; }).join("")}</div></section>`;
   // practice minutes, last 7 days
   const days = [...Array(7)].map((_, i) => addDays(todayIso(), i - 6));
@@ -816,9 +863,20 @@ function render() {
   document.getElementById("tabs").innerHTML = TABS.map(([k, l]) => `<button data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ""}>${IC[k]}<span>${l}</span></button>`).join("");
   if (SH.kind) refreshSheet();
   drawTimers();
+  if (S.go && S.plan) { const g = S.go; S.go = null; setTimeout(() => goTarget(g)); }
 }
 const VALID = TABS.map(t => t[0]);
-const fromHash = () => { const h = location.hash.slice(1); if (VALID.includes(h)) S.tab = h; };
+const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)); if (h.startsWith("go/")) { S.go = h.slice(3); history.replaceState(null, "", "#" + S.tab); } else if (VALID.includes(h)) S.tab = h; };
+// app:<target> links from steps (and the Android app's "#go/<target>"): open the view where the step gets done.
+function goTarget(t) {
+  const [k, arg] = t.split("/"); eng("web_go:" + k);
+  if (["body", "pelvic", "piano", "voice", "meals"].includes(k)) { if (S.tab !== "today") goTab("today"); openKind(k); }
+  else if ((k === "recipe" || k === "cook") && arg) show("recipe", () => drawRecipe(arg));
+  else if (k === "kroger" || k === "freezer" || k === "recipes") { S.food = k === "kroger" ? "list" : k; goTab("food"); }
+  else if (k === "calendar" || k === "inbox" || k === "wish") { goTab("soon"); if (k === "wish") setTimeout(() => document.getElementById("capture-text")?.focus(), 50); }
+  else if (k === "bugs") { const text = prompt("What bugs you? A mess, a chore, anything you keep walking past."); if (text?.trim()) gh("issues", { method: "POST", body: JSON.stringify({ title: `Bugs me: ${text.trim().slice(0, 80)}`, body: `Captured on planLAB web on ${nice(todayIso())}. Claude: turn it into steps.` }) }).catch(() => alert("Couldn't send it. Try again online.")); }
+  else if (VALID.includes(k)) goTab(k);
+}
 fromHash();
 addEventListener("hashchange", () => { fromHash(); render(); });
 const goTab = k => { if (S.tab !== k) eng("web_tab:" + k); S.tab = k; history.replaceState(null, "", "#" + k); render(); scrollTo({ top: 0 }); };
@@ -826,6 +884,8 @@ const goTab = k => { if (S.tab !== k) eng("web_tab:" + k); S.tab = k; history.re
 document.addEventListener("click", async e => {
   const q = s => e.target.closest(s);
   let el;
+  if ((el = q("[data-go]"))) { e.preventDefault(); goTarget(el.dataset.go); return; }
+  if ((el = q("[data-ext]"))) { eng("web_link"); return; }
   if ((el = q("[data-recipe]"))) { e.preventDefault(); const slug = el.dataset.recipe; show("recipe", () => drawRecipe(slug)); return; }
   if (q("#close-sheet") || e.target.id === "sheet") { closeSheet(); return; }
   if ((el = q("[data-timer]"))) { T.list = T.list.filter(t => t.id !== el.dataset.timer); runTimers(); return; }
@@ -835,6 +895,7 @@ document.addEventListener("click", async e => {
   if (q("#ses-pause")) { togglePause(); return; }
   if (q("#ses-next")) { nextStep(); return; }
   if (q("#ses-stop")) { finishSession(); return; }
+  if ((el = q("[data-feel]"))) { const n = +el.dataset.feel; S.log.ticks["feel-" + todayIso()] = Object.fromEntries([1, 2, 3, 4, 5].map(i => [String(i), i === n])); touch(); eng("feel"); try { navigator.vibrate && navigator.vibrate(8); } catch {} render(); return; }
   if ((el = q("[data-addmin]"))) { logMinutes(S.day, el.dataset.addmin, +el.dataset.m); render(); return; }
   if ((el = q("[data-set]"))) { const sk = "sets-" + S.day; S.log.ticks[sk] = { ...(S.log.ticks[sk] || {}), [el.dataset.set]: +el.dataset.n }; touch();
     const w = workoutFor(findDay(S.day)); if (w && w.moves.every(m => (S.log.ticks[sk][m.key] || 0) >= m.sets)) { tickPut(S.day, "body", true); beep(1); } render(); return; }

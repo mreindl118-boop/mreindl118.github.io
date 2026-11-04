@@ -281,6 +281,9 @@ h1, h2, p { margin: 0; }
 .tailbtn { flex: none; width: 48px; align-self: stretch; display: grid; place-items: center; color: var(--accent); }
 .tailbtn svg { width: 20px; height: 20px; }
 .tailbtn:active { background: var(--sunk); }
+.lbtns { flex: none; display: flex; gap: 6px; align-items: center; padding-right: 10px; flex-wrap: wrap; justify-content: flex-end; max-width: 46%; }
+.lbtn { display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border-radius: 999px; background: var(--accent-soft, var(--sunk)); color: var(--accent); font-weight: 700; font-size: 13px; text-decoration: none; white-space: nowrap; }
+.lbtn:active { filter: brightness(.95); }
 .center { text-align: center; justify-self: center; }
 .pad { padding: 16px; }
 .seg.three { grid-template-columns: repeat(3, 1fr); }
@@ -382,6 +385,24 @@ a.iconbtn { color: var(--accent); margin-left: auto; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
 @media (max-width: 350px) { .tiles, .recipes { grid-template-columns: 1fr; } .tag { width: 64px; } }
+/* insights */
+.feel { padding: 12px 14px; display: grid; gap: 8px; }
+.feel .rl { font-weight: 700; }
+.feel-b { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.feel-b button { display: grid; justify-items: center; gap: 2px; padding: 8px 0; border-radius: var(--r-ctl); background: var(--sunk); color: var(--muted); font-size: 12px; transition: background .15s var(--ease); }
+.feel-b button b { font: 800 18px var(--round); color: var(--fg); }
+.feel-b button.on { background: var(--accent); color: var(--accent-ink); }
+.feel-b button.on b { color: var(--accent-ink); }
+.ins-head { display: grid; gap: 4px; padding: 14px; width: 100%; background: var(--accent-soft); }
+.ins-head .rl { font-weight: 700; }
+.ins-head .rs { color: var(--muted); font-size: 14px; }
+.spark { width: 84px; height: 28px; flex: none; }
+.spark polyline { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.spark.up polyline { stroke: var(--ok); } .spark.down polyline { stroke: var(--warn); }
+.bars { display: grid; gap: 4px; margin: 6px 0 2px; }
+.bar, .prog { display: block; height: 8px; border-radius: 99px; background: var(--sunk); overflow: hidden; }
+.bar i, .prog i { display: block; height: 100%; border-radius: 99px; background: var(--warn); }
+.bar.b i { background: var(--ok); } .prog { margin: 6px 0 2px; } .prog i { background: var(--accent); }
 </style>
 </head>
 <body>

@@ -85,6 +85,7 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
         }
         item { Label("Your call") ; CallCard(b) }
         item { Label("Check off"); Tiles(day, b) }
+        if (date == today) item { Spacer(Modifier.height(12.dp)); FeelRow(date); Spacer(Modifier.height(10.dp)); InsightHead { onOpen("insights") } }
         item { Label("Eat"); EatCard(day, date) }
         val stepped = day.boxes.filter { it.steps.isNotEmpty() }.sortedBy { Store.MAIN.indexOf(it.key).let { i -> if (i < 0) 99 else i } }
         if (stepped.isNotEmpty()) {
@@ -141,9 +142,11 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
                 for (i in due) {
                     val on = LogDoc.ticked(st.log, "inbox", i.key, i.done)
                     RowItem(lead = { CheckDot(on, tk.accent, 28.dp) { Store.tick("inbox", i.key, !on) } }, title = i.what, sub = if (i.steps.isEmpty()) "Due today" else "Due today · ${i.steps.count { LogDoc.ticked(st.log, "inbox", it.key, it.done) }} of ${i.steps.size} steps")
+                    if (i.links.isNotEmpty() && !on) LinkChips(i.links, i.what, tk.accent, Modifier.padding(start = 40.dp, bottom = 6.dp))
                     for (sub in i.steps) {
                         val so = LogDoc.ticked(st.log, "inbox", sub.key, sub.done)
                         RowItem(Modifier.padding(start = 28.dp), lead = { CheckDot(so, tk.accent, 24.dp) { Store.tick("inbox", sub.key, !so) } }, title = sub.text, titleColor = if (so) tk.muted else tk.fg)
+                        if (sub.links.isNotEmpty() && !so) LinkChips(sub.links, sub.text, tk.accent, Modifier.padding(start = 64.dp, bottom = 6.dp))
                     }
                 }
                 for (c in day.coming) RowItem(lead = { Dot(tk.line) }, title = c.replaceFirstChar { it.uppercase() })

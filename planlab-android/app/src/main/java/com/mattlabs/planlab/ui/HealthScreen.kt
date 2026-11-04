@@ -67,7 +67,7 @@ fun openHealthConnectStore(ctx: Context) {
 }
 
 @Composable
-fun HealthScreen(onSettings: () -> Unit) {
+fun HealthScreen(onSettings: () -> Unit, onInsights: () -> Unit = {}) {
     val st by Store.state.collectAsState()
     val tk = t()
     val connect = rememberHealthConnect()
@@ -113,6 +113,7 @@ fun HealthScreen(onSettings: () -> Unit) {
                 }
             }
         }
+        item { Spacer(Modifier.height(12.dp)); InsightHead(onInsights) }
         for (group in listOf("Sleep", "Heart", "Move", "Body", "Food")) {
             val ms = shown.filter { it.group == group }
             if (ms.isEmpty()) continue

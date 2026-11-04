@@ -327,6 +327,22 @@ object Store {
         setStep(day, box, step, true)
     }
 
+    // ---------- insights (log/insights.json, from tools/insights.py) and the 1-tap feel check-in
+    private var insCache: Pair<String, JSONObject?> = "" to null
+    /** [plan] is only there so screens redraw when a new pull lands. */
+    @Suppress("UNUSED_PARAMETER")
+    fun insights(plan: Plan): JSONObject? {
+        val raw = files["log/insights.json"] ?: return null
+        if (insCache.first != raw) insCache = raw to runCatching { JSONObject(raw) }.getOrNull()
+        return insCache.second
+    }
+    fun feel(log: JSONObject, date: LocalDate): Int =
+        log.optJSONObject("ticks")?.optJSONObject("feel-$date")?.let { o -> (1..5).firstOrNull { o.optBoolean(it.toString()) } } ?: 0
+    fun setFeel(date: LocalDate, n: Int) {
+        count("feel")
+        addOps(*(1..5).map { LogDoc.tickOp("feel-$date", it.toString(), it == n) }.toTypedArray())
+    }
+
     fun brief(date: LocalDate = LocalDate.now()): Coach.Brief = Coach.brief(_state.value.plan, _state.value.health, date, LocalTime.now())
 
     /** Re-emits state and redraws everything that shows it. */
@@ -430,6 +446,7 @@ object Store {
     private fun pullPlan(gh: GitHub) {
         val out = mutableMapOf<String, String>()
         for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md", "rewards.md", "meals/foods.md")) gh.file(n)?.let { out[n] = it }
+        runCatching { gh.file("log/insights.json") }.getOrNull()?.let { out["log/insights.json"] = it }
         val today = LocalDate.now()
         // Only the weeks that matter now: last week, this week and anything ahead.
         val thisWeek = today.minusWeeks(1).let { "%d-W%02d".format(it.get(java.time.temporal.IsoFields.WEEK_BASED_YEAR), it.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR)) }

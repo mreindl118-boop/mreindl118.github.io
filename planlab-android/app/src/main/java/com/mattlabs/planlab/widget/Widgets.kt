@@ -9,6 +9,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalSize
 import androidx.glance.appwidget.LinearProgressIndicator
+import androidx.glance.LocalContext
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
@@ -18,6 +19,7 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
@@ -161,6 +163,15 @@ private fun TodayContent() {
                             style = TextStyle(color = if (on) WC.muted else WC.fg, fontSize = 15.sp, fontWeight = if (on) FontWeight.Normal else FontWeight.Medium), maxLines = 1)
                         val next = if (on) null else Store.nextStep(day, box)
                         if (next != null) Text("Next: ${next.label} · tap when done", style = TextStyle(color = WC.kind(box.key), fontSize = 12.sp), maxLines = 1)
+                    }
+                    val nextStep = if (on) null else Store.nextStep(day, box)
+                    val link = nextStep?.links?.firstOrNull()
+                    if (nextStep != null && link != null) {
+                        Spacer(GlanceModifier.width(6.dp))
+                        Box(GlanceModifier.height(30.dp).padding(horizontal = 10.dp).background(WC.kind(box.key)).cornerRadius(15.dp)
+                            .clickable(actionStartActivity(com.mattlabs.planlab.ui.Links.intent(LocalContext.current, link.url, "widget"))), contentAlignment = Alignment.Center) {
+                            Text(com.mattlabs.planlab.ui.Links.name(link, nextStep.label).take(10) + if (link.url.startsWith("app:")) " ›" else " ↗", style = TextStyle(color = WC.white, fontSize = 12.sp, fontWeight = FontWeight.Bold), maxLines = 1)
+                        }
                     }
                 }
             }

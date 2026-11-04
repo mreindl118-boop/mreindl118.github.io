@@ -160,10 +160,12 @@ object Notifier {
             val n = Store.stepsDone(day, box)
             base(ctx, CH_NUDGE, "${Store.LABEL[key] ?: box.label} · step ${n + 1} of ${box.steps.size}", next.label + if (n == 0 && title.isNotBlank()) "\n$title" else "")
                 .addAction(action(ctx, "✓ Done", "step", slot, key, notif = id, step = next.key))
+                .also { nb -> next.links.firstOrNull()?.let { l -> nb.addAction(NotificationCompat.Action.Builder(0, com.mattlabs.planlab.ui.Links.name(l, next.label).take(16), linkIntent(ctx, l.url)).build()) } }
         } else {
             base(ctx, CH_NUDGE, title, text).addAction(action(ctx, whole?.first ?: "Done", "done", slot, key, whole?.second ?: 0, id))
         }
-        snoozes.forEach { (label, m) -> nb.addAction(action(ctx, label, "snooze", slot, minutes = m, notif = id)) }
+        // Android shows three buttons: Done, the step's link (if any) or snooze, and Skip.
+        if (next?.links.isNullOrEmpty()) snoozes.forEach { (label, m) -> nb.addAction(action(ctx, label, "snooze", slot, minutes = m, notif = id)) }
         nb.addAction(action(ctx, "Skip today", "skip", slot, key, notif = id))
         post(ctx, id, nb)
         return true
@@ -206,6 +208,9 @@ object Notifier {
     fun foodIntent(ctx: Context): PendingIntent =
         PendingIntent.getActivity(ctx, 78, Intent(ctx, com.mattlabs.planlab.ui.FoodActivity::class.java).putExtra("from", "notif").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+    fun linkIntent(ctx: Context, url: String): PendingIntent =
+        PendingIntent.getActivity(ctx, url.hashCode(), com.mattlabs.planlab.ui.Links.intent(ctx, url, "notif"), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
     fun bugIntent(ctx: Context): PendingIntent =
         PendingIntent.getActivity(ctx, 77, Intent(ctx, com.mattlabs.planlab.ui.BugActivity::class.java).putExtra("from", "notif").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),

@@ -46,6 +46,9 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private var tab by mutableStateOf("today")
     private var settings by mutableStateOf(false)
+    /** An "app:" target the planner should open (from a step's link), and a counter so the same one opens twice. */
+    private var go by mutableStateOf<String?>(null)
+    private var goN by mutableStateOf(0)
 
     private val askNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { Alarms.scheduleAll(this) }
 
@@ -82,6 +85,7 @@ class MainActivity : ComponentActivity() {
     private fun handle(i: Intent?) {
         i ?: return
         i.getStringExtra("tab")?.let { tab = it; settings = false }
+        i.getStringExtra("go")?.let { t -> tab = Links.tabFor(t); settings = false; if (tab == "planner") { go = t; goN++ }; i.removeExtra("go") }
         i.getStringExtra("from")?.let { Store.count("open_from:$it"); i.removeExtra("from") }
         i.getStringExtra("bug")?.let { openBug(this, "shortcut", camera = it == "photo"); i.removeExtra("bug") }
         i.getStringExtra("food")?.let { openFood(this, "shortcut"); i.removeExtra("food") }
@@ -114,10 +118,11 @@ class MainActivity : ComponentActivity() {
                     Column(Modifier.fillMaxSize()) {
                         when (k) {
                             "today" -> TodayScreen(loading, onSettings = { settings = true }, onOpen = { tab = it })
-                            "health" -> HealthScreen(onSettings = { settings = true })
+                            "health" -> HealthScreen(onSettings = { settings = true }, onInsights = { tab = "insights" })
                             "week" -> WeekScreen()
                             "progress" -> ProgressScreen()
-                            else -> PlannerScreen(onBack = back)
+                            "insights" -> InsightsScreen(onBack = back)
+                            else -> PlannerScreen(onBack = back, go = go, goN = goN)
                         }
                     }
                 }
