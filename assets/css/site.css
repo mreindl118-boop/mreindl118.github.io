@@ -15,6 +15,7 @@
   --pine: #2E4A3B;
   --clay: #B4603A;
   --moss: #B7C95A;
+  --leaf: #7A9A3C; /* the logo's middle arc: decorative marks only, never text on paper (2.9:1) */
   --sans: 'IBM Plex Sans', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
@@ -74,8 +75,9 @@ img { max-width: 100%; }
 .navlinks a:hover { color: var(--clay); }
 .navlinks a .ind { display: flex; align-items: center; width: 100%; opacity: 0; }
 .navlinks a.active .ind { opacity: 1; }
-.navlinks .ind .sq { display: block; width: 4px; height: 4px; background: var(--clay); flex-shrink: 0; }
-.navlinks .ind .ln { display: block; flex: 1; height: 1.5px; background: var(--clay); }
+/* the current-tab indicator carries the logo's three colours: pine square, leaf line, clay ring */
+.navlinks .ind .sq { display: block; width: 4px; height: 4px; background: var(--pine); flex-shrink: 0; }
+.navlinks .ind .ln { display: block; flex: 1; height: 1.5px; background: var(--leaf); }
 .navlinks .ind .ci { display: block; width: 5px; height: 5px; border: 1.5px solid var(--clay); border-radius: 50%; box-sizing: border-box; flex-shrink: 0; }
 
 /* Gliding indicator: a floating copy that slides between tabs on click */
@@ -101,6 +103,10 @@ img { max-width: 100%; }
 .rule-motif .ci { display: block; width: 7px; height: 7px; border: 1px solid currentColor; border-radius: 50%; box-sizing: border-box; flex-shrink: 0; }
 .rule-motif.thick .ln { height: 1.5px; }
 .rule-motif.thick .ci { border-width: 1.5px; }
+/* On paper the motif takes the logo's colours (the dark footer keeps its own tone) */
+main .rule-motif .sq { background: var(--pine); }
+main .rule-motif .ln { background: var(--leaf); }
+main .rule-motif .ci { border-color: var(--clay); }
 
 /* ---------- Buttons ---------- */
 .btn {
