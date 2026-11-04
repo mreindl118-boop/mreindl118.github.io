@@ -50,7 +50,7 @@ class MdTest {
         assertEquals(listOf("piano/warm-up-five-finger-pattern-3-min", "piano/g-major-scale-hands-separate", "piano/test-piece-bars-1-4-slow"), piano.steps.map { it.key })
         assertEquals("Warm-up: five-finger pattern, 3 min", piano.steps[0].label)
         assertTrue(piano.steps[1].done)
-        assertEquals("Stretch", mon.boxes.last().label)
+        assertEquals("stretch", mon.boxes.last().label)
         assertEquals(1, mon.boxes.last().steps.size)
         val tue = plan.weeks.single().days[1]
         assertEquals(3, tue.boxes.size)
