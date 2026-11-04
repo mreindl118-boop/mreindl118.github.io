@@ -6,16 +6,6 @@ const REPO = "mreindl118-boop/GeneralStorage";
 const DIR = "projects/planlab";
 const KEY_URL = "https://github.com/settings/personal-access-tokens/new?name=planLAB&description=Read%20my%20planner%20on%20my%20phone&target_name=mreindl118-boop&expires_in=none&contents=read&issues=write";
 
-const ICON = {
-  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
-  left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
-  right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
-  today: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.5l2.8 2.8L16.5 9.5"/></svg>',
-  week: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
-  soon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3.5l2.5 5.2 5.7.8-4.1 4 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4.1-4 5.7-.8z"/></svg>',
-  food: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 11h16a8 8 0 0 1-16 0zM8 4c0 2 2 2 2 4M13 4c0 2 2 2 2 4"/></svg>',
-};
-const TABS = [["today","Today"],["week","Week"],["soon","Coming up"],["food","Food"]];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const pad = n => String(n).padStart(2, "0");
 const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -109,7 +99,7 @@ function parseRecipe(slug, text) {
 }
 
 // ---------- GitHub
-const S = { tab: "today", day: todayIso(), plan: store.json("planlab-cache", null), ticks: store.json("planlab-ticks", {}), loading: false, error: "", token: store.get("planlab-key"), msg: "" };
+const S = { tab: "today", food: "list", setupStep: 1, day: todayIso(), plan: store.json("planlab-cache", null), ticks: store.json("planlab-ticks", {}), loading: false, error: "", token: store.get("planlab-key"), msg: "" };
 async function gh(path, raw) {
   const r = await fetch(`https://api.github.com/repos/${REPO}/${path}`, { headers: { Authorization: `Bearer ${S.token}`, Accept: raw ? "application/vnd.github.raw+json" : "application/vnd.github+json" }, cache: "no-store" });
   if (r.status === 401 || r.status === 403 || r.status === 404) { const e = new Error("key"); e.status = r.status; throw e; }
@@ -166,101 +156,169 @@ function boxDetail(day, key) {
   return p ? esc(p.replace(new RegExp("^" + key + "\\s*", "i"), "")) : "";
 }
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-const TITLES = { meals: "Eat", body: "Body", piano: "Piano", voice: "Voice", groceries: "Groceries ordered" };
 
-// ---------- views
-const checkRow = (attrs, checked, label, detail) => `<button class="check" role="checkbox" aria-checked="${checked}" ${attrs}><span class="box">${ICON.check}</span><span class="txt"><span class="label">${label}</span>${detail ? `<span class="detail">${detail}</span>` : ""}</span></button>`;
-const head2 = (title, right) => `<div class="h2row"><h2>${title}</h2>${right ? `<span class="note">${right}</span>` : ""}</div>`;
-function bigChip(date) {
+// ---------- icons (one stroke family, 24px grid)
+const I = (d, w = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const IC = {
+  check: I('<path d="M5 12.5l4.5 4.5L19 7.5"/>', 3),
+  left: I('<path d="M15 5l-7 7 7 7"/>', 2.4),
+  right: I('<path d="M9 5l7 7-7 7"/>', 2.4),
+  close: I('<path d="M6 6l12 12M18 6L6 18"/>', 2.4),
+  meals: I('<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 1.5-3 4-3 7h3v11"/>'),
+  body: I('<circle cx="12" cy="4.5" r="2"/><path d="M5 9l7 1.5L19 9M12 10.5V15l-3.5 6M12 15l3.5 6"/>'),
+  piano: I('<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M8 5v8M12 5v8M16 5v8M6.5 13h3M10.5 13h3M14.5 13h3M8 13v6M12 13v6M16 13v6"/>', 1.7),
+  voice: I('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>'),
+  task: I('<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12l2.5 2.5 4.5-5"/>'),
+  today: I('<circle cx="12" cy="12" r="8.5"/><path d="M8 12.5l2.8 2.8L16.5 9.5"/>'),
+  week: I('<rect x="3.5" y="5" width="17" height="15" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'),
+  soon: I('<path d="M12 3.5l2.5 5.2 5.7.8-4.1 4 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4.1-4 5.7-.8z"/>'),
+  food: I('<path d="M4 11h16a8 8 0 0 1-16 0zM8 4c0 2 2 2 2 4M13 4c0 2 2 2 2 4"/>'),
+  plus: I('<path d="M12 5v14M5 12h14"/>', 2.4),
+  heart: I('<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>'),
+  clock: I('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
+  refresh: I('<path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/>'),
+  key: I('<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l2 2M14 9l2 2"/>'),
+  paste: I('<rect x="6" y="4" width="12" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/>'),
+};
+const TABS = [["today", "Today"], ["week", "Week"], ["soon", "Coming up"], ["food", "Food"]];
+const KIND = { meals: ["Eat", "meals"], body: ["Body", "body"], piano: ["Piano", "piano"], voice: ["Voice", "voice"] };
+
+// ---------- small pieces
+const ring = (done, n, size = 64) => {
+  const r = size / 2 - 5, c = 2 * Math.PI * r, f = n ? done / n : 0;
+  return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${size/2}" cy="${size/2}" r="${r}" class="ring-bg"/><circle cx="${size/2}" cy="${size/2}" r="${r}" class="ring-fg${f === 1 ? " full" : ""}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - f)}" transform="rotate(-90 ${size/2} ${size/2})"/></svg>`;
+};
+const pill = (label, tone = "") => `<span class="pill ${tone}">${label}</span>`;
+const lab = t => `<h2 class="lab">${t}</h2>`;
+function bigPill(date) {
   const s = bigDay(); if (!s) return "";
   const n = daysBetween(date, s.date), name = bigName(s);
-  if (n > 1) return `<span class="chip">${n} days to ${esc(name)}</span>`;
-  if (n === 1) return `<span class="chip">${esc(cap(name))} tomorrow</span>`;
-  if (n === 0) return `<span class="chip">${esc(cap(name))} today</span>`;
-  return `<span class="chip blue">Day ${-n} after ${esc(name)}</span>`;
+  if (n > 1) return pill(`${n} days to ${esc(name)}`, "warm");
+  if (n === 1) return pill(`${esc(cap(name))} tomorrow`, "warm");
+  if (n === 0) return pill(`${esc(cap(name))} today`, "warm");
+  return pill(`Day ${-n} after ${esc(name)}`, "soft");
 }
+const checkRow = (attrs, checked, label, sub) => `<button class="row check" role="checkbox" aria-checked="${checked}" ${attrs}><span class="box">${IC.check}</span><span class="rt"><span class="rl">${label}</span>${sub ? `<span class="rs">${sub}</span>` : ""}</span></button>`;
+function tileDetail(day, key) {
+  if (key === "meals") return `${day.eat.length} meals${(day.eat.join(" ").match(/~?\d+ g protein/) || [""])[0] ? " · " + day.eat.join(" ").match(/~?\d+ g protein/)[0] : ""}`;
+  if (key === "body") return esc(day.body.replace(/\s*\(.*\)/, ""));
+  const p = day.practice.find(x => x.toLowerCase().startsWith(key));
+  return p ? esc(p.replace(new RegExp("^" + key + "\\s*", "i"), "").replace(/\s*\(.*\)/, "")) : "";
+}
+const MEAL = ["Breakfast", "Lunch", "Dinner", "Also"];
 
+// ---------- views
 function viewSetup() {
-  return `<header class="top"><div class="t"><h1>planLAB</h1><div class="sub">Your plan, on this phone</div></div></header>
-  <section class="section"><p>Your planner lives in your private GitHub repo. This page reads it with a key that stays on this phone. You set it up once.</p></section>
-  <section class="section">${head2("1. Make a key")}
-    <p><a class="btn" href="${KEY_URL}" target="_blank" rel="noopener">Make my key on GitHub</a></p>
-    <p class="note">Under Repository access pick <b>Only select repositories</b> and choose <b>GeneralStorage</b>. Everything else is filled in. Tap Generate, then Copy.</p></section>
-  <section class="section">${head2("2. Paste it here")}
-    <form class="capture" id="keyform"><input id="key-input" type="password" placeholder="github_pat_…" autocomplete="off" aria-label="GitHub key"><button class="btn">Open my plan</button></form></section>
-  ${S.error ? `<p class="status" role="status">${esc(S.error)}</p>` : ""}`;
+  const step = S.setupStep || 1;
+  return `<section class="setup">
+    <div class="setup-mark">${IC.today}</div>
+    <h1>planLAB</h1>
+    <p class="lead">Your plan for today, this week and what's coming up.</p>
+    <ol class="steps">
+      <li class="${step === 1 ? "on" : "done"}"><span class="num">${step > 1 ? IC.check : "1"}</span><div><b>Make your key</b><span>GitHub opens with everything filled in. Pick <b>GeneralStorage</b> under repository access, tap Generate, then Copy.</span>
+        <a class="btn" href="${KEY_URL}" target="_blank" rel="noopener" data-step="2">${IC.key} Make my key</a></div></li>
+      <li class="${step === 2 ? "on" : ""}"><span class="num">2</span><div><b>Paste it here</b><span>It stays on this phone. You only do this once.</span>
+        <form id="keyform" class="field"><input id="key-input" type="password" placeholder="github_pat_…" autocomplete="off" aria-label="Your GitHub key"><button type="button" class="btn ghost icon" id="paste" aria-label="Paste">${IC.paste}</button></form>
+        <button class="btn" form="keyform">Open my plan</button></div></li>
+    </ol>
+    ${S.error ? `<p class="toast-inline" role="status">${esc(S.error)}</p>` : ""}
+  </section>`;
 }
 
 function viewToday() {
   const date = S.day, day = findDay(date), t = todayIso();
   const title = date === t ? "Today" : date === addDays(t, 1) ? "Tomorrow" : date === addDays(t, -1) ? "Yesterday" : nice(date, { weekday: "long" });
-  let h = `<header class="top"><button class="navbtn" data-go="-1" aria-label="Previous day">${ICON.left}</button>
-    <div class="t"><h1>${title}</h1><div class="sub">${nice(date, { weekday: "long", month: "long", day: "numeric" })} ${bigChip(date)}</div></div>
-    <button class="navbtn" data-go="1" aria-label="Next day">${ICON.right}</button></header>`;
-  if (date !== t) h += `<p><button class="btn small" data-jump="${t}">Back to today</button></p>`;
+  const c = day ? dayCount(day) : { n: 0, done: 0 }, all = c.n && c.done === c.n;
+  let h = `<header class="hero">
+    <div class="hero-t"><p class="eyebrow">${nice(date, { weekday: "long", month: "long", day: "numeric" })}</p><h1>${title}</h1><div class="pills">${bigPill(date)}${date !== t ? `<button class="pill btnpill" data-jump="${t}">Back to today</button>` : ""}</div></div>
+    ${day ? `<div class="hero-ring${all ? " pop" : ""}">${ring(c.done, c.n, 76)}<span class="ring-n">${all ? IC.check : `${c.done}<small>/${c.n}</small>`}</span></div>` : ""}
+    <div class="daynav"><button class="iconbtn" data-go="-1" aria-label="Previous day">${IC.left}</button><button class="iconbtn" data-go="1" aria-label="Next day">${IC.right}</button></div>
+  </header>`;
   if (!day) {
     const last = allDays().at(-1);
-    h += `<div class="empty">${!S.plan ? "Loading your plan…" : last && date > last.date ? "This day isn't planned yet. Claude writes next week's plan on Sunday." : "Nothing planned for this day."}</div>`;
-  } else {
-    const { n, done } = dayCount(day);
-    h += `<section class="section">${head2("Do today", `${done} of ${n} done`)}<div class="progress" aria-hidden="true"><i style="width:${n ? done / n * 100 : 0}%"></i></div>
-      <div class="list">${day.boxes.map(b => checkRow(`data-list="${date}" data-item="${b.key}"`, tickGet(date, b), esc(TITLES[b.key] || cap(b.label)), boxDetail(day, b.key))).join("")}</div></section>`;
-    const extra = day.practice.filter(p => !day.boxes.some(b => p.toLowerCase().startsWith(b.key)));
-    if (extra.length) h += `<p class="note">Also, if you feel like it: ${extra.map(esc).join(" · ")}</p>`;
-    if (day.coming.length) h += `<section class="section">${head2("On your radar")}<div class="list">${day.coming.map(c => `<div class="row"><span class="what">${recipeLinks(c)}</span></div>`).join("")}</div></section>`;
+    return h + `<div class="empty">${IC.week}<p>${!S.plan ? "Loading your plan…" : last && date > last.date ? "Not planned yet. Next week's plan arrives Sunday." : "Nothing planned for this day."}</p></div>`;
   }
-  const due = inboxItems().filter(i => i.date === date && !tickGet("inbox", i));
-  if (due.length) h += `<section class="section">${head2(date === t ? "Due today" : "Due this day")}<div class="list">${due.map(i => checkRow(`data-list="inbox" data-item="${i.key}"`, false, esc(i.what), "")).join("")}</div></section>`;
+  if (all) h += `<p class="cheer">All done${date === t ? " today" : ""}. Nice work.</p>`;
+  else if (!store.get("planlab-tip")) h += `<p class="tip">Tap a card when it's done.</p>`;
+  const main = day.boxes.filter(b => KIND[b.key]), other = day.boxes.filter(b => !KIND[b.key]);
+  h += `<div class="tiles">${main.map(b => { const on = tickGet(date, b);
+    return `<button class="tile k-${b.key}" role="checkbox" aria-checked="${on}" data-list="${date}" data-item="${b.key}">
+      <span class="tile-top"><span class="tile-ic">${IC[b.key]}</span><span class="box">${IC.check}</span></span>
+      <span class="tile-name">${KIND[b.key][0]}</span><span class="tile-sub">${tileDetail(day, b.key)}</span></button>`; }).join("")}</div>`;
+  if (other.length) h += `<div class="card list">${other.map(b => checkRow(`data-list="${date}" data-item="${b.key}"`, tickGet(date, b), esc(cap(b.label)), "")).join("")}</div>`;
+  if (day.eat.length) h += `<section class="sec">${lab("Meals")}<div class="card list">${day.eat.map((m, i) => `<div class="row"><span class="tag">${MEAL[Math.min(i, 3)]}</span><span class="rt"><span class="rl n">${recipeLinks(m.replace(/\s*\(~?\d+ g protein\)/, ""))}</span></span></div>`).join("")}</div></section>`;
+  const extra = day.practice.filter(p => !day.boxes.some(b => p.toLowerCase().startsWith(b.key)));
+  const radar = [...day.coming, ...extra.map(x => cap(x) + " (if you feel like it)")];
+  const due = inboxItems().filter(i => i.date === date);
   const ev = (S.plan?.calendar || []).filter(e => e.date === date);
-  if (ev.length) h += `<section class="section">${head2("On the calendar")}<div class="list">${ev.map(e => `<div class="row"><span class="what">${esc(e.what)}${e.notes ? `<small>${esc(e.notes)}</small>` : ""}</span></div>`).join("")}</div></section>`;
+  if (due.length || radar.length || ev.length) {
+    h += `<section class="sec">${lab("On your radar")}<div class="card list">
+      ${ev.map(e => `<div class="row"><span class="dot warm"></span><span class="rt"><span class="rl">${esc(e.what)}</span>${e.notes ? `<span class="rs">${esc(e.notes)}</span>` : ""}</span></div>`).join("")}
+      ${due.map(i => checkRow(`data-list="inbox" data-item="${i.key}"`, tickGet("inbox", i), esc(i.what), "Due today")).join("")}
+      ${radar.map(x => `<div class="row"><span class="dot"></span><span class="rt"><span class="rl n">${recipeLinks(cap(x))}</span></span></div>`).join("")}</div></section>`;
+  }
   return h;
 }
 
 function viewWeek() {
   const w = weekOf(S.day) || (S.plan?.weeks || []).at(-1);
-  let h = `<header class="top"><div class="t"><h1>This week</h1>${w ? `<div class="sub">${nice(w.start, { month: "short", day: "numeric" })} to ${nice(addDays(w.start, 6), { month: "short", day: "numeric" })} · ${esc(w.phase)}</div>` : ""}</div></header>`;
-  if (!w) return h + `<div class="empty">${!S.plan ? "Loading your plan…" : "No week planned yet."}</div>`;
-  if (w.focus) h += `<p>${esc(cap(w.focus))}</p>`;
-  const t = todayIso();
-  h += `<section class="section">${head2("Days")}<div class="list">${w.days.map(d => { const c = dayCount(d);
-    return `<button class="row${d.date === t ? " today" : ""}" data-jump="${d.date}"><span class="when">${esc(d.label.slice(0, 3))} ${parse(d.date).getDate()}</span><span class="what">${esc(d.body)}<small>${esc(d.eat.at(-1) || "")}</small></span><span class="chip ${c.done === c.n && c.n ? "green" : "blue"}">${c.done}/${c.n}</span></button>`; }).join("")}</div></section>`;
-  if (w.glance.length) h += `<section class="section">${head2("The week at a glance")}<div class="list">${w.glance.map(g => `<div class="row"><span class="what"><b>${esc(g.label)}</b><small>${recipeLinks(g.text)}</small></span></div>`).join("")}</div></section>`;
+  let h = `<header class="hero"><div class="hero-t"><p class="eyebrow">${w ? `${nice(w.start, { month: "short", day: "numeric" })} – ${nice(addDays(w.start, 6), { month: "short", day: "numeric" })}` : ""}</p><h1>This week</h1>${w?.phase ? `<div class="pills">${pill(esc(cap(w.phase.replace(/\s*\(.*\)/, ""))), "soft")}</div>` : ""}</div></header>`;
+  if (!w) return h + `<div class="empty">${IC.week}<p>${!S.plan ? "Loading your plan…" : "No week planned yet."}</p></div>`;
+  const t = todayIso(), sel = w.days.find(d => d.date === S.day) || w.days.find(d => d.date === t) || w.days[0];
+  h += `<div class="strip">${w.days.map(d => { const c = dayCount(d);
+    return `<button class="dayp${d.date === sel.date ? " sel" : ""}${d.date === t ? " now" : ""}" data-pick="${d.date}" aria-pressed="${d.date === sel.date}"><span>${esc(d.label.slice(0, 1))}</span>${ring(c.done, c.n, 38)}<b>${parse(d.date).getDate()}</b></button>`; }).join("")}</div>`;
+  if (w.focus) h += `<p class="focus">${esc(cap(w.focus))}</p>`;
+  if (sel) {
+    const c = dayCount(sel);
+    h += `<button class="card daycard" data-jump="${sel.date}"><span class="dc-h"><b>${esc(nice(sel.date, { weekday: "long" }))}</b>${pill(`${c.done} of ${c.n}`, c.done === c.n && c.n ? "ok" : "soft")}</span>
+      <span class="dc-r">${IC.body}<span>${esc(sel.body)}</span></span><span class="dc-r">${IC.meals}<span>${esc(sel.eat.at(-1) || "")}</span></span>
+      ${sel.coming.length ? `<span class="dc-r">${IC.soon}<span>${esc(cap(sel.coming[0]))}</span></span>` : ""}<span class="dc-go">Open day ${IC.right}</span></button>`;
+  }
+  const G = { "With Elizabeth": IC.heart, Cooking: IC.meals, Groceries: IC.food };
+  if (w.glance.length) h += `<section class="sec">${lab("At a glance")}<div class="card list">${w.glance.map(g => `<div class="row"><span class="tag-ic">${G[g.label] || IC.clock}</span><span class="rt"><span class="rl">${esc(g.label.replace(/\s*\(.*\)/, ""))}</span><span class="rs">${recipeLinks(g.text)}</span></span></div>`).join("")}</div></section>`;
   const wi = S.plan.weeks.indexOf(w);
-  h += `<p class="btnrow">${wi > 0 ? `<button class="btn small" data-jump="${S.plan.weeks[wi-1].start}" data-stay="1">Last week</button>` : ""}${wi < S.plan.weeks.length - 1 ? `<button class="btn small" data-jump="${S.plan.weeks[wi+1].start}" data-stay="1">Next week</button>` : ""}</p>`;
+  h += `<div class="seg two">${wi > 0 ? `<button data-pick="${S.plan.weeks[wi-1].start}">${IC.left} Last week</button>` : "<span></span>"}${wi < S.plan.weeks.length - 1 ? `<button data-pick="${S.plan.weeks[wi+1].start}">Next week ${IC.right}</button>` : "<span></span>"}</div>`;
   return h;
 }
 
 function viewSoon() {
   const t = todayIso(), s = bigDay(), n = s ? daysBetween(t, s.date) : -1;
-  let h = `<header class="top"><div class="t"><h1>Coming up</h1></div></header>`;
-  if (s && n >= 0) h += `<div class="hero"><div class="big">${n}</div><p><strong>${n === 0 ? esc(cap(bigName(s))) + " is today" : (n === 1 ? "day until " : "days until ") + esc(bigName(s))}</strong>${esc(nice(s.date, { weekday: "short", month: "short", day: "numeric" }))}${s.notes ? ` · ${esc(s.notes)}` : ""}</p></div>`;
-  h += `<section class="section">${head2("Want to do something?")}<form class="capture" id="capture"><input id="capture-text" placeholder="See Goose in the spring" autocomplete="off" aria-label="Something you want to do"><button class="btn" id="capture-btn">Add</button></form>
-    <p class="note">${S.msg ? esc(S.msg) : "Claude gives it a date the next morning and puts it in your plan."}</p></section>`;
-  const before = inboxItems().filter(i => /^before/i.test(i.group));
-  const setup = S.plan?.setup || [];
+  let h = `<header class="hero"><div class="hero-t"><p class="eyebrow">What's ahead</p><h1>Coming up</h1></div></header>`;
+  if (s && n >= 0) h += `<div class="card count"><span class="count-n">${n}</span><span class="count-t"><b>${n === 0 ? esc(cap(bigName(s))) + " is today" : (n === 1 ? "day to " : "days to ") + esc(bigName(s))}</b><span>${esc(nice(s.date, { weekday: "long", month: "short", day: "numeric" }))}</span></span></div>`;
+  h += `<form class="card wish" id="capture"><label for="capture-text" class="lab">Want to do something?</label><div class="field"><input id="capture-text" placeholder="See Goose in the spring" autocomplete="off"><button class="btn icon" id="capture-btn" aria-label="Add">${IC.plus}</button></div><p class="rs">${S.msg ? esc(S.msg) : "Claude gives it a date the next morning."}</p></form>`;
+  const before = inboxItems().filter(i => /^before/i.test(i.group)), setup = S.plan?.setup || [];
   if (n >= 0 && (before.length || setup.length)) {
     const all = [...before.map(i => ["inbox", i, i.what, i.when]), ...setup.map(i => ["setup", i, i.text, ""])];
-    h += `<section class="section">${head2(s ? "Before " + esc(bigName(s)) : "Before then", `${all.filter(([l, i]) => tickGet(l, i)).length} of ${all.length} done`)}
-      <div class="list">${all.map(([l, i, text, when]) => checkRow(`data-list="${l}" data-item="${i.key}"`, tickGet(l, i), esc(text), esc(when))).join("")}</div></section>`;
+    const open = all.filter(([l, i]) => !tickGet(l, i)), done = all.length - open.length;
+    h += `<section class="sec"><div class="labrow">${lab(s ? "Before " + esc(bigName(s)) : "Before then")}<span class="rs">${done} of ${all.length}</span></div><div class="bar"><i style="width:${all.length ? done / all.length * 100 : 0}%"></i></div>
+      <div class="card list">${[...open, ...all.filter(([l, i]) => tickGet(l, i))].map(([l, i, text, when]) => checkRow(`data-list="${l}" data-item="${i.key}"`, tickGet(l, i), esc(text), esc(when))).join("")}</div></section>`;
   }
   const ev = (S.plan?.calendar || []).filter(e => e.date >= t);
-  if (ev.length) h += `<section class="section">${head2("Calendar")}<div class="list">${ev.map(e => `<div class="row${daysBetween(t, e.date) <= 3 ? " soon" : ""}"><span class="when">${e.approx ? "~" : ""}${nice(e.date, { month: "short", day: "numeric" })}</span><span class="what">${esc(e.what)}<small>${esc([e.who, e.notes].filter(Boolean).join(" · "))}</small></span></div>`).join("")}</div></section>`;
+  if (ev.length) h += `<section class="sec">${lab("Calendar")}<div class="card list">${ev.map(e => { const d = parse(e.date);
+    return `<div class="row"><span class="date${daysBetween(t, e.date) <= 3 ? " soon" : ""}"><small>${d.toLocaleDateString("en-US", { month: "short" })}</small>${e.approx ? "~" : ""}${d.getDate()}</span><span class="rt"><span class="rl">${esc(e.what)}</span><span class="rs">${esc([e.who, e.notes].filter(Boolean).join(" · ") || d.toLocaleDateString("en-US", { weekday: "long" }))}</span></span></div>`; }).join("")}</div></section>`;
   const later = inboxItems().filter(i => !/^(before|open)/i.test(i.group));
-  if (later.length) h += `<section class="section">${head2("Later")}<div class="list">${later.map(i => checkRow(`data-list="inbox" data-item="${i.key}"`, tickGet("inbox", i), esc(i.what), esc(i.when))).join("")}</div></section>`;
-  if (S.plan?.watching?.length) h += `<section class="section">${head2("Claude is watching for")}<div class="list">${S.plan.watching.map(w => `<div class="row"><span class="what">${esc(w)}</span></div>`).join("")}</div></section>`;
+  if (later.length) h += `<section class="sec">${lab("Later")}<div class="card list">${later.map(i => checkRow(`data-list="inbox" data-item="${i.key}"`, tickGet("inbox", i), esc(i.what), esc(i.when.replace(/\s*\(.*\)/, "")))).join("")}</div></section>`;
+  if (S.plan?.watching?.length) h += `<section class="sec">${lab("Claude is watching for")}<div class="card list">${S.plan.watching.map(w => `<div class="row"><span class="dot"></span><span class="rt"><span class="rl n">${esc(w)}</span></span></div>`).join("")}</div></section>`;
   return h;
 }
 
 function viewFood() {
-  let h = `<header class="top"><div class="t"><h1>Food</h1></div></header>`;
-  const g = (S.plan?.groceries || []).at(-1);
-  if (g) {
+  const mode = S.food || "list";
+  let h = `<header class="hero"><div class="hero-t"><p class="eyebrow">Eat well, cook less</p><h1>Food</h1></div></header>
+    <div class="seg" role="tablist"><button role="tab" aria-selected="${mode === "list"}" data-food="list">Kroger list</button><button role="tab" aria-selected="${mode === "recipes"}" data-food="recipes">Recipes</button></div>`;
+  if (mode === "list") {
+    const g = (S.plan?.groceries || []).at(-1);
+    if (!g) return h + `<div class="empty">${IC.food}<p>${!S.plan ? "Loading…" : "No list this week."}</p></div>`;
     const id = `groceries-${g.week}`, items = g.sections.flatMap(s => s.items), done = items.filter(i => tickGet(id, i)).length;
-    h += `<section class="section">${head2(`Kroger list · ${esc(g.pickup || g.week)}`, `${done} of ${items.length}`)}<div class="progress" aria-hidden="true"><i style="width:${items.length ? done / items.length * 100 : 0}%"></i></div></section>`;
-    for (const s of g.sections) h += `<section class="section">${head2(esc(s.name))}<div class="list plain">${s.items.map(i => checkRow(`data-list="${id}" data-item="${i.key}"`, tickGet(id, i), esc(i.text), "")).join("")}</div></section>`;
+    h += `<div class="labrow"><span class="rs">${g.pickup ? "Pickup " + esc(g.pickup) : esc(g.week)}</span><span class="rs">${done} of ${items.length} in the cart</span></div><div class="bar"><i style="width:${items.length ? done / items.length * 100 : 0}%"></i></div>`;
+    for (const s of g.sections) {
+      const left = s.items.filter(i => !tickGet(id, i)).length;
+      h += `<section class="sec">${lab(`${esc(s.name)} <span class="cnt">${left ? left + " left" : "done"}</span>`)}<div class="card list compact">${[...s.items.filter(i => !tickGet(id, i)), ...s.items.filter(i => tickGet(id, i))].map(i => checkRow(`data-list="${id}" data-item="${i.key}"`, tickGet(id, i), esc(i.text), "")).join("")}</div></section>`;
+    }
+  } else {
+    const rs = S.plan?.recipes || [];
+    h += rs.length ? `<div class="recipes">${rs.map(r => `<button class="card rcard" data-recipe="${r.slug}"><span class="rc-p"><b>${r.protein ?? "?"}</b>g protein</span><span class="rc-t">${esc(r.title)}</span><span class="rc-m">${r.kcal ?? "?"} kcal${r.standing ? ` · ${esc(/none/i.test(r.standing) ? "no standing" : r.standing.split(/[;(,]/)[0].trim() + " standing")}` : ""}</span></button>`).join("")}</div>` : `<div class="empty">${IC.food}<p>${!S.plan ? "Loading…" : "No recipes yet."}</p></div>`;
   }
-  const rs = S.plan?.recipes || [];
-  h += `<section class="section">${head2("Recipes")}${rs.length ? `<div class="list">${rs.map(r => `<button class="recipe" data-recipe="${r.slug}"><span class="name">${esc(r.title)}</span><span class="macros"><span><b>${r.protein ?? "?"} g</b> protein</span><span>${r.kcal ?? "?"} kcal</span>${r.standing ? `<span>Standing: ${esc(r.standing.split(/[;(]/)[0].trim())}</span>` : ""}</span></button>`).join("")}</div>` : `<div class="empty">${!S.plan ? "Loading recipes…" : "No recipes yet."}</div>`}</section>`;
   return h;
 }
 
@@ -269,10 +327,8 @@ function md(src) {
   const out = [], lines = src.split("\n"); let i = 0;
   while (i < lines.length) {
     const l = lines[i];
-    if (/^#\s/.test(l)) { out.push(`<h1>${inline(l.slice(2))}</h1>`); i++; }
-    else if (/^##\s/.test(l)) { out.push(`<h2>${inline(l.slice(3))}</h2>`); i++; }
-    else if (/^\|/.test(l)) { const rows = []; while (i < lines.length && /^\|/.test(lines[i])) { if (!/^\|[\s\-|]+\|$/.test(lines[i].trim())) rows.push(lines[i].trim().replace(/^\||\|$/g, "").split("|")); i++; }
-      out.push(`<div class="tbl"><table>${rows.map((r, k) => `<tr>${r.map(c => k ? `<td>${inline(c.trim())}</td>` : `<th>${inline(c.trim())}</th>`).join("")}</tr>`).join("")}</table></div>`); }
+    if (/^#\s/.test(l) || /^\|/.test(l)) { while (i < lines.length && /^\|/.test(lines[i])) i++; if (/^#\s/.test(l)) i++; }
+    else if (/^##\s/.test(l)) { out.push(`<h2 class="lab">${inline(l.slice(3))}</h2>`); i++; }
     else if (/^\s*-\s/.test(l)) { const it = []; while (i < lines.length && /^\s*-\s/.test(lines[i])) it.push(lines[i++].replace(/^\s*-\s/, "")); out.push(`<ul>${it.map(x => `<li>${inline(x)}</li>`).join("")}</ul>`); }
     else if (/^\d+\.\s/.test(l)) { const it = []; while (i < lines.length && /^\d+\.\s/.test(lines[i])) it.push(lines[i++].replace(/^\d+\.\s/, "")); out.push(`<ol>${it.map(x => `<li>${inline(x)}</li>`).join("")}</ol>`); }
     else { if (l.trim()) out.push(`<p>${inline(l)}</p>`); i++; }
@@ -282,64 +338,75 @@ function md(src) {
 function openRecipe(slug) {
   const r = (S.plan?.recipes || []).find(x => x.slug === slug); if (!r) return;
   const sh = document.getElementById("sheet");
-  sh.innerHTML = `<div class="wrap"><header class="top"><button class="navbtn" id="close-sheet" aria-label="Close recipe">${ICON.left}</button><div class="t"><div class="sub">Recipe</div></div></header><article class="md">${md(r.md)}</article></div>`;
-  sh.hidden = false; sh.scrollTop = 0; document.getElementById("close-sheet").focus();
+  const stat = (v, u, l) => `<span class="stat"><b>${v ?? "?"}<small>${u}</small></b><span>${l}</span></span>`;
+  sh.innerHTML = `<div class="sheet-card" role="dialog" aria-modal="true" aria-label="${esc(r.title)}"><div class="grab"></div>
+    <div class="sheet-h"><h1>${esc(r.title)}</h1><button class="iconbtn" id="close-sheet" aria-label="Close">${IC.close}</button></div>
+    <div class="stats">${stat(r.protein, "g", "protein")}${stat(r.kcal, "", "kcal")}${stat(r.carbs, "g", "carbs")}${stat(r.fat, "g", "fat")}</div>
+    <article class="md">${md(r.md)}</article></div>`;
+  sh.hidden = false; requestAnimationFrame(() => sh.classList.add("open"));
+  sh.querySelector(".sheet-card").scrollTop = 0; document.getElementById("close-sheet").focus();
 }
+function closeSheet() { const sh = document.getElementById("sheet"); sh.classList.remove("open"); setTimeout(() => { sh.hidden = true; }, 220); }
 
 // ---------- render + events
 function render() {
-  const app = document.getElementById("app");
-  const tabs = document.querySelector(".tabs");
+  const app = document.getElementById("app"), tabs = document.querySelector(".tabs");
   if (!S.token || (S.badKey && !S.plan)) { app.innerHTML = `<div class="wrap">${viewSetup()}</div>`; tabs.hidden = true; return; }
   tabs.hidden = false;
   const view = { today: viewToday, week: viewWeek, soon: viewSoon, food: viewFood }[S.tab];
   const draft = document.getElementById("capture-text")?.value;
-  const when = S.plan?.built ? new Date(S.plan.built).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }) : "";
-  app.innerHTML = `<div class="wrap">${view()}
-    ${S.error ? `<p class="status" role="status">${esc(S.error)}${S.badKey ? ` <button class="link" id="reset-key">Set up a new key</button>` : ""}</p>` : ""}
-    <p class="status">${S.loading ? "Updating…" : when ? `Loaded ${when} · <button class="link" id="refresh">Refresh</button>` : ""}</p></div>`;
+  const when = S.plan?.built ? new Date(S.plan.built).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
+  app.innerHTML = `<div class="wrap v-${S.tab}">${view()}
+    ${S.error ? `<p class="toast-inline" role="status">${esc(S.error)}${S.badKey ? ` <button class="link" id="reset-key">Set up a new key</button>` : ""}</p>` : ""}
+    <p class="foot">${S.loading ? "Updating…" : when ? `Updated ${when}` : ""} <button class="link" id="refresh" aria-label="Refresh">${IC.refresh}</button></p></div>`;
   const ci = document.getElementById("capture-text"); if (ci && draft) ci.value = draft;
-  document.getElementById("tabs").innerHTML = TABS.map(([k, l]) => `<button data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ""}>${ICON[k]}<span>${l}</span></button>`).join("");
+  document.getElementById("tabs").innerHTML = TABS.map(([k, l]) => `<button data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ""}>${IC[k]}<span>${l}</span></button>`).join("");
 }
 const VALID = TABS.map(t => t[0]);
 const fromHash = () => { const h = location.hash.slice(1); if (VALID.includes(h)) S.tab = h; };
 fromHash();
 addEventListener("hashchange", () => { fromHash(); render(); });
+const goTab = k => { S.tab = k; history.replaceState(null, "", "#" + k); render(); scrollTo({ top: 0 }); };
 
-document.addEventListener("click", e => {
+document.addEventListener("click", async e => {
   const r = e.target.closest("[data-recipe]"); if (r) { e.preventDefault(); openRecipe(r.dataset.recipe); return; }
-  if (e.target.closest("#close-sheet")) { document.getElementById("sheet").hidden = true; return; }
+  if (e.target.closest("#close-sheet") || e.target.id === "sheet") { closeSheet(); return; }
   if (e.target.closest("#refresh")) { load(); return; }
-  if (e.target.closest("#reset-key")) { store.del("planlab-key"); S.token = null; S.badKey = false; S.error = ""; render(); return; }
-  const tab = e.target.closest("[data-tab]"); if (tab) { S.tab = tab.dataset.tab; if (S.tab === "today") S.day = todayIso(); history.replaceState(null, "", "#" + S.tab); render(); scrollTo(0, 0); return; }
+  if (e.target.closest("#reset-key")) { store.del("planlab-key"); S.token = null; S.badKey = false; S.error = ""; S.setupStep = 1; render(); return; }
+  if (e.target.closest("[data-step]")) { S.setupStep = 2; setTimeout(render, 300); return; }
+  if (e.target.closest("#paste")) { try { const v = await navigator.clipboard.readText(); document.getElementById("key-input").value = v.trim(); } catch { document.getElementById("key-input").focus(); } return; }
+  const tab = e.target.closest("[data-tab]"); if (tab) { if (tab.dataset.tab === "today") S.day = todayIso(); goTab(tab.dataset.tab); return; }
+  const f = e.target.closest("[data-food]"); if (f) { S.food = f.dataset.food; render(); return; }
   const go = e.target.closest("[data-go]"); if (go) { S.day = addDays(S.day, +go.dataset.go); render(); return; }
-  const j = e.target.closest("[data-jump]"); if (j) { S.day = j.dataset.jump; if (!j.dataset.stay) { S.tab = "today"; history.replaceState(null, "", "#today"); } render(); scrollTo(0, 0); return; }
+  const pk = e.target.closest("[data-pick]"); if (pk) { S.day = pk.dataset.pick; render(); return; }
+  const j = e.target.closest("[data-jump]"); if (j) { S.day = j.dataset.jump; goTab("today"); return; }
   const l = e.target.closest("[data-list]"); if (l) {
     const list = l.dataset.list, key = l.dataset.item;
     const pool = list === "inbox" ? inboxItems() : list === "setup" ? S.plan.setup : list.startsWith("groceries-") ? (S.plan.groceries.find(g => `groceries-${g.week}` === list)?.sections.flatMap(s => s.items) || []) : (findDay(list)?.boxes || []);
-    const item = pool.find(x => x.key === key); if (item) tickSet(list, item);
+    const item = pool.find(x => x.key === key); if (!item) return;
+    store.set("planlab-tip", "1");
+    if (navigator.vibrate) try { navigator.vibrate(8); } catch {}
+    tickSet(list, item);
   }
 });
 document.addEventListener("submit", async e => {
   e.preventDefault();
   if (e.target.id === "keyform") {
-    const v = document.getElementById("key-input").value.trim(); if (!v) return;
+    const v = document.getElementById("key-input").value.trim(); if (!v) { document.getElementById("key-input").focus(); return; }
     S.token = v; S.badKey = false; S.error = ""; store.set("planlab-key", v); render(); load(); return;
   }
   if (e.target.id !== "capture") return;
-  const inp = document.getElementById("capture-text"), text = inp.value.trim(); if (!text) return;
+  const inp = document.getElementById("capture-text"), text = inp.value.trim(); if (!text) { inp.focus(); return; }
   const btn = document.getElementById("capture-btn"); btn.disabled = true;
   try {
     const r = await fetch(`https://api.github.com/repos/${REPO}/issues`, { method: "POST", headers: { Authorization: `Bearer ${S.token}`, Accept: "application/vnd.github+json", "Content-Type": "application/json" },
       body: JSON.stringify({ title: `Wish: ${text}`, body: `Added from planLAB on ${nice(todayIso())}. Claude: give it a date in inbox.md, then close this.` }) });
     if (!r.ok) throw new Error(String(r.status));
     inp.value = ""; S.msg = `Added "${text}". Claude dates it tomorrow morning.`;
-  } catch {
-    S.msg = "Couldn't add it. Your key may not allow issues; tell Claude in chat instead.";
-  }
+  } catch { S.msg = "Couldn't add it. Tell Claude in chat instead."; }
   btn.disabled = false; render();
 });
-document.addEventListener("keydown", e => { if (e.key === "Escape") document.getElementById("sheet").hidden = true; });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
 
 let lastToday = todayIso();
 setInterval(() => { const t = todayIso(); if (t !== lastToday) { if (S.day === lastToday) S.day = t; lastToday = t; load(); } }, 60000);
