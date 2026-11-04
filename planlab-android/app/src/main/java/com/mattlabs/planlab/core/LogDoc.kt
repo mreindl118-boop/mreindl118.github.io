@@ -48,6 +48,12 @@ object LogDoc {
         return if (l.has(key) && l.opt(key) is Boolean) l.getBoolean(key) else fallback
     }
 
+    /** The tick if the log has one, else null. */
+    fun tick(doc: JSONObject, list: String, key: String): Boolean? {
+        val l = doc.optJSONObject("ticks")?.optJSONObject(list) ?: return null
+        return if (l.has(key) && l.opt(key) is Boolean) l.getBoolean(key) else null
+    }
+
     fun skipped(doc: JSONObject, date: String, key: String): Boolean = ticked(doc, "skip-$date", key, false)
     fun minutes(doc: JSONObject, date: String, key: String): Int = doc.optJSONObject("mins")?.optJSONObject(date)?.optInt(key, 0) ?: 0
     fun pelvic(doc: JSONObject, date: String): Int = doc.optJSONObject("ticks")?.optJSONObject("pf-$date")?.optInt("n", 0) ?: 0

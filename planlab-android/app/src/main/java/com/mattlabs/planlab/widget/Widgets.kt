@@ -74,7 +74,8 @@ class ToggleAction : ActionCallback {
         if (key == "pf") Store.pelvicSet(today) else {
             val day = Store.state.value.plan.day(today) ?: return
             val box = day.boxes.firstOrNull { it.key == key } ?: return
-            Store.toggle(day, box)
+            // An area with steps ticks its next step; one without ticks (or unticks) the area.
+            if (box.steps.isNotEmpty() && !Store.isDone(day, box)) Store.doNextStep(today, key) else Store.toggle(day, box)
         }
         Widgets.updateAll(context)
     }
@@ -121,7 +122,7 @@ private fun TodayContent() {
             Text(if (st.hasKey) "Nothing planned today." else "Open planLAB to set it up.", style = TextStyle(color = WC.muted, fontSize = 14.sp))
         } else {
             val log = st.log
-            for (box in day.boxes.take(6)) {
+            for (box in day.boxes.take(7)) {
                 val on = Store.isDone(day, box)
                 val skipped = LogDoc.skipped(log, today.toString(), box.key)
                 Row(GlanceModifier.fillMaxWidth().padding(vertical = 3.dp).clickable(actionRunCallback<ToggleAction>(actionParametersOf(ToggleAction.KEY to box.key))),
@@ -130,8 +131,12 @@ private fun TodayContent() {
                         Text(if (on) "✓" else "", style = TextStyle(color = WC.white, fontSize = 14.sp, fontWeight = FontWeight.Bold))
                     }
                     Spacer(GlanceModifier.width(10.dp))
-                    Text((Store.LABEL[box.key] ?: box.label.replaceFirstChar { it.uppercase() }) + if (skipped && !on) "  (skipped)" else "",
-                        style = TextStyle(color = if (on) WC.muted else WC.fg, fontSize = 15.sp, fontWeight = if (on) FontWeight.Normal else FontWeight.Medium), maxLines = 1)
+                    Column(GlanceModifier.defaultWeight()) {
+                        Text((Store.LABEL[box.key] ?: box.label.replaceFirstChar { it.uppercase() }) + (if (box.steps.isNotEmpty()) "  ${Store.stepsDone(day, box)}/${box.steps.size}" else "") + if (skipped && !on) "  (skipped)" else "",
+                            style = TextStyle(color = if (on) WC.muted else WC.fg, fontSize = 15.sp, fontWeight = if (on) FontWeight.Normal else FontWeight.Medium), maxLines = 1)
+                        val next = if (on) null else Store.nextStep(day, box)
+                        if (next != null) Text("Next: ${next.label} · tap when done", style = TextStyle(color = WC.kind(box.key), fontSize = 12.sp), maxLines = 1)
+                    }
                 }
             }
             val pf = LogDoc.pelvic(log, today.toString())

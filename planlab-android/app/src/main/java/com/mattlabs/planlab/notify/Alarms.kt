@@ -102,12 +102,15 @@ class ActionReceiver : BroadcastReceiver() {
         val date = runCatching { LocalDate.parse(intent.getStringExtra("date")) }.getOrDefault(LocalDate.now())
         when (act) {
             "done" -> Store.done(date, key, min.takeIf { it > 0 })
+            "step" -> Store.doNextStep(date, key, intent.getStringExtra("step")?.takeIf { it.isNotEmpty() })
             "skip" -> Store.skip(date, key)
             "pelvic" -> Store.pelvicSet(date)
             "elevate" -> Store.addCount(date, "elevate")
             "snooze" -> slot?.let { Alarms.snooze(ctx, it, if (min > 0) min else 60) }
         }
         if (notif != 0) Notifier.cancel(ctx, notif)
+        // A step done from a banner brings the banner back with the next step.
+        if (act == "step" && slot != null && date == LocalDate.now()) Notifier.fire(ctx, slot)
         val p = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try { Notifier.refreshPinned(ctx); runCatching { Widgets.updateAll(ctx) } } finally { p.finish() }

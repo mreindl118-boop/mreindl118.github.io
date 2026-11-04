@@ -116,8 +116,40 @@ object Store {
         addOps(*ops.toTypedArray())
     }
 
-    fun isDone(day: Day, box: Box): Boolean = LogDoc.ticked(_state.value.log, day.date.toString(), box.key, box.done)
+    /** Ticked directly, or (when it has steps and was never ticked directly) all its steps ticked. */
+    fun isDone(day: Day, box: Box): Boolean {
+        LogDoc.tick(_state.value.log, day.date.toString(), box.key)?.let { return it }
+        if (box.steps.isNotEmpty() && box.steps.all { stepDone(day, it) }) return true
+        return box.done
+    }
+    fun stepDone(day: Day, step: Box): Boolean = LogDoc.ticked(_state.value.log, day.date.toString(), step.key, step.done)
+    fun nextStep(day: Day, box: Box): Box? = box.steps.firstOrNull { !stepDone(day, it) }
+    fun stepsDone(day: Day, box: Box): Int = box.steps.count { stepDone(day, it) }
     fun toggle(day: Day, box: Box) = if (isDone(day, box)) tick(day.date.toString(), box.key, false) else done(day.date, box.key)
+
+    /** Ticks one step; ticking the last open step ticks its box too, and unticking a step unticks the box. */
+    fun setStep(day: Day, box: Box, step: Box, value: Boolean) {
+        val d = day.date.toString()
+        val ops = mutableListOf(LogDoc.tickOp(d, step.key, value))
+        if (value && box.steps.all { it.key == step.key || stepDone(day, it) }) {
+            ops += LogDoc.tickOp(d, box.key, true)
+            if (box.key == "piano" || box.key == "voice") {
+                val m = day.plannedMinutes(box.key)
+                if (m > 0 && LogDoc.minutes(_state.value.log, d, box.key) == 0) ops += LogDoc.addOp("mins", d, box.key, m)
+            }
+        }
+        if (!value && LogDoc.tick(_state.value.log, d, box.key) == true) ops += LogDoc.tickOp(d, box.key, false)
+        addOps(*ops.toTypedArray())
+    }
+
+    /** Ticks the next open step of [key] on [date] (from a widget or a notification button). */
+    fun doNextStep(date: LocalDate, key: String, stepKey: String? = null) {
+        val day = _state.value.plan.day(date) ?: return
+        val box = day.boxes.firstOrNull { it.key == key } ?: return
+        if (box.steps.isEmpty()) { done(date, key); return }
+        val step = stepKey?.let { k -> box.steps.firstOrNull { it.key == k } } ?: nextStep(day, box) ?: return
+        setStep(day, box, step, true)
+    }
 
     fun brief(date: LocalDate = LocalDate.now()): Coach.Brief = Coach.brief(_state.value.plan, _state.value.health, date, LocalTime.now())
 

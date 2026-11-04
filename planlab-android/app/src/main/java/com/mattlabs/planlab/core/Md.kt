@@ -55,10 +55,31 @@ object Md {
             val date = runCatching { LocalDate.of(year, month, dm.groupValues[3].toInt()) }.getOrNull() ?: continue
             var eat = emptyList<String>(); var bodyLine = ""; var practice = emptyList<String>(); var coming = emptyList<String>()
             val boxes = mutableListOf<Box>()
+            // Sub-steps, two accepted forms: a "### piano" heading followed by "- [ ] step" lines (key "piano/<step>"),
+            // or an indented "  - [ ] piano: step" line under the box row (key = the whole label).
+            val steps = linkedMapOf<String, MutableList<Box>>()
+            val heads = mutableMapOf<String, String>()
+            var area: String? = null
             for (raw in body.lines()) {
-                var line = raw.trim()
-                if (!line.startsWith("- ")) continue
-                line = line.substring(2)
+                val t = raw.trim()
+                if (t.startsWith("### ")) { area = keyOf(t.removePrefix("### ")); heads[area] = strip(t.removePrefix("### ")); continue }
+                if (!t.startsWith("- ")) continue
+                val indented = raw.startsWith(" ") || raw.startsWith("\t")
+                val single = CHECK.find(raw)
+                if (area != null && single != null) {
+                    val label = strip(single.groupValues[2])
+                    steps.getOrPut(area) { mutableListOf() } += Box("$area/${keyOf(label)}", label, single.groupValues[1].equals("x", true))
+                    continue
+                }
+                if (indented && single != null) {
+                    val full = strip(single.groupValues[2])
+                    val c = full.indexOf(':')
+                    val parent = if (c > 0) keyOf(full.substring(0, c)) else boxes.lastOrNull()?.key ?: continue
+                    val label = if (c > 0) full.substring(c + 1).trim() else full
+                    steps.getOrPut(parent) { mutableListOf() } += Box(keyOf(full), label, single.groupValues[1].equals("x", true))
+                    continue
+                }
+                val line = t.substring(2)
                 if (line.startsWith("[")) {
                     for (b in BOXES.findAll(line)) {
                         val label = b.groupValues[2].trim()
@@ -75,6 +96,11 @@ object Md {
                     "practice" -> practice = parts
                     "coming up" -> coming = parts
                 }
+            }
+            for ((parent, list) in steps) {
+                val i = boxes.indexOfFirst { it.key == parent }
+                if (i >= 0) boxes[i] = boxes[i].copy(steps = list)
+                else boxes += Box(parent, heads[parent] ?: parent.replace('-', ' '), false, list)
             }
             days += Day(date, head, eat, bodyLine, practice, coming, boxes)
         }
@@ -97,12 +123,17 @@ object Md {
         }.sortedBy { it.date }
     }
 
+    /** Checklists by section. An indented box is a step of the box above it. */
     fun checklists(text: String): List<Pair<String, List<Item>>> = sections(text).mapNotNull { (head, body) ->
         val name = strip(head)
-        val items = body.lines().mapNotNull { l ->
-            val m = CHECK.find(l) ?: return@mapNotNull null
+        val items = mutableListOf<Item>()
+        for (l in body.lines()) {
+            val m = CHECK.find(l) ?: continue
             val t = strip(m.groupValues[2])
-            Item(keyOf(t), t, m.groupValues[1].equals("x", true), name)
+            val item = Item(keyOf(t), t, m.groupValues[1].equals("x", true), name)
+            val indented = l.startsWith("  ") || l.startsWith("\t")
+            if (indented && items.isNotEmpty()) items[items.size - 1] = items.last().let { it.copy(steps = it.steps + item) }
+            else items += item
         }
         if (items.isEmpty()) null else name to items
     }

@@ -7,7 +7,8 @@ import java.time.temporal.ChronoUnit
 // The plan, read from the Markdown in GeneralStorage projects/planlab/. Mirrors planlab/app.js on the site and
 // projects/planlab/tools/app_data.py, so all three read the same files the same way.
 
-data class Box(val key: String, val label: String, val done: Boolean)
+/** A checkbox. [steps] are its sub-steps (each checkable); the box counts done when all of them are. */
+data class Box(val key: String, val label: String, val done: Boolean, val steps: List<Box> = emptyList())
 
 data class Day(
     val date: LocalDate,
@@ -27,7 +28,7 @@ data class Week(val id: String, val start: LocalDate, val phase: String, val foc
 
 data class CalEvent(val date: LocalDate, val what: String, val who: String, val notes: String, val big: Boolean)
 
-data class Item(val key: String, val text: String, val done: Boolean, val group: String, val date: LocalDate? = null, val what: String = text)
+data class Item(val key: String, val text: String, val done: Boolean, val group: String, val date: LocalDate? = null, val what: String = text, val steps: List<Item> = emptyList())
 
 data class Plan(
     val weeks: List<Week>,

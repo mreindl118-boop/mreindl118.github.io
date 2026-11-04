@@ -44,14 +44,24 @@ function parseWeek(id, text) {
     const dm = head.match(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+(\d\d)-(\d\d)/); if (!dm) continue;
     const month = +dm[2], year = mon.getMonth() === 11 && month === 1 ? mon.getFullYear() + 1 : mon.getFullYear();
     const d = { date: `${year}-${dm[2]}-${dm[3]}`, label: head, eat: [], body: "", practice: [], coming: [], boxes: [] };
-    for (let line of body.split("\n")) {
-      line = line.trim(); if (!line.startsWith("- ")) continue; line = line.slice(2);
+    // Sub-steps (same rules as the Android app): "### piano" then "- [ ] step" lines (key "piano/<step>"),
+    // or an indented "  - [ ] piano: step" under the box row (key = the whole label).
+    const steps = {}, heads = {}; let area = null;
+    for (const raw of body.split("\n")) {
+      const t = raw.trim();
+      if (t.startsWith("### ")) { area = keyOf(t.slice(4)); heads[area] = stripMd(t.slice(4)); continue; }
+      const one = raw.match(/^\s*- \[( |x|X)\]\s*(.+)/);
+      if (one && area) { const label = stripMd(one[2]); (steps[area] = steps[area] || []).push({ key: `${area}/${keyOf(label)}`, label, done: one[1].toLowerCase() === "x" }); continue; }
+      if (one && /^\s/.test(raw)) { const full = stripMd(one[2]), c = full.indexOf(":"); const parent = c > 0 ? keyOf(full.slice(0, c)) : d.boxes.at(-1)?.key; if (!parent) continue;
+        (steps[parent] = steps[parent] || []).push({ key: keyOf(full), label: c > 0 ? full.slice(c + 1).trim() : full, done: one[1].toLowerCase() === "x" }); continue; }
+      let line = t; if (!line.startsWith("- ")) continue; line = line.slice(2);
       if (line.startsWith("[")) { for (const b of line.matchAll(/\[( |x|X)\]\s*([^\[]+)/g)) { const label = b[2].trim(); d.boxes.push({ key: keyOf(label), label, done: b[1].toLowerCase() === "x" }); } continue; }
       const c = line.indexOf(":"); if (c < 0) continue;
       const k = line.slice(0, c).trim().toLowerCase(), v = line.slice(c + 1);
       const parts = v.split(" · ").filter(p => p.trim()).map(stripMd);
       if (k === "eat") d.eat = parts; else if (k === "body") d.body = stripMd(v); else if (k === "practice") d.practice = parts; else if (k === "coming up") d.coming = parts;
     }
+    for (const [k, list] of Object.entries(steps)) { const b = d.boxes.find(x => x.key === k); if (b) b.steps = list; else d.boxes.push({ key: k, label: heads[k] || k.replace(/-/g, " "), done: false, steps: list }); }
     w.days.push(d);
   }
   return w;
@@ -77,7 +87,9 @@ function parseChecklists(text) {
   const out = [];
   for (const [head, body] of sections(text)) {
     const items = [];
-    for (const line of body.split("\n")) { const m = line.match(/^\s*- \[( |x|X)\]\s*(.+)/); if (m) { const t = stripMd(m[2]); items.push({ key: keyOf(t), text: t, done: m[1].toLowerCase() === "x" }); } }
+    for (const line of body.split("\n")) { const m = line.match(/^\s*- \[( |x|X)\]\s*(.+)/); if (!m) continue; const t = stripMd(m[2]), it = { key: keyOf(t), text: t, done: m[1].toLowerCase() === "x" };
+      // An indented box is a step of the box above it.
+      if (/^(  |\t)/.test(line) && items.length) (items.at(-1).steps = items.at(-1).steps || []).push(it); else items.push(it); }
     if (items.length) out.push({ name: stripMd(head), items });
   }
   return out;
@@ -270,7 +282,9 @@ const findDay = date => allDays().find(d => d.date === date);
 const weekOf = date => (S.plan?.weeks || []).find(w => date >= w.start && date <= addDays(w.start, 6));
 const bigDay = () => (S.plan?.calendar || []).find(e => e.big && daysBetween(todayIso(), e.date) > -60) || (S.plan?.calendar || []).find(e => e.big);
 const bigName = e => e.what.replace(/\s*\(.*\)$/, "").toLowerCase();
-function tickGet(list, item) { const t = S.log.ticks[list]; return t && typeof t[item.key] === "boolean" ? t[item.key] : !!item.done; }
+function tickGet(list, item) { const t = S.log.ticks[list]; if (t && typeof t[item.key] === "boolean") return t[item.key]; if (item.steps?.length && item.steps.every(x => tickGet(list, x))) return true; return !!item.done; }
+const withSteps = items => items.flatMap(i => [i, ...(i.steps || [])]);
+const stepsDone = (list, item) => (item.steps || []).filter(x => tickGet(list, x)).length;
 function tickPut(list, key, v) { S.log.ticks[list] = { ...(S.log.ticks[list] || {}), [key]: v }; touch(); }
 function tickSet(list, item) { tickPut(list, item.key, !tickGet(list, item)); render(); }
 const dayCount = d => ({ n: d.boxes.length, done: d.boxes.filter(b => tickGet(d.date, b)).length });
@@ -387,6 +401,8 @@ function bigPill(date) {
 const checkRow = (attrs, checked, label, sub, tail = "") => `<div class="row has-tail"><button class="check rowbtn" role="checkbox" aria-checked="${checked}" ${attrs}><span class="box">${IC.check}</span><span class="rt"><span class="rl">${label}</span>${sub ? `<span class="rs">${sub}</span>` : ""}</span></button>${tail}</div>`;
 const unset = v => !v || /^\(.*\)$/.test(v) || /\?\)?$/.test(v);
 function tileDetail(day, key) {
+  const sb = day.boxes.find(b => b.key === key);
+  if (sb?.steps?.length && !tickGet(day.date, sb)) { const nx = sb.steps.find(x => !tickGet(day.date, x)); return `${stepsDone(day.date, sb)}/${sb.steps.length} · ${esc(nx.label)}`; }
   if (key === "meals") { const p = dayProtein(day), t = S.plan?.profile?.protein; return p ? `${p} g protein${t ? ` of ${t}` : ""}` : `${day.eat.length} meals`; }
   if (key === "body") { const w = workoutFor(day); return esc(w ? `${w.moves.length} moves · ${w.minutes || mins(day.body)} min` : day.body.replace(/\s*\(.*\)/, "")); }
   const done = minsOn(day.date, key), plan = plannedMins(day, key);
@@ -433,7 +449,11 @@ function viewToday() {
     return `<div class="tile k-${b.key}${on ? " on" : ""}"><button class="tile-main" data-open="${b.key}" aria-label="Open ${KIND[b.key]}">
       <span class="tile-ic">${IC[b.key]}</span><span class="tile-name">${KIND[b.key]}</span><span class="tile-sub">${tileDetail(day, b.key)}</span></button>
       <button class="tile-check" role="checkbox" aria-checked="${on}" aria-label="${KIND[b.key]} done" data-list="${date}" data-item="${b.key}"><span class="box">${IC.check}</span></button></div>`; }).join("")}</div>`;
-  if (other.length) h += `<div class="card list">${other.map(b => checkRow(`data-list="${date}" data-item="${b.key}"`, tickGet(date, b), recipeLinks(cap(b.label)), "")).join("")}</div>`;
+  const stepped = day.boxes.filter(b => b.steps?.length);
+  for (const b of stepped) { const n = stepsDone(date, b);
+    h += `<section class="sec">${lab(`${esc(KIND[b.key] || cap(b.label))} <span class="cnt">${n === b.steps.length ? "done" : `${n} of ${b.steps.length}`}</span>`)}<div class="card list compact">${b.steps.map(x => checkRow(`data-list="${date}" data-item="${x.key}"`, tickGet(date, x), recipeLinks(cap(x.label)), "")).join("")}</div></section>`; }
+  const plain = other.filter(b => !b.steps?.length);
+  if (plain.length) h += `<div class="card list">${plain.map(b => checkRow(`data-list="${date}" data-item="${b.key}"`, tickGet(date, b), recipeLinks(cap(b.label)), "")).join("")}</div>`;
   const pf = S.plan?.program?.daily;
   if (pf) h += `<button class="card strip-card" data-open="pelvic"><span class="tag-ic">${IC.heart}</span><span class="rt"><span class="rl">${esc(cap(pf.title.replace(/\s*\(.*\)/, "")))}</span><span class="rs">Twice a day · ${pf.reps.map(r => `${r.n} ${r.name}`).join(", ")}</span></span>${pill(`${(S.log.ticks["pf-" + date] || {}).n || 0}/2`, ((S.log.ticks["pf-" + date] || {}).n || 0) >= 2 ? "ok" : "soft")}</button>`;
   if (day.eat.length) h += `<section class="sec">${lab("Meals")}<div class="card list">${day.eat.map((m, i) => `<div class="row"><span class="tag">${MEAL[Math.min(i, 3)]}</span><span class="rt"><span class="rl n">${recipeLinks(m.replace(/\s*\(~?\d+ g protein\)/, ""))}</span></span></div>`).join("")}</div></section>`;
@@ -444,7 +464,7 @@ function viewToday() {
   if (due.length || radar.length || ev.length) {
     h += `<section class="sec">${lab("On your radar")}<div class="card list">
       ${ev.map(e => `<div class="row"><span class="dot warm"></span><span class="rt"><span class="rl">${esc(e.what)}</span>${e.notes ? `<span class="rs">${esc(e.notes)}</span>` : ""}</span></div>`).join("")}
-      ${due.map(i => checkRow(`data-list="inbox" data-item="${i.key}"`, tickGet("inbox", i), esc(i.what), "Due today")).join("")}
+      ${due.map(i => checkRow(`data-list="inbox" data-item="${i.key}"`, tickGet("inbox", i), esc(i.what), i.steps?.length ? `Due today · ${stepsDone("inbox", i)} of ${i.steps.length} steps` : "Due today") + (i.steps || []).map(x => checkRow(`data-list="inbox" data-item="${x.key}"`, tickGet("inbox", x), "↳ " + esc(x.text), "")).join("")).join("")}
       ${radar.map(x => `<div class="row"><span class="dot"></span><span class="rt"><span class="rl n">${recipeLinks(cap(x))}</span></span></div>`).join("")}</div></section>`;
   }
   return h;
@@ -746,7 +766,7 @@ document.addEventListener("click", async e => {
   if ((el = q("[data-jump]"))) { S.day = el.dataset.jump; goTab("today"); return; }
   if ((el = q("[data-list]"))) {
     const list = el.dataset.list, key = el.dataset.item;
-    const pool = list === "inbox" ? inboxItems() : list === "setup" ? S.plan.setup : list.startsWith("groceries-") ? (S.plan.groceries.find(g => `groceries-${g.week}` === list)?.sections.flatMap(s => s.items) || []) : (findDay(list)?.boxes || []);
+    const pool = withSteps(list === "inbox" ? inboxItems() : list === "setup" ? S.plan.setup : list.startsWith("groceries-") ? (S.plan.groceries.find(g => `groceries-${g.week}` === list)?.sections.flatMap(s => s.items) || []) : (findDay(list)?.boxes || []));
     const item = pool.find(x => x.key === key); if (!item) return;
     store.set("planlab-tip2", "1");
     try { navigator.vibrate && navigator.vibrate(8); } catch {}

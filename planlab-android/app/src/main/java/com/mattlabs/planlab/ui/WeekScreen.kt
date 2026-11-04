@@ -77,7 +77,7 @@ fun WeekScreen() {
                     for (box in d.boxes) {
                         val on = Store.isDone(d, box)
                         RowItem(lead = { CheckDot(on, tk.kind(box.key), 28.dp) { Store.toggle(d, box) } }, title = Store.LABEL[box.key] ?: box.label.replaceFirstChar { it.uppercase() },
-                            sub = when (box.key) { "body" -> d.body; "meals" -> d.eat.lastOrNull(); "piano", "voice" -> d.practice.firstOrNull { it.lowercase().startsWith(box.key) }; else -> null })
+                            sub = if (box.steps.isNotEmpty()) "${Store.stepsDone(d, box)} of ${box.steps.size} steps" else when (box.key) { "body" -> d.body; "meals" -> d.eat.lastOrNull(); "piano", "voice" -> d.practice.firstOrNull { it.lowercase().startsWith(box.key) }; else -> null })
                     }
                     for (c in d.coming) RowItem(lead = { Dot(tk.line) }, title = c.replaceFirstChar { it.uppercase() })
                 }
