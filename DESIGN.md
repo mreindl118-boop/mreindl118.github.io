@@ -144,6 +144,10 @@ single tone. Adopted November 2026 from Sam Kremer's portfolio feedback, approve
 
 **Heading and Body Font:** IBM Plex Sans (with system-ui, sans-serif), the wordmark's face
 **Label/Mono Font:** IBM Plex Mono (with ui-monospace, monospace)
+**Files:** self-hosted latin subsets in `assets/fonts/` (SIL OFL 1.1, `OFL.txt` beside them):
+Sans 400/500/600/700 and Mono 400/500, declared at the top of `site.css` with `font-display: swap`
+and Google Fonts' latin `unicode-range` (so ← → ↗ ⤢ ✕ come from the system font). Every page
+preloads Sans 400 and Mono 400. No third-party font requests.
 
 **Character:** One engineered sans in two registers: bold and tracked tight for titles, the way
 the wordmark sets "Understory", and regular for reading. A mono that behaves like drawing-sheet
@@ -162,8 +166,8 @@ lettering does the annotating.
 ### Named Rules
 **The Wordmark Rule.** Headings are set in the wordmark's face, IBM Plex Sans Bold at -0.02em, so
 a title and the brand read as one voice. Source Serif 4 was retired in November 2026 (Sam
-Kremer's feedback, approved by the owner) and is no longer requested from Google Fonts. Don't
-bring a serif back for headings.
+Kremer's feedback, approved by the owner) and is no longer loaded. Don't bring a serif back for
+headings.
 
 **The Title Block Rule.** Monospace is the annotation voice of a drawing set: labels, dates,
 counters, figure numbers. It is never used for running text or headings.
