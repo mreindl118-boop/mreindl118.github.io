@@ -429,8 +429,12 @@ main .rule-motif .ci { border-color: var(--clay); }
 @media (max-width: 640px) { .contact-close { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- Loading and failure states ---------- */
-/* containers filled from the content JSON hold their space until it lands (no jump) */
-#grid:empty, #p-meta:empty { min-height: 100svh; }
+/* containers filled from the content JSON hold their space until it lands (no jump). On a project
+   page the empty title holds it: everything the JSON fills sits under the title, so nothing on
+   screen moves when it lands (a held meta grid moved as the title filled above it, and pulled the
+   footer up as it collapsed), and the empty meta grid takes no room, so its rule can't slide up */
+#grid:empty, #p-title:empty { min-height: 100svh; }
+#p-meta:empty { display: none; }
 .load-note { grid-column: 1 / -1; }
 .load-note .mono-note { margin: 0; }
 .load-note-links { display: flex; gap: 10px 26px; flex-wrap: wrap; margin-top: 12px; }

@@ -56,11 +56,12 @@
       '<span style="color:var(--faint); white-space:nowrap">(16\u00a0MB)</span></a></div></div>';
   }
 
-  /* A figure or model photo that fails to load takes the covers' hatched placeholder */
+  /* A figure or model photo that fails to load takes the covers' hatched placeholder and says so
+     ("Figure didn't load"); "coming soon" stays for a cover the data doesn't have yet */
   function imgPh(img, label) {
     var ph = document.createElement('div');
     ph.className = 'cover-ph img-ph';
-    ph.innerHTML = '<span class="ph-label">' + esc(label) + ' \u2014 coming soon</span>';
+    ph.innerHTML = '<span class="ph-label">' + esc(label.charAt(0).toUpperCase() + label.slice(1)) + ' didn\u2019t load</span>';
     if (img.parentNode) img.parentNode.replaceChild(ph, img);
   }
 

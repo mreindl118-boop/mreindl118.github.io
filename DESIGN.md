@@ -364,8 +364,10 @@ nav (about 838×750 at 1440×900); the range input below takes the same width so
 the divider.
 
 ### Loading and failure states
-- **No jumps:** the containers the content JSON fills (`#grid`, `#p-meta`) hold a viewport of
-  height while empty, and sections that may not apply (drawing set, prev/next) start hidden.
+- **No jumps:** what the content JSON fills holds a viewport of height while empty: the Projects
+  `#grid`, and on a project page the title (`#p-title`), under which everything else it fills
+  sits (the empty meta grid takes no room). Nothing on screen moves when the content lands, and
+  sections that may not apply (drawing set, prev/next) start hidden.
 - **Content that can't load:** one bad project file costs only that project. With nothing to
   show, the Projects grid (and a project page, under an h1 "Projects didn’t load") gives the mono
   note "Projects didn’t load." and two mono links, "Flip through the portfolio book →" and
@@ -373,7 +375,9 @@ the divider.
   project pages; the portfolio's stage offers just the PDF link.
 - **Unknown project:** h1 "Project not found" and "All projects →"; the page is `noindex`.
 - **A missing image:** a portfolio spread shows "Couldn’t load this spread" and a Retry button
-  (44px) in the stage; blowout figures and model photos take the covers' hatched placeholder.
+  (44px) in the stage; blowout figures and model photos take the covers' hatched placeholder,
+  saying "Figure didn’t load" or "Model photo didn’t load" ("coming soon" is only for a cover the
+  data doesn't have yet).
 
 ## Do's and Don'ts
 
