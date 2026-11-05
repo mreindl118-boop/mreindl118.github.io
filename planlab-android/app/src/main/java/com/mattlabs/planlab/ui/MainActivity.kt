@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
         }
         i.getStringExtra("from")?.let { Store.count("open_from:$it"); i.removeExtra("from") }
         i.getStringExtra("bug")?.let { openBug(this, "shortcut", camera = it == "photo"); i.removeExtra("bug") }
-        i.getStringExtra("food")?.let { openFood(this, "shortcut"); i.removeExtra("food") }
+        i.getStringExtra("food")?.let { tab = "food"; settings = false; Store.count("open_from:shortcut"); i.removeExtra("food") }
         val data = i.data ?: return
         if (data.scheme == "planlab" && data.host == "key") {
             val k = data.fragment ?: data.getQueryParameter("k")
@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
                 NavigationBar(containerColor = tk.surface) {
                     for ((k, label, icon) in TABS) NavigationBarItem(
                         selected = tab == k, onClick = { if (tab != k) Store.count("screen:$k"); tab = k },
-                        icon = { Icon(icon, null) }, label = { Text(label) },
+                        icon = { if (k == "food") Icon(androidx.compose.ui.res.painterResource(com.mattlabs.planlab.R.drawable.ic_tab_food), null) else Icon(icon!!, null) }, label = { Text(label) },
                         colors = NavigationBarItemDefaults.colors(selectedIconColor = tk.accent, selectedTextColor = tk.accent, indicatorColor = tk.accentSoft, unselectedIconColor = tk.muted, unselectedTextColor = tk.muted),
                     )
                 }
@@ -125,6 +125,7 @@ class MainActivity : ComponentActivity() {
                         when (k) {
                             "today" -> TodayScreen(loading, onSettings = { settings = true }, onOpen = { tab = it })
                             "health" -> HealthScreen(onSettings = { settings = true }, onInsights = { tab = "insights" })
+                            "food" -> FoodScreen()
                             "week" -> WeekScreen()
                             "progress" -> ProgressScreen()
                             "insights" -> InsightsScreen(onBack = back)
@@ -141,8 +142,10 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        val TABS: List<Triple<String, String, ImageVector>> = listOf(
+        /** "food" draws its own icon (ic_tab_food); the core icon set has none. */
+        val TABS: List<Triple<String, String, ImageVector?>> = listOf(
             Triple("today", "Today", Icons.Filled.Home),
+            Triple("food", "Food", null),
             Triple("health", "Body", Icons.Filled.Favorite),
             Triple("week", "Week", Icons.Filled.DateRange),
             Triple("progress", "Level", Icons.Filled.Star),

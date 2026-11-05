@@ -12,7 +12,7 @@ import com.mattlabs.planlab.data.Store
  * https links open in their own app (YouTube, Spotify, Maps…) or the browser.
  */
 object Links {
-    private val TABS = setOf("today", "health", "week", "progress", "planner")
+    private val TABS = setOf("today", "food", "health", "week", "progress", "planner")
 
     fun intent(ctx: Context, url: String, from: String): Intent = when {
         url == "app:bugs" -> Intent(ctx, BugActivity::class.java).putExtra("from", from)
