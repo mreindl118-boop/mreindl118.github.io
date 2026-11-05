@@ -168,7 +168,7 @@ private fun TodayContent() {
                 Row(GlanceModifier.fillMaxWidth().background(WC.sunk).cornerRadius(20.dp).padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                     Ico(next.box.key, c, 34.dp)
                     Spacer(GlanceModifier.width(10.dp))
-                    Text(next.step?.let { com.mattlabs.planlab.ui.TodayData.short(it) } ?: com.mattlabs.planlab.ui.TodayData.label(next.box),
+                    Text(com.mattlabs.planlab.core.Discreet.text(next.step?.let { com.mattlabs.planlab.ui.TodayData.short(it) } ?: com.mattlabs.planlab.ui.TodayData.label(next.box)),
                         GlanceModifier.defaultWeight().clickable(actionStartActivity<MainActivity>(actionParametersOf(FROM to "widget"))),
                         style = TextStyle(color = WC.fg, fontSize = 17.sp, fontWeight = FontWeight.Bold), maxLines = 2)
                     Box(GlanceModifier.size(48.dp).background(c).cornerRadius(24.dp)

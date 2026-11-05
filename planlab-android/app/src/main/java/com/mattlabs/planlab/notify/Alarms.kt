@@ -19,7 +19,7 @@ import java.time.ZoneId
 /** The day's banners. Each only shows if its thing is still open. */
 enum class Slot(val label: String, val time: LocalTime, val notifId: Int) {
     BRIEF("Morning plan", LocalTime.of(7, 30), 10),
-    PELVIC_AM("Pelvic floor, morning", LocalTime.of(9, 30), 11),
+    PELVIC_AM("Quick set, morning", LocalTime.of(9, 30), 11),
     ELEVATE_1("Elevate (recovery)", LocalTime.of(11, 0), 12),
     ELEVATE_2("Elevate (recovery)", LocalTime.of(15, 0), 13),
     BODY("Body", LocalTime.of(16, 30), 14),
@@ -27,7 +27,7 @@ enum class Slot(val label: String, val time: LocalTime, val notifId: Int) {
     ELEVATE_3("Elevate (recovery)", LocalTime.of(19, 0), 16),
     PIANO("Piano", LocalTime.of(19, 30), 17),
     MEALS("Food check", LocalTime.of(20, 0), 18),
-    PELVIC_PM("Pelvic floor, evening", LocalTime.of(20, 30), 19),
+    PELVIC_PM("Quick set, evening", LocalTime.of(20, 30), 19),
     EVENING("Evening check-in", LocalTime.of(21, 30), 20),
     // Movement breaks: the time comes from the day's "### move" steps ("Break 1 at 10:30, 1 min: …").
     MOVE_1("Move breaks", LocalTime.of(10, 30), 21),
