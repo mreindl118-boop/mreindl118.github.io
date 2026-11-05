@@ -458,6 +458,9 @@ main .rule-motif .ci { border-color: var(--clay); }
   font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
   text-transform: uppercase; color: var(--faint); margin-bottom: 12px;
 }
+/* About: once its grid is one column (below 760px: two 320px tracks + the 56px gap + gutters),
+   the bio comes before the photo and Recognition, so a phone reaches the reading first */
+@media (max-width: 759px) { .about-bio { order: -1; } }
 .skill-row { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line-soft); padding: 10px 0; flex-wrap: wrap; }
 .skill-tool { font-weight: 500; font-size: 15px; }
 .skill-level { font-size: 14px; color: var(--muted); max-width: 46ch; }

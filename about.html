@@ -34,15 +34,14 @@
 <main id="main" tabindex="-1">
 
 <div class="wrap" style="padding-top:56px; padding-bottom:88px">
-  <div style="display:flex; flex-wrap:wrap; gap:36px 72px; align-items:flex-start; justify-content:space-between">
-    <div style="flex:1 1 420px; min-width:0">
-      <div class="kicker" style="margin-bottom:14px">About</div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr)); gap:36px 56px; align-items:end">
+    <div style="min-width:0">
       <h1 class="h-head" style="font-size:clamp(36px,5vw,56px); line-height:1.06; margin:0">Matthew Reindl</h1>
-      <div class="mono-note" style="margin-top:16px">Emerging Landscape Architect · MLA, University of Cincinnati DAAP 2026 · Cincinnati, OH</div>
+      <p style="font-size:18px; line-height:1.5; margin:14px 0 0; color:var(--ink); max-width:40ch">Emerging landscape architect in Cincinnati. MLA, University of Cincinnati DAAP, 2026.</p>
     </div>
-    <div class="rule-section" id="contact" style="flex:0 1 340px; min-width:280px">
-      <div class="rule-label">Get in Touch</div>
-      <div style="display:flex; flex-direction:column; gap:8px; font-size:14px">
+    <div class="rule-section" id="contact" style="max-width:62ch">
+      <h2 class="h-head" style="font-size:22px; margin:0 0 10px">Get in touch</h2>
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:16px">
         <a href="mailto:mreindl118@gmail.com" style="text-decoration:none">mreindl118@gmail.com</a>
         <a href="https://www.linkedin.com/in/matthew-reindl-95b80425a/" target="_blank" rel="noopener" style="text-decoration:none">linkedin.com/in/matthew-reindl ↗</a>
       </div>
@@ -56,13 +55,9 @@
     <div style="max-width:460px">
       <div class="rule-section">
         <img src="assets/img/headshot.webp" alt="Matthew Reindl" class="img-fade" style="filter:grayscale(1) contrast(1.02); mask-image:linear-gradient(to right,transparent 0,#000 32px,#000 calc(100% - 32px),transparent 100%),linear-gradient(to bottom,transparent 0,#000 32px,#000 calc(100% - 32px),transparent 100%)">
-        <div style="display:flex; justify-content:space-between; gap:12px; padding-top:12px; flex-wrap:wrap">
-          <span style="font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--pine)">Understory Design Studio</span>
-          <span style="font-family:var(--mono); font-size:11px; color:var(--faint)">Cincinnati, OH</span>
-        </div>
       </div>
       <div class="rule-section" style="margin-top:32px">
-        <div class="rule-label">Recognition</div>
+        <h2 class="h-head" style="font-size:22px; margin:0 0 10px">Recognition</h2>
         <div style="display:flex; flex-direction:column; gap:12px; font-size:14px; line-height:1.5">
           <div style="display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--line-soft); padding-bottom:12px">
             <img src="assets/logos/daapworks.jpg" alt="DAAPWorks logo" style="width:132px; height:108px; object-fit:contain; flex-shrink:0; mix-blend-mode:multiply">
@@ -80,7 +75,7 @@
       </div>
     </div>
 
-    <div style="max-width:62ch">
+    <div class="about-bio" style="max-width:62ch">
       <p style="font-size:16.5px; line-height:1.7; margin:0; text-wrap:pretty">I'm Matthew Reindl, a Cincinnati-based emerging landscape architect and 2026 Master of Landscape Architecture graduate from the University of Cincinnati's College of DAAP. Landscape architecture gives me a way to bring together the things I care about most: spaces that matter, ecology, problem-solving, visual communication, and making.</p>
       <p style="font-size:16.5px; line-height:1.7; margin:20px 0 0; text-wrap:pretty">I am especially drawn to parks, trails, campuses, and landscapes shaped by natural systems — rivers and floodplains, terrain, soils, and the plant communities that grow from them — where thoughtful design can improve both environmental performance and everyday life.</p>
       <p style="font-size:16.5px; line-height:1.7; margin:20px 0 0; text-wrap:pretty">My process moves between research and hands-on exploration. I use GIS and site analysis to understand the systems already shaping a place, then develop ideas through AutoCAD, Rhino, digital visualization, 3D printing, laser cutting, and physical models. My experience with the Cincinnati Recreation Commission has grounded that process in real public sites, budgets, planting decisions, field verification, and implementation.</p>

@@ -213,6 +213,15 @@ and after the drawing set otherwise. Proctor's master plan appears once, as the 
 under the meta grid. The written sections are rows: the heading (22px) in the left third, the
 text (64ch) in the right two-thirds, each under a 1px line (one column on phones).
 
+About opens on the name (no kicker) and one 18px ink sentence that says what he is, where, and
+the degree. Its top row and its body share one grid (`auto-fit`, 320px minimum, 56px gap), so
+the page keeps two left edges: the name, the headshot and Recognition on the first; contact and
+the bio on the second. "Get in touch" and "Recognition" are 22px headings over a 1px ink rule,
+not mono labels, and the headshot carries no caption. Below 760px, where that grid is one
+column, the bio comes before the headshot and Recognition (`.about-bio`), so a phone reads name,
+contact, bio. The résumé's Download PDF ↓ and Print are the standard primary and outline buttons
+(44px tall), and the tools section under the sheet (`#skills`) opens on its heading, no kicker.
+
 ## Elevation & Depth
 
 Flat by default. Depth comes from tone (paper → panel), ink rules and the dark footer field.
