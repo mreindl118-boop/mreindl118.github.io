@@ -79,18 +79,24 @@
     $('mp-fit').onclick = pz.fit;
   }
 
-  /* ---------------- Capstone booklet (pdf.js) ---------------- */
+  /* ---------------- Capstone booklet (pdf.js) ----------------
+     The booklet is 11 PDF parts (assets/booklet/Part_NN.pdf); parts.json lists their page
+     counts, so the page total and the scrubber are known before any PDF loads. Nothing heavy
+     loads until the reader nears the viewer (or presses Open booklet, an arrow or the
+     scrubber). Then only the part holding the current spread is fetched; once that spread is
+     on screen the next part is prefetched, one fetch at a time. */
   var bk = {
-    started: false, docs: [], total: 0, idx: 0,
+    started: false, parts: null, offsets: [], total: 0, idx: 0,
+    docs: [], job: null, wait: {}, skip: {},
     pages: [], tiers: {}, rendering: {}, retried: {},
-    loadQ: Promise.resolve(), renderQ: Promise.resolve(),
-    lib: null, pz: null, failed: false
+    renderQ: Promise.resolve(), manifestP: null,
+    lib: null, libP: null, libTries: 0, pz: null, io: null, failed: false
   };
-  var BK_PARTS = 11;
   var PDFJS = new URL('assets/vendor/pdfjs/pdf.min.mjs', location.href).href;
   var PDFJS_WORKER = new URL('assets/vendor/pdfjs/pdf.worker.min.mjs', location.href).href;
 
   function bkFile(i) { return 'assets/booklet/Part_' + String(i + 1).padStart(2, '0') + '.pdf'; }
+  function pad2(n) { return String(n).padStart(2, '0'); }
 
   function bkUnits() {
     var t = bk.total, u = [];
@@ -100,68 +106,149 @@
 
   function bkStatus(msg) { $('bk-status').textContent = msg || ''; }
 
+  function bkManifest() {
+    if (bk.manifestP) return bk.manifestP;
+    bk.manifestP = US.getJSON('assets/booklet/parts.json').then(function (m) {
+      var parts = (m && m.parts) || [];
+      if (!parts.length || parts.some(function (n) { return !(n > 0); })) throw new Error('bad booklet manifest');
+      var t = 0;
+      bk.offsets = parts.map(function (n) { var o = t; t += n; return o; });
+      bk.parts = parts;
+      bk.total = t;
+      $('bk-count').textContent = pad2(t);
+      $('bk-scrub').max = Math.max(bkUnits().length - 1, 0);
+      if (!bk.started) $('bk-num').textContent = pad2(1);
+      return bk.parts;
+    }).catch(function (e) {
+      bk.manifestP = null;   // let Retry ask again
+      throw e;
+    });
+    return bk.manifestP;
+  }
+
+  // page index (0-based, whole booklet) -> part index
+  function bkPartOf(i) {
+    for (var p = bk.parts.length - 1; p > 0; p--) if (i >= bk.offsets[p]) return p;
+    return 0;
+  }
+
+  // a failed import() stays failed for that URL, so a retry asks for a fresh one
   function bkLib() {
     if (bk.lib) return Promise.resolve(bk.lib);
-    return import(PDFJS).then(function (lib) {
-      lib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
-      bk.lib = lib;
-      return lib;
+    if (!bk.libP) {
+      bk.libP = import(PDFJS + (bk.libTries ? '?retry=' + bk.libTries : '')).then(function (lib) {
+        lib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+        bk.lib = lib;
+        return lib;
+      }, function (e) {
+        bk.libP = null;
+        bk.libTries = (bk.libTries || 0) + 1;
+        throw e;
+      });
+    }
+    return bk.libP;
+  }
+
+  /* Choose the one part to fetch next: the current spread's first missing part, or, once
+     that spread is on screen, the part after it. A fetch in flight that the current spread
+     doesn't need gives way when the reader jumps to a spread that needs a different part. */
+  function bkPump() {
+    if (!bk.started || !bk.parts || bk.failed) return;
+    var unit = bkUnits()[bk.idx] || [];
+    var need = [];
+    unit.forEach(function (o) {
+      var p = bkPartOf(o);
+      if (!bk.docs[p] && need.indexOf(p) < 0) need.push(p);
     });
+    var want = null, prefetch = false;
+    if (need.length) {
+      want = need[0];
+    } else if (unit.length && unit.every(function (o) { return bk.pages[o]; })) {
+      var nx = bkPartOf(unit[unit.length - 1]) + 1;
+      if (nx < bk.parts.length && !bk.docs[nx] && !bk.skip[nx]) { want = nx; prefetch = true; }
+    }
+    var job = bk.job;
+    if (job) {
+      if (job.part === want) { if (!prefetch) job.prefetch = false; return; }
+      if (want === null || prefetch || need.indexOf(job.part) >= 0 || !job.ctrl) return;
+      job.aborted = true;
+      job.ctrl.abort();
+      bk.job = null;
+    }
+    if (want === null || bk.wait[want]) return;
+    bkFetchPart(want, prefetch);
+  }
+
+  function bkFetchPart(part, prefetch) {
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var job = { part: part, prefetch: prefetch, ctrl: ctrl, aborted: false };
+    var libFailed = false;
+    bk.job = job;
+    bkStatus('Loading part ' + (part + 1) + ' / ' + bk.parts.length);
+    bkLib().catch(function (e) { libFailed = true; throw e; }).then(function () {
+      return fetch(bkFile(part), ctrl ? { signal: ctrl.signal } : undefined);
+    }).then(function (r) {
+      if (!r.ok) throw new Error('missing part ' + (part + 1));
+      return r.arrayBuffer();
+    }).then(function (buf) {
+      return bk.lib.getDocument({ data: buf }).promise;
+    }).then(function (doc) {
+      if (doc.numPages !== bk.parts[part]) {
+        console.warn('booklet part ' + (part + 1) + ' has ' + doc.numPages + ' pages; parts.json says ' + bk.parts[part]);
+      }
+      bk.docs[part] = doc;
+      done('');
+    }, function (e) {
+      if (job.aborted) return;
+      console.warn(libFailed ? 'booklet library failed' : 'booklet part failed', e && (e.message || e));
+      var key = 'part:' + part;
+      if (libFailed) {
+        bk.failed = true;
+      } else if (!bk.retried[key]) {
+        bk.retried[key] = true;           // one quiet retry after 3 s
+        bk.wait[part] = true;
+        setTimeout(function () { delete bk.wait[part]; bkPump(); }, 3000);
+      } else if (job.prefetch) {
+        bk.skip[part] = true;             // stop prefetching it; fetched again when needed
+      } else {
+        bk.failed = true;
+      }
+      done(libFailed ? 'Could not load the booklet viewer' : '');
+    });
+    function done(msg) {
+      if (bk.job !== job) return;
+      bk.job = null;
+      bkStatus(msg);
+      bkEnsureCurrent();
+      bkPaint();
+    }
   }
 
   function bkStart() {
     if (bk.started) return;
     bk.started = true;
+    if (bk.io) { bk.io.disconnect(); bk.io = null; }
     $('bk-intro').hidden = true;
-    bkStatus('Loading part 1 / ' + BK_PARTS);
-    bk.loadQ = bk.loadQ.then(function () { return bkLib(); }).catch(function (e) {
-      console.warn('booklet library failed', e && (e.message || e));
+    bkPaint();
+    bkManifest().then(function () {
+      bkGo(bk.idx);
+    }, function (e) {
+      console.warn('booklet manifest failed', e && (e.message || e));
       bk.failed = true;
-      bkStatus('Could not load the booklet viewer');
       bkPaint();
-      throw e;
     });
-    for (var i = 0; i < BK_PARTS; i++) {
-      (function (i) {
-        bk.loadQ = bk.loadQ.then(function () {
-          bkStatus('Loading part ' + (i + 1) + ' / ' + BK_PARTS);
-          return fetch(bkFile(i)).then(function (r) {
-            if (!r.ok) throw new Error('missing part ' + (i + 1));
-            return r.arrayBuffer();
-          }).then(function (buf) {
-            return bk.lib.getDocument({ data: buf }).promise;
-          }).then(function (doc) {
-            bk.docs.push(doc);
-            bk.total = bk.docs.reduce(function (s, d) { return s + d.numPages; }, 0);
-            $('bk-count').textContent = String(bk.total).padStart(2, '0');
-            $('bk-scrub').max = Math.max(bkUnits().length - 1, 0);
-            if (i === BK_PARTS - 1) bkStatus('');
-            bkEnsureCurrent();
-            bkPaint();
-          });
-        }).catch(function (e) {
-          console.warn('booklet part failed', e && (e.message || e));
-        });
-      })(i);
-    }
   }
 
   function bkPageCanvas(i, w) {
-    var k = i;
-    for (var d = 0; d < bk.docs.length; d++) {
-      var doc = bk.docs[d];
-      if (k < doc.numPages) {
-        return doc.getPage(k + 1).then(function (page) {
-          var vp0 = page.getViewport({ scale: 1 });
-          var vp = page.getViewport({ scale: w / vp0.width });
-          var c = document.createElement('canvas');
-          c.width = Math.round(vp.width); c.height = Math.round(vp.height);
-          return page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise.then(function () { return c; });
-        });
-      }
-      k -= doc.numPages;
-    }
-    return Promise.reject(new Error('page ' + (i + 1) + ' not loaded yet'));
+    var part = bkPartOf(i), doc = bk.docs[part];
+    if (!doc) return Promise.reject(new Error('page ' + (i + 1) + ' not loaded yet'));
+    return doc.getPage(i - bk.offsets[part] + 1).then(function (page) {
+      var vp0 = page.getViewport({ scale: 1 });
+      var vp = page.getViewport({ scale: w / vp0.width });
+      var c = document.createElement('canvas');
+      c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+      return page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise.then(function () { return c; });
+    });
   }
 
   function bkRender(i, targetW) {
@@ -171,14 +258,15 @@
     if ((bk.tiers[i] || 0) >= w) return;
     bk.rendering[key] = true;
     bk.renderQ = bk.renderQ.then(function () {
-      var covered = bk.docs.reduce(function (s, d) { return s + d.numPages; }, 0);
-      if (covered <= i) { delete bk.rendering[key]; return; }
+      if (!bk.docs[bkPartOf(i)]) { delete bk.rendering[key]; return; }
       return bkPageCanvas(i, w).then(function (c) {
         bk.tiers[i] = w;
         bk.pages[i] = c.toDataURL('image/jpeg', 0.85);
         bk.failed = false;
         delete bk.rendering[key];
+        if (!bk.job) bkStatus('');
         bkPaint();
+        bkPump();   // the spread is on screen: time to prefetch the next part
       }).catch(function (e) {
         delete bk.rendering[key];
         console.warn('booklet render failed', e && (e.message || e));
@@ -193,10 +281,13 @@
     });
   }
 
+  // render the current spread and the next one from the parts already loaded, then fetch
   function bkEnsureCurrent() {
+    if (!bk.parts) return;
     var units = bkUnits();
     var cur = (units[bk.idx] || []).concat(units[bk.idx + 1] || []);
-    cur.forEach(function (o) { if (!bk.pages[o]) bkRender(o); });
+    cur.forEach(function (o) { if (!bk.pages[o] && bk.docs[bkPartOf(o)]) bkRender(o); });
+    bkPump();
   }
 
   function bkAwardsPanel() {
@@ -246,8 +337,7 @@
     }
     $('bk-loading').hidden = !(bk.started && !hasPage && !bk.failed);
     $('bk-failedbox').hidden = !(bk.started && !hasPage && bk.failed);
-    $('bk-num').textContent = unit.length
-      ? unit.map(function (o) { return String(o + 1).padStart(2, '0'); }).join('–') : '··';
+    $('bk-num').textContent = unit.length ? unit.map(function (o) { return pad2(o + 1); }).join('–') : '··';
   }
 
   function bkGo(n) {
@@ -269,27 +359,36 @@
       }
     });
     $('bk-start').onclick = bkStart;
-    $('bk-prev').onclick = function () { bkGo(bk.idx - 1); };
-    $('bk-next').onclick = function () { bkGo(bk.idx + 1); };
+    $('bk-prev').onclick = function () { bkStart(); bkGo(bk.idx - 1); };
+    $('bk-next').onclick = function () { bkStart(); bkGo(bk.idx + 1); };
     $('bk-zin').onclick = bk.pz.zoomIn;
     $('bk-zout').onclick = bk.pz.zoomOut;
     $('bk-fit').onclick = bk.pz.fit;
     $('bk-scrub').addEventListener('input', function (e) {
-      if (!bk.started) { bkStart(); }
+      bkStart();
       bkGo(parseInt(e.target.value, 10) || 0);
     });
     $('bk-retry').onclick = function () {
-      bk.retried = {}; bk.failed = false;
+      bk.retried = {}; bk.skip = {}; bk.failed = false;
       bkStatus('Recovering viewer…');
-      if (!bk.lib || !bk.docs.length) {
-        bk.started = false;
-        bk.loadQ = Promise.resolve();
-        bkStart();
-      } else {
-        bkEnsureCurrent();
-      }
       bkPaint();
+      bkManifest().then(function () { bkGo(bk.idx); }, function (e) {
+        console.warn('booklet manifest failed', e && (e.message || e));
+        bk.failed = true;
+        bkStatus('');
+        bkPaint();
+      });
     };
+    // the page total and scrubber come from the manifest (tiny); the PDFs wait for the reader
+    bkManifest().catch(function (e) { console.warn('booklet manifest failed', e && (e.message || e)); });
+    if ('IntersectionObserver' in window) {
+      bk.io = new IntersectionObserver(function (entries) {
+        if (entries.some(function (en) { return en.isIntersecting; })) bkStart();
+      }, { rootMargin: '0px 0px 200px 0px' });
+      bk.io.observe($('bk-stage'));
+    } else {
+      bkStart();
+    }
   }
 
   /* ---------------- Page assembly ---------------- */
@@ -427,8 +526,7 @@
     if (p.slug === 'proctor-landing-park') {
       $('mp-section').hidden = false;
       mpInit();
-      bkInit();
-      bkStart(); // booklet opens automatically; the intro gate becomes a loading state
+      bkInit();   // the booklet opens itself as the reader nears it; the intro is the idle state
     }
   }
 

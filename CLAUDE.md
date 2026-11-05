@@ -131,6 +131,15 @@ fix that label by hand when the PDF size changes. Portfolio spreads also feed th
 individual figures cut from the boards (`content/projects/<slug>/g-*.webp`,
 `gallery` + `focus` in each JSON).
 
+The Proctor capstone booklet on its project page is 11 PDF parts
+(`assets/booklet/Part_NN.pdf`, pdf.js), with each part's page count in
+`assets/booklet/parts.json` (`{"parts":[5,7,7,3,4,2,1,3,2,6,5],"page":[612,792]}`,
+45 pages). The viewer loads no PDF until the reader comes within 200 px of it
+(or uses its controls), then fetches only the part holding the current spread
+and prefetches the next part once that spread is drawn. Update parts.json
+whenever the booklet is re-exported (`pdfinfo` gives the counts); the console
+warns when a part disagrees with it.
+
 Pages are static HTML + `content/site.json` and `content/projects/*.json`
 (`index.json` lists slugs). `hidden: true` unlists a project everywhere while
 its direct project.html URL keeps working. `[CONFIRM ...]` markers in JSON are

@@ -266,6 +266,10 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
 - **Phones:** the drawing set's toolbar sits on one row from about 383px (10px padding, 6px gaps).
   The portfolio and booklet toolbars keep their spacing: their counters change width between
   single pages and spreads, so a tighter bar would flip between one and two rows as you page.
+- **Loading:** the capstone booklet waits on its intro ("Open booklet") until the reader comes
+  within 200px of it or uses its arrows or scrubber; it then reads "Rendering…" until the spread
+  is drawn, with "Loading part n / 11" in the toolbar. A part that fails twice shows the failed
+  box and its Retry button.
 
 The Projects page's blowout is the lightbox panel without a stage: it opens on the project's
 first figure, then the mono meta line, a mono link to the full project page (named for what
