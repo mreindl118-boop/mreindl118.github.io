@@ -2,6 +2,7 @@ package com.mattlabs.planlab.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,8 +67,11 @@ object TodayData {
 
     /** The dose, only when it is short and mostly numbers ("3 × 10", "5 min"). */
     fun dose(step: PBox): String? {
-        val d = Moves.find(Store.state.value.plan.moves, step.label, step.links)?.field("Dose") ?: return null
-        return d.takeIf { it.length <= 16 }
+        Moves.find(Store.state.value.plan.moves, step.label, step.links)?.field("Dose")?.let { return it.takeIf { d -> d.length <= 16 } }
+        // No how-to card: the numbers after the name ("Dead bug 3 × 10 each side" -> "3 × 10 each side").
+        val full = MoveSheet.shortLabel(step.label).split(" — ", " (").first().trim()
+        val rest = full.removePrefix(short(step)).trim().trimStart(',', '-', ':').trim()
+        return rest.takeIf { it.isNotEmpty() && (it.first().isDigit() || it.first() == '×') && it.length <= 18 }
     }
 }
 
@@ -142,7 +146,11 @@ fun NextUpCard(day: Day) {
                 if (step != null && (move != null || box.key == "body" || box.key == "move"))
                     RoundButton(R.drawable.ic_a_info, tk.fg, tk.sunk, "How to") { MoveSheet.show(MoveSheet.Req(day.date, box.key, step.key, null)) }
                 Row(Modifier.weight(1f).height(64.dp).clip(RoundedCornerShape(22.dp)).background(color)
-                    .clickable { if (step != null) Store.setStep(day, box, step, true) else Store.toggle(day, box) },
+                    .clickable {
+                        val name = step?.let { TodayData.short(it) } ?: TodayData.label(box)
+                        if (step != null) { Store.setStep(day, box, step, true); Undo.offer("✓ $name") { Store.setStep(day, box, step, false) } }
+                        else { Store.toggle(day, box); Undo.offer("✓ $name") { Store.toggle(day, box) } }
+                    },
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     Icon(Icons.Filled.Check, null, Modifier.size(28.dp), tint = Color.White)
                     Spacer(Modifier.width(8.dp))
@@ -169,9 +177,10 @@ fun StepDots(n: Int, at: Int, color: Color) {
 }
 
 /** One tile in the ring grid. */
-data class RingTile(val key: String, val f: Float, val center: String, val color: Color, val onTap: () -> Unit)
+data class RingTile(val key: String, val f: Float, val label: String, val color: Color, val onLong: (() -> Unit)? = null, val onTap: () -> Unit)
 
-/** Rings with icons, three per row, no captions. The open one gets an outline. */
+/** Rings with icons and a one-word name, three per row. Tap does it; press and hold undoes it. */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun RingGrid(tiles: List<RingTile>, openKey: String?) {
     val tk = t()
@@ -180,13 +189,14 @@ fun RingGrid(tiles: List<RingTile>, openKey: String?) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 for (tile in row) {
                     val on = tile.key == openKey
-                    Column(Modifier.weight(1f).clip(RoundedCornerShape(22.dp)).background(if (on) soft(tile.color, tk.dark) else tk.surface).clickable { tile.onTap() }.padding(vertical = 14.dp),
+                    Column(Modifier.weight(1f).clip(RoundedCornerShape(22.dp)).background(if (on) soft(tile.color, tk.dark) else tk.surface)
+                        .combinedClickable(onLongClick = tile.onLong, onClick = { tile.onTap() }).padding(vertical = 12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                        Ring(tile.f, if (tile.f >= 1f) tk.ok else tile.color, 72.dp, 8.dp) {
+                        Ring(tile.f, if (tile.f >= 1f) tk.ok else tile.color, 64.dp, 7.dp) {
                             if (tile.f >= 1f) Icon(Icons.Filled.Check, null, Modifier.size(30.dp), tint = tk.ok)
                             else AreaIcon(tile.key, tile.color, 30.dp)
                         }
-                        if (tile.center.isNotEmpty()) Text(tile.center, Modifier.padding(top = 6.dp), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = tk.muted)
+                        Text(tile.label, Modifier.padding(top = 6.dp), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = tk.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
                 repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }

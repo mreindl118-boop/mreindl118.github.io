@@ -47,6 +47,10 @@ object TodayPick {
     /** The first [n] words, without a trailing comma or clause ("Play C major scale, slow" -> "Play C major scale"). */
     fun words(text: String, n: Int): String {
         val head = text.split(" — ", " - ", " (", ", ", ": ", "; ").first().trim()
-        return head.split(Regex("""\s+""")).take(n).joinToString(" ").trimEnd(',', '.', ':', ';')
+        // Stop before a dose ("Dead bug 3 × 10" -> "Dead bug"), unless the step starts with a number.
+        val ws = head.split(Regex("""\s+"""))
+        val cut = ws.withIndex().firstOrNull { (i, w) -> i > 0 && w.isNotEmpty() && (w.first().isDigit() || w.first() == '×' || w.first() == '~') }?.index ?: ws.size
+        val kept = ws.take(cut)
+        return kept.take(n).joinToString(" ").trimEnd(',', '.', ':', ';')
     }
 }

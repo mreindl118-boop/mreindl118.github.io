@@ -50,6 +50,8 @@ class TodayPickTest {
         assertEquals("Play test scale slowly", TodayPick.words("Play test scale slowly with both hands", 4))
         assertEquals("Test bug", TodayPick.words("Test bug — 3 × 10 each side", 4))
         assertEquals("Clear the desk", TodayPick.words("Clear the desk, then the shelf", 4))
+        assertEquals("Test bug", TodayPick.words("Test bug 3 × 10 each side", 4))
+        assertEquals("3 slow breaths", TodayPick.words("3 slow breaths", 4))
     }
 
     @Test fun aDueCheckInWinsToo() {
