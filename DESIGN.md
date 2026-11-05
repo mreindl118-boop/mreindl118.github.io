@@ -220,7 +220,9 @@ the bio on the second. "Get in touch" and "Recognition" are 22px headings over a
 not mono labels, and the headshot carries no caption. Below 760px, where that grid is one
 column, the bio comes before the headshot and Recognition (`.about-bio`), so a phone reads name,
 contact, bio. The résumé's Download PDF ↓ and Print are the standard primary and outline buttons
-(44px tall), and the tools section under the sheet (`#skills`) opens on its heading, no kicker.
+(44px tall). Under the sheet, the tools section (`#skills`, the target of skills.html) is headed
+"Tools and fluency", with one 16px ink sentence (sans, not mono) over the graded tool lists; the
+sheet's own mono "Skills" heading stays the only "Skills" on the page.
 
 ## Elevation & Depth
 
