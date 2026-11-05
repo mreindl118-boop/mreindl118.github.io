@@ -256,9 +256,11 @@
     projectCard: projectCard, panZoom: panZoom, loadPortfolio: loadPortfolio
   };
 
-  /* Nav indicator glide: on click, the square-line-circle indicator slides
-     from the active tab to the clicked one, then the page navigates. The
-     destination page plays a subtle settle highlight on arrival. */
+  /* Nav indicator glide: on a mouse or touch click, the square-line-circle
+     indicator slides from the active tab to the clicked one (200ms), then the
+     page navigates; the destination page eases the tab label from clay to ink.
+     Keyboard Enter (click detail 0) navigates at once: no motion on keyboard
+     actions. */
   function initNavGlide() {
     var nav = document.querySelector('.navlinks');
     if (!nav) return;
@@ -287,6 +289,7 @@
       if (link.classList.contains('active')) return;
       if (e.defaultPrevented || e.button !== 0) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (e.detail === 0) return;   // keyboard Enter: the link navigates natively, no hold
       if (gliding) { e.preventDefault(); return; }
       gliding = true;
       e.preventDefault();
@@ -314,14 +317,14 @@
       try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (err) {}
       if (reduced) { go(); return; }
 
+      // left/top stay at the old tab; the glide is a transform (plus the width)
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
-          fly.style.left = (to.left - navRect.left) + 'px';
-          fly.style.top = (to.top - navRect.top) + 'px';
+          fly.style.transform = 'translate(' + (to.left - from.left) + 'px,' + (to.top - from.top) + 'px)';
           fly.style.width = to.width + 'px';
         });
       });
-      setTimeout(go, 330);
+      setTimeout(go, 200);
     });
   }
 

@@ -95,20 +95,21 @@ img { max-width: 100%; }
 .navlinks .ind .ln { display: block; flex: 1; height: 1.5px; background: var(--leaf); }
 .navlinks .ind .ci { display: block; width: 5px; height: 5px; border: 1.5px solid var(--clay); border-radius: 50%; box-sizing: border-box; flex-shrink: 0; }
 
-/* Gliding indicator: a floating copy that slides between tabs on click */
+/* Gliding indicator: a floating copy that slides between tabs on a mouse or touch click. It sits
+   at the old tab and moves by transform (width follows, since tabs differ in length) on a strong
+   ease-out, so the destination reads within the first 80ms of the 200ms the page waits */
 .navlinks .ind-fly {
   position: absolute; display: flex; align-items: center; opacity: 1; pointer-events: none; margin: 0;
-  transition: left .3s cubic-bezier(.4, 0, .2, 1), top .3s cubic-bezier(.4, 0, .2, 1), width .3s cubic-bezier(.4, 0, .2, 1);
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), width 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .navlinks a.arriving { color: var(--clay); transition: color .2s ease; }
-/* Arrival settle on the destination page */
-.navlinks a.active.arrived > span:first-child { animation: tabSettle .7s ease; }
-.navlinks a.active.arrived .ind { animation: indSettle .5s ease; }
+/* Arrival settle on the destination page: the label eases from clay to ink (the marker that just
+   landed stays put at full strength) */
+.navlinks a.active.arrived > span:first-child { animation: tabSettle 200ms cubic-bezier(0.23, 1, 0.32, 1); }
 @keyframes tabSettle { 0% { color: var(--clay); } 100% { color: var(--ink); } }
-@keyframes indSettle { 0% { opacity: .2; } 100% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .navlinks .ind-fly { transition: none; }
-  .navlinks a.active.arrived > span:first-child, .navlinks a.active.arrived .ind { animation: none; }
+  .navlinks a.active.arrived > span:first-child { animation: none; }
 }
 
 /* Square—line—circle divider motif (from the design board) */

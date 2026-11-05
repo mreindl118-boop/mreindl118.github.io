@@ -285,7 +285,10 @@ Diagonal hatching marks placeholders.
 ### Navigation
 - Wordmark left (brand mark + "Understory / Design Studio"), four mono links right; the current
   tab carries the square–line–circle indicator in the mark's colours (pine square, leaf line,
-  clay ring), which glides to the next tab on click (honours reduced motion). The current tab is
+  clay ring). On a mouse or touch click it glides to the next tab, moved by transform over 200ms on
+  `cubic-bezier(0.23, 1, 0.32, 1)`, and the page loads as it lands; the new page eases the tab label
+  from clay to ink over 200ms (the marker itself doesn't replay). Keyboard Enter navigates at once,
+  with no glide, and reduced motion skips the glide and the settle. The current tab is
   `aria-current="page"` (on a project page and the portfolio book, that is Projects).
 
 ### Viewers (signature component)
