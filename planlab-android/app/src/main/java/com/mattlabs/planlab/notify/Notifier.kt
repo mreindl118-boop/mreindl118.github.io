@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.mattlabs.planlab.R
+import com.mattlabs.planlab.core.Discreet
 import com.mattlabs.planlab.core.LogDoc
 import com.mattlabs.planlab.core.Phase
 import com.mattlabs.planlab.data.Store
@@ -65,6 +66,9 @@ object Notifier {
             val i = Intent(ctx, ActionReceiver::class.java).setAction("planlab.dismiss.${slot.name}").putExtra("act", "dismiss").putExtra("slot", slot.name)
             b.setDeleteIntent(PendingIntent.getBroadcast(ctx, 500 + slot.ordinal, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
         }
+        // On the lock screen: just "planLAB", details after unlocking.
+        b.setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setPublicVersion(
+            NotificationCompat.Builder(ctx, b.build().channelId ?: CH_NUDGE).setSmallIcon(R.drawable.ic_stat).setContentTitle("planLAB").setContentText("1 thing to do").build())
         try { NotificationManagerCompat.from(ctx).notify(id, b.build()) } catch (_: SecurityException) {}
     }
 
@@ -72,7 +76,7 @@ object Notifier {
 
     private fun base(ctx: Context, ch: String, title: String, text: String) = NotificationCompat.Builder(ctx, ch)
         .setSmallIcon(R.drawable.ic_stat).setColor(0xFF2F7DE1.toInt())
-        .setContentTitle(title).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text))
+        .setContentTitle(Discreet.text(title)).setContentText(Discreet.text(text)).setStyle(NotificationCompat.BigTextStyle().bigText(Discreet.text(text)))
         .setContentIntent(openApp(ctx)).setAutoCancel(true)
         .setPriority(NotificationCompat.PRIORITY_HIGH).setCategory(NotificationCompat.CATEGORY_REMINDER)
 
@@ -102,7 +106,7 @@ object Notifier {
             Slot.PELVIC_AM, Slot.PELVIC_PM -> {
                 val n = LogDoc.pelvic(log, today.toString())
                 if (n >= 2 || (slot == Slot.PELVIC_AM && n >= 1)) return false
-                post(ctx, id, base(ctx, CH_NUDGE, "Pelvic floor ${n + 1}/2", "10 slow, 10 quick")
+                post(ctx, id, base(ctx, CH_NUDGE, "Quick set · 1 min", "Set ${n + 1} of 2")
                     .addAction(action(ctx, "Done", "pelvic", slot, notif = id))
                     .addAction(action(ctx, "In 30 min", "snooze", slot, minutes = 30, notif = id)))
             }
@@ -254,7 +258,7 @@ object Notifier {
         }
         val text = com.mattlabs.planlab.ui.TodayData.next(day)?.let { n -> "Next: " + (n.step?.let { com.mattlabs.planlab.ui.TodayData.short(it) } ?: com.mattlabs.planlab.ui.TodayData.label(n.box)) } ?: "✓"
         val nb = NotificationCompat.Builder(ctx, CH_TODAY).setSmallIcon(R.drawable.ic_stat).setColor(0xFF2F7DE1.toInt())
-            .setContentTitle(title).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text)).setOngoing(true).setOnlyAlertOnce(true).setSilent(true)
+            .setContentTitle(Discreet.text(title)).setContentText(Discreet.text(text)).setStyle(NotificationCompat.BigTextStyle().bigText(Discreet.text(text))).setOngoing(true).setOnlyAlertOnce(true).setSilent(true)
             .setContentIntent(openApp(ctx)).setProgress(day.boxes.size, done, false)
             .setPriority(NotificationCompat.PRIORITY_LOW).setCategory(NotificationCompat.CATEGORY_STATUS)
         open.take(1).forEach { nb.addAction(action(ctx, "✓ " + (Store.LABEL[it.key] ?: it.label.take(14)), "step", null, it.key, notif = 0)) }
