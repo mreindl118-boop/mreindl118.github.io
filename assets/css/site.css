@@ -230,9 +230,12 @@ main .rule-motif .ci { border-color: var(--clay); }
   cursor: grab; touch-action: pan-y pinch-zoom; background: var(--paper);
 }
 .vstage.tall { height: min(68vh, 640px); }
-/* the portfolio book never shrinks below that, and grows on tall screens (780px at 1920x1080,
-   1000px from 1300px of height), still inside the 1240 container; the booklet keeps its own */
-@media (min-width: 641px) { #pf-stage { height: max(min(68vh, 640px), min(calc(100svh - 300px), 1000px)); } }
+/* the portfolio book never shrinks below that, and on taller screens grows only as far as keeps
+   its scrubber and caption bar in the first view: 100svh less the nav, header, toolbar and foot
+   (455px while the header takes two rows, below 960px; 395px from 960px), at most 1000px, still
+   inside the 1240 container; the booklet keeps its own */
+@media (min-width: 641px) { #pf-stage { height: max(min(68vh, 640px), min(calc(100svh - 455px), 1000px)); } }
+@media (min-width: 960px) { #pf-stage { height: max(min(68vh, 640px), min(calc(100svh - 395px), 1000px)); } }
 /* its caption links to the project page; a 24px line keeps the footer one height either way */
 #pf-caption { line-height: 24px; }
 #pf-caption a { display: inline-block; }

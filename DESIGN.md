@@ -333,12 +333,17 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
 - **Portfolio book (portfolio.html):** the page opens on the book, not on furniture: no kicker,
   the H1 at the shared page-title size, one `.note-sans` sentence that carries the years, and the
   plain primary button "Download PDF ↓ (16 MB)" (the one under the book reads "Download PDF ↓").
-  From 641px the stage is `max(min(68vh, 640px), min(100svh − 300px, 1000px))`: never smaller
-  than the shared tall stage, and on tall screens it grows (780px at 1920×1080, 1000px from
-  1300px of height), still inside the 1240 container. Under the viewer, a row of the drawing
+  From 641px the stage is `max(min(68vh, 640px), min(100svh − 455px, 1000px))` (`− 395px` from
+  960px, where the header is one row): never smaller than the shared tall stage, and on taller
+  screens it grows only as far as keeps the scrubber and caption bar in the first view (725px at
+  820×1180, 685px at 1920×1080, 1000px from 1395px of height), still inside the 1240 container.
+  On short desktop screens (1440×900 and below) the shared size wins, so the whole viewer fits one
+  screen under the nav but its foot starts below the first view. Under the viewer, a row of the drawing
   set's `.thumbbtn` jumps opens each project's first spread; the buttons come from spreads.json,
   one per "NN Title" caption number (its first spread), so they follow the Contents page, and the
-  current project's is active (none on the cover, Other work or the colophon). A project spread's
+  current project's is active (none on the cover, Other work or the colophon); a jump made while
+  the stage's top is above the screen (a phone, scrolled to the row) brings the stage back, just
+  under the nav (instantly under reduced motion). A project spread's
   caption links to its project page, with a mono "Project page →" at the right of the foot
   (matched by title prefix against the listed projects); other captions stay plain text.
 

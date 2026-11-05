@@ -206,7 +206,16 @@
   $('pf-scrub').addEventListener('input', function (e) { show(parseInt(e.target.value, 10) || 0); });
   $('pf-jumps').addEventListener('click', function (e) {
     var b = e.target.closest('.thumbbtn');
-    if (b) show(parseInt(b.getAttribute('data-k'), 10));
+    if (!b) return;
+    show(parseInt(b.getAttribute('data-k'), 10));
+    // the row sits under the book, so on a phone the stage can be above the screen: bring it back,
+    // landing just under the sticky nav (html's scroll-padding-top), at once under reduced motion
+    var stage = $('pf-stage'), nav = document.querySelector('.nav');
+    if (stage.getBoundingClientRect().top < (nav ? nav.getBoundingClientRect().bottom : 0)) {
+      var instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      try { stage.scrollIntoView({ block: 'start', behavior: instant ? 'instant' : 'auto' }); }
+      catch (err) { stage.scrollIntoView(true); }   // a browser that predates 'instant'
+    }
   });
   // page-wide left/right flip the book, except in a form field (the scrubber has its own), on the
   // focused stage (which handles its keys itself), with a browser shortcut, or while zoomed in
