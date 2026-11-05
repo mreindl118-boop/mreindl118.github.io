@@ -192,9 +192,8 @@ the nav's measured height (`--nav-h`, set by `site.js`; 66px, 53px at 476–640p
 at 474px and below), so sections carry no scroll margins of their own. The jump glides (`scroll-behavior:
 smooth`) only for visitors who haven't asked for reduced motion.
 
-On Home the featured project is the page's one full-width picture: the plan drawing itself at the
-container width (the legend-free plan, not the board with its title box, text and legends; loaded
-lazily, below the first screen), with the title in the left third and its sentence in the right
+On Home the featured project is the page's one full-width picture: its whole master plan at the
+container width (never cropped), with the title in the left third and its sentence in the right
 two-thirds underneath (one column on phones), so it doesn't repeat the hero's text-and-picture split.
 Home ends on contact, not a list: on the panel ground under the rule motif, "Get in Touch" sets the
 email address as a Headline-weight link (700, clamp(28px, 4.4vw, 56px)) in the left two-thirds, with
