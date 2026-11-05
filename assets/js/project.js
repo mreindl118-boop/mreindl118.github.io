@@ -97,9 +97,11 @@
   function mpInit() {
     var pz = US.panZoom($('mp-stage'), $('mp-surface'), $('mp-badge'));
     var opener = null;
-    // an aria-modal dialog takes focus, locks the page behind it and gives focus back on close
-    function open() {
+    // an aria-modal dialog takes focus, locks the page behind it and gives focus back on close;
+    // opened from the keyboard (click detail 0), it appears without its entrance
+    function open(e) {
       opener = document.activeElement;
+      $('mp-box').toggleAttribute('data-instant', !!(e && e.detail === 0));
       $('mp-box').hidden = false;
       document.body.style.overflow = 'hidden';
       pz.fit(true);

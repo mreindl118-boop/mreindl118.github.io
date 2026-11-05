@@ -334,6 +334,17 @@ main .rule-motif .ci { border-color: var(--clay); }
   display: flex; align-items: center; justify-content: center; padding: 18px;
 }
 .lightbox[hidden] { display: none; }
+/* Opening, the box eases in: the scrim fades and the sheet rises 6px into place, 200ms. Closing is
+   instant (exit faster than entrance), so is a keyboard open (data-instant, set by the opener), and
+   reduced motion gets no entrance at all. Browsers without @starting-style open instantly. */
+.lightbox { transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1); }
+.lightbox-panel { transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1), transform 200ms cubic-bezier(0.23, 1, 0.32, 1); }
+@starting-style {
+  .lightbox { opacity: 0; }
+  .lightbox-panel { opacity: 0; transform: translateY(6px); }
+}
+.lightbox[data-instant], .lightbox[data-instant] .lightbox-panel { transition: none; }
+@media (prefers-reduced-motion: reduce) { .lightbox, .lightbox-panel { transition: none; } }
 .lightbox-panel {
   position: relative; background: var(--paper); border: 1px solid var(--ink);
   width: min(1560px, 97vw); height: 93vh; height: 93dvh; display: flex; flex-direction: column;

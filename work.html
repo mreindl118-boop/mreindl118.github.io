@@ -194,7 +194,8 @@
   }
 
   var opener = null;
-  function open(slug, push) {
+  // instant: opened from the keyboard (Enter on a card), so the box appears without its entrance
+  function open(slug, push, instant) {
     var i = order.indexOf(slug);
     if (i < 0) return;
     cur = i;
@@ -207,6 +208,7 @@
     body.scrollTop = 0;
     if (inBody) body.focus();
     var wasOpen = !$('bo-box').hidden;
+    if (!wasOpen) $('bo-box').toggleAttribute('data-instant', instant === true);
     $('bo-box').hidden = false;
     document.body.style.overflow = 'hidden';
     if (!wasOpen) { opener = document.activeElement; $('bo-close').focus(); }
@@ -262,7 +264,7 @@
     var m = /slug=([^&]+)/.exec(a.getAttribute('href') || '');
     if (!m) return;
     e.preventDefault();
-    open(decodeURIComponent(m[1]));
+    open(decodeURIComponent(m[1]), true, e.detail === 0);
   });
   US.loadProjects().then(function (projects) {
     var visible = projects.filter(function (p) { return !p.hidden; });

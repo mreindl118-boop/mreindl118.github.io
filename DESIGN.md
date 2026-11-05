@@ -346,7 +346,11 @@ scrolls from the keyboard (the scroll keys also work from the toolbar buttons).
 
 Both lightboxes (the blowout and Proctor's full-screen master plan) behave as modal dialogs: on
 open, focus moves to the close button, Tab cycles inside, the page behind stops scrolling, and
-Escape or Close hands focus back to the control that opened it.
+Escape or Close hands focus back to the control that opened it. Opened with a mouse or a tap, a
+lightbox eases in: the scrim fades and the sheet rises 6px into place over 200ms on
+`cubic-bezier(0.23, 1, 0.32, 1)` (`@starting-style`; older browsers open at once). Closing,
+stepping to the next project and a keyboard open (`data-instant`) are instant, and reduced motion
+gets no entrance.
 
 ### Compare slider
 Two registered images wiped by a draggable divider with a round ink-ringed handle; keyboard
