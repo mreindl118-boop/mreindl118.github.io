@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
+<noscript><style>#p-meta { display: none; }</style></noscript>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -43,6 +44,7 @@
     </div>
     <h1 id="p-title" class="h-head" style="font-size:clamp(28px,5vw,50px); margin:12px 0 0; line-height:1.08; max-width:24ch; text-wrap:balance"></h1>
   </div>
+  <noscript><div class="load-note" style="margin-top:30px; border-top:1px solid var(--ink); padding-top:16px"><p class="mono-note">Projects didn’t load.</p><div class="load-note-links"><a class="link-mono" href="portfolio.html">Flip through the portfolio book&nbsp;&rarr;</a><a class="link-mono" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf">Download PDF&nbsp;&darr; <span style="color:var(--faint); white-space:nowrap">(16&nbsp;MB)</span></a></div></div></noscript>
   <div class="meta-grid" id="p-meta"></div>
 
   <!-- Compare slider: same-frame views (existing site, concepts) declared as "compare" in the project JSON -->
@@ -129,7 +131,7 @@
   </div>
 
   <!-- Drawing set (hidden for projects that only have models) -->
-  <div id="dw-section">
+  <div id="dw-section" hidden>
   <h2 class="h-head" style="font-size:26px; margin:48px 0 14px">Drawing set</h2>
   <div class="viewer">
     <div class="vbar">
@@ -167,7 +169,7 @@
     <div id="p-models-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:28px 24px"></div>
   </div>
 
-  <div id="p-nav" style="display:flex; justify-content:space-between; gap:16px; margin-top:56px; border-top:1px solid var(--line); padding-top:20px; flex-wrap:wrap">
+  <div id="p-nav" hidden style="display:flex; justify-content:space-between; gap:16px; margin-top:56px; border-top:1px solid var(--line); padding-top:20px; flex-wrap:wrap">
     <a id="p-prev" href="#" style="text-decoration:none; font-size:14px"><span style="font-family:var(--mono); font-size:11px; color:var(--faint); display:block">← Previous</span><span id="p-prev-title"></span></a>
     <a id="p-next" href="#" style="text-decoration:none; font-size:14px; text-align:right"><span style="font-family:var(--mono); font-size:11px; color:var(--faint); display:block">Next →</span><span id="p-next-title"></span></a>
   </div>

@@ -380,6 +380,17 @@ main .rule-motif .ci { border-color: var(--clay); }
 .contact-mail { justify-self: start; font-weight: 700; font-size: clamp(28px, 4.4vw, 56px); letter-spacing: -.02em; color: var(--ink); text-decoration-thickness: 2px; overflow-wrap: anywhere; }
 @media (max-width: 640px) { .contact-close { grid-template-columns: minmax(0, 1fr); } }
 
+/* ---------- Loading and failure states ---------- */
+/* containers filled from the content JSON hold their space until it lands (no jump) */
+#grid:empty, #p-meta:empty { min-height: 100svh; }
+.load-note { grid-column: 1 / -1; }
+.load-note .mono-note { margin: 0; }
+.load-note-links { display: flex; gap: 10px 26px; flex-wrap: wrap; margin-top: 12px; }
+.img-ph {
+  aspect-ratio: 4 / 3; border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+}
+
 /* ---------- Meta grid (project page) ---------- */
 .meta-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));

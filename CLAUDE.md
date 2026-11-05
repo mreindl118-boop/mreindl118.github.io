@@ -126,7 +126,9 @@ privacy pass first, then this script (update its transcriptions if captions
 change). The script also writes `assets/portfolio/cover-thumb.webp` (the
 Portfolio Book band's cover, spread 0 at 560 px wide; work.html hard-codes
 560x761) but not the "(16 MB)" label beside that band's PDF link in work.html;
-fix that label by hand when the PDF size changes. Portfolio spreads also feed the project pages
+fix that label by hand when the PDF size changes, along with its copies in the
+load-failure note (`loadNote` in `assets/js/site.js`) and the `<noscript>` notes
+in work.html, project.html and portfolio.html. Portfolio spreads also feed the project pages
 (`content/projects/<slug>/pf-NN.webp`), and the Projects-page blowouts use
 individual figures cut from the boards (`content/projects/<slug>/g-*.webp`,
 `gallery` + `focus` in each JSON).

@@ -279,7 +279,20 @@ scrolls from the keyboard (the scroll keys also work from the toolbar buttons).
 
 ### Compare slider
 Two registered images wiped by a draggable divider with a round ink-ringed handle; keyboard
-operable through a range input; mono tags name each side.
+operable through a range input; mono tags name each side. Each view's `w`/`h` in the JSON gives
+the stage its shape before the images arrive.
+
+### Loading and failure states
+- **No jumps:** the containers the content JSON fills (`#grid`, `#p-meta`) hold a viewport of
+  height while empty, and sections that may not apply (drawing set, prev/next) start hidden.
+- **Content that can't load:** one bad project file costs only that project. With nothing to
+  show, the Projects grid (and a project page, under an h1 "Projects didn’t load") gives the mono
+  note "Projects didn’t load." and two mono links, "Flip through the portfolio book →" and
+  "Download PDF ↓ (16 MB)". The same note is the `<noscript>` fallback on the Projects and
+  project pages; the portfolio's stage offers just the PDF link.
+- **Unknown project:** h1 "Project not found" and "All projects →"; the page is `noindex`.
+- **A missing image:** a portfolio spread shows "Couldn’t load this spread" and a Retry button
+  (44px) in the stage; blowout figures and model photos take the covers' hatched placeholder.
 
 ## Do's and Don'ts
 

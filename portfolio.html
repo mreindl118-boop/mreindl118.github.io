@@ -61,6 +61,7 @@
     </div>
     <div class="vstage tall" id="pf-stage">
       <div class="vsurface" id="pf-surface"></div>
+      <noscript><div class="voverlay"><a class="link-mono" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf">Download PDF&nbsp;&darr; <span style="color:var(--faint); white-space:nowrap">(16&nbsp;MB)</span></a></div></noscript>
       <div class="vbadge" id="pf-badge">100%</div>
     </div>
     <div class="vscrub">
@@ -95,14 +96,14 @@
 <script src="assets/js/site.js"></script>
 <script>
 (function () {
-  var idx = 0, PF = null, N = 0;
+  var idx = 0, PF = null, N = 0, retries = {};
   var $ = function (id) { return document.getElementById(id); };
   var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));
   function show(k) {
     if (!PF) return;
     idx = Math.min(Math.max(k, 0), N - 1);
     var img = document.createElement('img');
-    img.src = PF.src(idx);
+    img.src = PF.src(idx) + (retries[idx] ? '?retry=' + retries[idx] : '');
     img.alt = PF.spreads[idx].caption + ', ' + PF.label(idx).toLowerCase();
     img.draggable = false;
     img.style.cssText = 'max-width:100%; max-height:100%; width:auto; height:auto; display:block; background:#FFF; user-select:none; visibility:hidden';
@@ -119,6 +120,15 @@
       [idx + 1, idx - 1].forEach(function (n) {
         if (n >= 0 && n < N) { var pre = new Image(); pre.src = PF.src(n); }
       });
+    };
+    img.onerror = function () {
+      if (want !== idx) return;
+      sf.innerHTML = '<div class="voverlay"><span class="note">Couldn\u2019t load this spread</span>' +
+        '<button type="button" class="btn" style="min-height:44px">Retry</button></div>';
+      sf.querySelector('button').onclick = function () {
+        retries[want] = (retries[want] || 0) + 1;
+        show(want);
+      };
     };
     pz.fit(true);
     $('pf-num').textContent = PF.label(idx);

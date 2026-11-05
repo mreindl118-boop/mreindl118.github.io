@@ -29,11 +29,15 @@
    {
     "label": "Concept 1 · dam removal",
     "file": "evans-park/compare-concept-1.webp",
+    "w": 1478,
+    "h": 1322,
     "caption": "Concept 1, dam removed and Mill Creek returned to a wetland corridor"
    },
    {
     "label": "Concept 2 · dam retained",
     "file": "evans-park/compare-concept-2.webp",
+    "w": 1478,
+    "h": 1322,
     "caption": "Concept 2, dam kept with a plaza on the impoundment"
    }
   ]

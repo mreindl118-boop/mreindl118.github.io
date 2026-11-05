@@ -23,13 +23,45 @@
 
   function loadSite() { return getJSON('content/site.json'); }
 
+  /* One bad or missing project file (a drop-box edit, say) costs only that project: the rest
+     still load, and the list carries the slugs that failed as .failed. It rejects only when
+     nothing loads. */
   function loadProjects() {
     return getJSON('content/projects/index.json').then(function (slugs) {
-      return Promise.all(slugs.map(function (s) { return getJSON('content/projects/' + s + '.json'); }));
-    }).then(function (projects) {
-      projects.sort(function (a, b) { return (b.sortKey || b.year || 0) - (a.sortKey || a.year || 0); });
-      return projects;
+      return Promise.allSettled(slugs.map(function (s) { return getJSON('content/projects/' + s + '.json'); }))
+        .then(function (results) {
+          var projects = [], failed = [];
+          results.forEach(function (r, i) {
+            if (r.status === 'fulfilled' && r.value && typeof r.value.slug === 'string') projects.push(r.value);
+            else {
+              failed.push(slugs[i]);
+              console.warn('project content failed: ' + slugs[i], r.reason ? (r.reason.message || r.reason) : 'no slug');
+            }
+          });
+          if (!projects.length) throw new Error('no project content loaded');
+          projects.sort(function (a, b) { return (b.sortKey || b.year || 0) - (a.sortKey || a.year || 0); });
+          projects.failed = failed;
+          return projects;
+        });
     });
+  }
+
+  /* Where project content should be when it can't load (Projects grid, a project page, whose
+     h1 then carries the lead): the portfolio book and its PDF still carry the work. The
+     <noscript> notes repeat it. */
+  function loadNote(noLead) {
+    return '<div class="load-note">' + (noLead ? '' : '<p class="mono-note">Projects didn\u2019t load.</p>') + '<div class="load-note-links">' +
+      '<a class="link-mono" href="portfolio.html">Flip through the portfolio book\u00a0\u2192</a>' +
+      '<a class="link-mono" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf">Download PDF\u00a0\u2193 ' +
+      '<span style="color:var(--faint); white-space:nowrap">(16\u00a0MB)</span></a></div></div>';
+  }
+
+  /* A figure or model photo that fails to load takes the covers' hatched placeholder */
+  function imgPh(img, label) {
+    var ph = document.createElement('div');
+    ph.className = 'cover-ph img-ph';
+    ph.innerHTML = '<span class="ph-label">' + esc(label) + ' \u2014 coming soon</span>';
+    if (img.parentNode) img.parentNode.replaceChild(ph, img);
   }
 
   function foldB64(b64) {
@@ -181,7 +213,7 @@
 
   window.US = {
     clean: clean, esc: esc, getJSON: getJSON,
-    loadSite: loadSite, loadProjects: loadProjects,
+    loadSite: loadSite, loadProjects: loadProjects, loadNote: loadNote, imgPh: imgPh,
     vcardHref: vcardHref, bindVcard: bindVcard,
     yearOf: yearOf, roleShort: roleShort,
     projectCard: projectCard, panZoom: panZoom, loadPortfolio: loadPortfolio

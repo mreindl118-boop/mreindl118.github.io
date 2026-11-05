@@ -413,6 +413,8 @@
     }
     function apply() {
       var a = views[ia], b = views[ib];
+      // the stage holds the plan's shape before the images arrive (w/h in the JSON)
+      if (a.w && a.h) stage.style.aspectRatio = a.w + ' / ' + a.h;
       $('cmp-img-a').src = 'content/projects/' + a.file;
       $('cmp-img-a').alt = clean(a.caption || a.label);
       $('cmp-img-b').src = 'content/projects/' + b.file;
@@ -500,14 +502,14 @@
       $('p-prev-title').textContent = prev.title;
       $('p-next').href = 'project.html?slug=' + encodeURIComponent(next.slug);
       $('p-next-title').textContent = next.title;
+      $('p-nav').hidden = false;
     }
 
     if (p.compare && (p.compare.views || []).length >= 2) cmpInit(p.compare);
 
-    if (p.images && p.images.length) {
+    if (p.images && p.images.length) {   // the section stays hidden for model-only projects
+      $('dw-section').hidden = false;
       dwInit(p);
-    } else {
-      $('dw-section').hidden = true;
     }
 
     // Models gallery: physical + digital models declared in the project JSON
@@ -517,7 +519,7 @@
       $('p-models-grid').innerHTML = models.map(function (m) {
         var cap = clean(m.caption);
         return '<figure style="margin:0">' +
-          '<img src="content/projects/' + m.file + '" alt="' + esc(cap) + '" loading="lazy" style="width:100%; display:block; border:1px solid var(--line); background:#FFF">' +
+          '<img src="content/projects/' + m.file + '" alt="' + esc(cap) + '" loading="lazy" onerror="US.imgPh(this,\'model photo\')" style="width:100%; display:block; border:1px solid var(--line); background:#FFF">' +
           '<figcaption style="font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:8px; line-height:1.5">' + esc(cap) +
           (m.medium ? ' · ' + esc(clean(m.medium)) : '') + '</figcaption></figure>';
       }).join('');
@@ -530,10 +532,30 @@
     }
   }
 
+  // a slug that names no project: say so (and keep the URL out of search), never show another
+  function renderMissing() {
+    document.title = 'Project not found — Understory Design Studio';
+    var robots = document.createElement('meta');
+    robots.name = 'robots'; robots.content = 'noindex';
+    document.head.appendChild(robots);
+    $('p-title').textContent = 'Project not found';
+    $('p-meta').hidden = true;
+    $('p-summary').style.marginTop = '20px';
+    $('p-summary').innerHTML = '<a class="link-mono" href="work.html">All projects\u00a0\u2192</a>';
+  }
+
+  // the content itself failed (this project's file, or all of them)
+  function renderFailed() {
+    $('p-title').textContent = 'Projects didn\u2019t load';
+    $('p-meta').innerHTML = US.loadNote(true);
+  }
+
   var slug = new URLSearchParams(location.search).get('slug') || 'proctor-landing-park';
   US.loadProjects().then(function (projects) {
     var chosen = null;
     projects.forEach(function (x) { if (x.slug === slug) chosen = x; });
-    renderProject(chosen || projects[0], projects);
-  }).catch(function (e) { console.warn('content load failed', e); });
+    if (chosen) renderProject(chosen, projects);
+    else if (projects.failed.indexOf(slug) >= 0) renderFailed();
+    else renderMissing();
+  }).catch(function (e) { console.warn('content load failed', e); renderFailed(); });
 })();
