@@ -11,6 +11,30 @@ Work on branch `claude/website-launch-design-0meyp9`, commit, push, then:
 `git checkout main && git merge --ff-only <branch> && git push origin main`,
 and return to the branch. The Pages CDN caches for ~10 minutes.
 
+## Backups and rollback
+
+Pushing tags or extra branches is refused here (HTTP 403), so the rollback points are commits
+in `main`'s own history. Deploys are fast-forwards, so these never disappear:
+
+| Point | What was live |
+| --- | --- |
+| `e94522e` | Before the design-review pass 7 (Nov 2026; site files identical to `d00c5fe`) |
+| `1f66f99` | After Sam's feedback and the pass-6 fixes |
+| `aa4fd37` | Before Sam's feedback (serif headings, page-flipper on Projects) |
+
+To put the website back to a point, without touching planLAB and without rewriting history,
+on the working branch:
+`git restore --source=<point> --staged --worktree -- . ':(exclude)planlab' ':(exclude)planlab-android' ':(exclude).github'`,
+then commit ("Roll back the website to <point>"), push, and fast-forward `main` as above.
+`git restore` with `--staged` also deletes files the point didn't have, so the tree matches it
+exactly. To drop one change set of pass 7 instead, `git revert` its commits newest first:
+set 1 `0bcbde9`; set 2 `54e05cc 5b5b50c 4afab8d` (2c `36eea40` and its fix `7688ae4` are
+already reverted by `ab8eb0a 93e8b53`; revert those two to bring the full-width band back);
+set 3 `54b9167 50ba932`; set 4 `3bb3832 2591708 71fa6a6`; set 5 `3e3a4f1 8057876 96c3db1 e86212b
+acd1b32 ddfd52b 7f2099f`; set 6 `7da0632 1586b8d 100f576`; set 7 `59a35e9 2ae578f`; set 8
+`0148a6f 3c50be8`; set 9 `c7edd74 a149b34 56b2b82 e2a3d74`. Later sets build on earlier ones
+(6 on 4 and 5, 9a on 4a), so re-run the audit harness after any revert.
+
 ## Drop box pipeline (design → implementation)
 
 The owner uploads redesigned pages, model photos, and PDFs to a private
