@@ -78,6 +78,8 @@
  "models": [
   {
    "file": "weaver-recreation/model-01.webp",
+   "w": 1536,
+   "h": 1318,
    "caption": "Laser-cut chipboard model — amphitheater rings, plaza pavilions, and planted rooms",
    "medium": "Laser-cut chipboard"
   }

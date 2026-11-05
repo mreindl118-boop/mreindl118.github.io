@@ -166,7 +166,7 @@
   };
 
   function figure(g, eager) {
-    return '<figure style="margin:0"><img src="content/projects/' + esc(g.file) + '" alt="' + esc(clean(g.caption)) + '" loading="' + (eager ? 'eager' : 'lazy') + '" onerror="US.imgPh(this,\'figure\')" style="width:100%; display:block; border:1px solid var(--line); background:#FFF">' +
+    return '<figure style="margin:0"><img src="content/projects/' + esc(g.file) + '"' + (+g.w > 0 && +g.h > 0 ? ' width="' + (+g.w) + '" height="' + (+g.h) + '"' : '') + ' alt="' + esc(clean(g.caption)) + '" loading="' + (eager ? 'eager' : 'lazy') + '" onerror="US.imgPh(this,\'figure\')" style="width:100%; height:auto; display:block; border:1px solid var(--line); background:#FFF">' +
       '<figcaption class="fig-cap">' + esc(clean(g.caption)) + '</figcaption></figure>';
   }
 

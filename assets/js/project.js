@@ -636,7 +636,7 @@
       $('p-models-grid').innerHTML = models.map(function (m) {
         var cap = clean(m.caption);
         return '<figure style="margin:0">' +
-          '<img src="content/projects/' + m.file + '" alt="' + esc(cap) + '" loading="lazy" onerror="US.imgPh(this,\'model photo\')" style="width:100%; display:block; border:1px solid var(--line); background:#FFF">' +
+          '<img src="content/projects/' + m.file + '"' + (+m.w > 0 && +m.h > 0 ? ' width="' + (+m.w) + '" height="' + (+m.h) + '"' : '') + ' alt="' + esc(cap) + '" loading="lazy" onerror="US.imgPh(this,\'model photo\')" style="width:100%; height:auto; display:block; border:1px solid var(--line); background:#FFF">' +
           '<figcaption class="fig-cap">' + esc(cap) +
           (m.medium ? ' · ' + esc(clean(m.medium)) : '') + '</figcaption></figure>';
       }).join('');
