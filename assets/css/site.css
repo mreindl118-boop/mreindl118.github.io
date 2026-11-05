@@ -340,7 +340,7 @@ main .rule-motif .ci { border-color: var(--clay); }
   color: var(--faint); text-align: right; margin-top: 6px;
 }
 
-/* ---------- Featured band + process strip (home) ---------- */
+/* ---------- Featured band + contact close (home) ---------- */
 .feature-link { display: block; color: var(--ink); text-decoration: none; border-top: 1px solid var(--ink); padding-top: 18px; }
 .feature-link:hover { color: var(--clay); }
 .feature-cover { aspect-ratio: 21 / 9; min-height: 260px; max-width: 100%; border: 1px solid var(--line); overflow: hidden; background: var(--panel); }
@@ -351,10 +351,13 @@ main .rule-motif .ci { border-color: var(--clay); }
 /* Home's one big picture: the whole master plan at container width, title and sentence under it */
 .feature-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 12px 48px; align-items: start; margin-top: 20px; }
 @media (max-width: 640px) { .feature-body { grid-template-columns: minmax(0, 1fr); } }
-.process-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 20px 24px; }
-.process-step { border-top: 1px solid var(--ink); padding-top: 12px; }
-.process-num { font-family: var(--mono); font-size: 11px; color: var(--faint); }
-.process-name { font-size: 14.5px; font-weight: 500; margin-top: 5px; }
+/* Home ends on contact: the address set as a headline (two-thirds), a line and two links beside it */
+.contact-close { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px 48px; align-items: end; }
+/* a class, not inline styles, so the clay hover applies; sized to its text (not the column) so the
+   link and its focus ring are the address itself; on a 320px screen it breaks before the @ */
+.contact-mail { justify-self: start; font-weight: 700; font-size: clamp(28px, 4.4vw, 56px); letter-spacing: -.02em; color: var(--ink); text-decoration-thickness: 2px; overflow-wrap: anywhere; }
+.contact-mail:hover { color: var(--clay); }
+@media (max-width: 640px) { .contact-close { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- Meta grid (project page) ---------- */
 .meta-grid {

@@ -171,7 +171,7 @@ counters, figure numbers. It is never used for running text or headings.
 ## Layout
 
 One centred container (1240px) with 32px gutters, 18px on phones (640px breakpoint). Grids use
-`auto-fit` with generous minimums (cards ~270–340px, meta cells 165px, process steps 170px) and
+`auto-fit` with generous minimums (cards ~270–340px, meta cells 165px) and
 collapse to one column on phones; a minimum is written `min(<n>px, 100%)` so a track never outgrows
 a 320px screen. Sections are framed by a full-width ink rule or the rule motif
 above a header row (`.rowhead`: title left, a mono link right). The nav is sticky: a 96%-opaque
@@ -183,6 +183,9 @@ at 474px and below), so sections carry no scroll margins of their own.
 On Home the featured project is the page's one full-width picture: its whole master plan at the
 container width (never cropped), with the title in the left third and its sentence in the right
 two-thirds underneath (one column on phones), so it doesn't repeat the hero's text-and-picture split.
+Home ends on contact, not a list: on the panel ground under the rule motif, "Get in Touch" sets the
+email address as a Headline-weight link (700, clamp(28px, 4.4vw, 56px)) in the left two-thirds, with
+one ink line and the Résumé and Portfolio book links in the right third (one column on phones).
 
 ## Elevation & Depth
 
