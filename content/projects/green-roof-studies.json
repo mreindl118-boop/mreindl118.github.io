@@ -20,6 +20,8 @@
  "images": [
   {
    "file": "green-roof-studies/pf-15.webp",
+   "w": 3400,
+   "h": 2310,
    "caption": "Roof plan, massing model, elevation, and existing roof — Clarendon Park Community Center",
    "drawing_type": "Portfolio spread",
    "scale": "",
@@ -29,26 +31,38 @@
  "gallery": [
   {
    "file": "green-roof-studies/g-h26_f1.webp",
+   "w": 1348,
+   "h": 1231,
    "caption": "Roof plan — planted beds, HVAC screen, elevator core, paved loop"
   },
   {
    "file": "green-roof-studies/g-h27_f0.webp",
+   "w": 1478,
+   "h": 790,
    "caption": "Massing model — raised beds around a central skylight"
   },
   {
    "file": "green-roof-studies/g-roof-render.webp",
+   "w": 1144,
+   "h": 768,
    "caption": "Roof render: planted beds around the skylight court, SketchUp"
   },
   {
    "file": "green-roof-studies/g-h27_f1.webp",
+   "w": 1478,
+   "h": 338,
    "caption": "Roof elevation with planting"
   },
   {
    "file": "green-roof-studies/g-h27_f2.webp",
+   "w": 722,
+   "h": 544,
    "caption": "Existing roof, Clarendon Park Community Center"
   },
   {
    "file": "green-roof-studies/g-h27_f3.webp",
+   "w": 722,
+   "h": 582,
    "caption": "Raised-bed detail"
   }
  ],

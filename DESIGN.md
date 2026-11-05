@@ -209,7 +209,8 @@ is hidden.
 A project page opens on its title (clamp(28px, 5vw, 56px), no kicker; an unlisted project's
 badge sits on its own line under it), the summary sentence, then the meta grid. The figures cut
 from the boards (the blowout's gallery) follow under "Drawings", one column at their own size
-(at most 960px, never upscaled), each with its caption; a figure whose drawing is already on the
+(at most 960px, never upscaled; each holds its box from the `w`/`h` its JSON entry gives, so nothing
+moves as they arrive), each with its caption; a figure whose drawing is already on the
 page is left out. They come straight after the meta grid when the drawing set is empty or a
 single portfolio spread (which then follows them as "Portfolio spread", without its one tab),
 and after the drawing set otherwise. Proctor's master plan appears once, as the inline sheet
@@ -319,8 +320,9 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
   ("DWG 01 / 08", "PP. 12–13 / 35") are polite live regions, and the drawing tabs carry
   `aria-pressed` with their active state.
 - **Phones:** the drawing set's toolbar sits on one row from about 383px (10px padding, 6px gaps),
-  and its stage takes the drawing's own shape (the image's aspect ratio, at most 70svh; a spread's
-  3400 / 2310 until it loads) instead of a fixed-height letterbox. It re-shapes and lands at fit
+  and its stage takes the drawing's own shape (the `w`/`h` of its JSON entry, at most 70svh, set
+  before the drawing arrives; without them the image's own ratio once it loads, a spread's
+  3400 / 2310 until then) instead of a fixed-height letterbox. It re-shapes and lands at fit
   when the width changes, not when a phone's toolbar slides away.
   The portfolio and booklet toolbars keep their spacing: their counters change width between
   single pages and spreads, so a tighter bar would flip between one and two rows as you page.

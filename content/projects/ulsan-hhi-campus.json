@@ -26,6 +26,8 @@
  "images": [
   {
    "file": "ulsan-hhi-campus/pf-12.webp",
+   "w": 3400,
+   "h": 2310,
    "caption": "Mipo-dong site plan and circular economies — closing the loop",
    "drawing_type": "Portfolio spread",
    "scale": "",
@@ -35,18 +37,26 @@
  "gallery": [
   {
    "file": "ulsan-hhi-campus/g-h21_f1.webp",
+   "w": 1478,
+   "h": 1385,
    "caption": "Site plan — Mipo-dong wastewater expansion"
   },
   {
    "file": "ulsan-hhi-campus/g-circular-economies-board.webp",
+   "w": 1600,
+   "h": 2400,
    "caption": "Circular economies — closing the loop"
   },
   {
    "file": "ulsan-hhi-campus/g-h22_f1.webp",
+   "w": 587,
+   "h": 587,
    "caption": "Bamboo rain garden and stormwater management"
   },
   {
    "file": "ulsan-hhi-campus/g-h22_f2.webp",
+   "w": 643,
+   "h": 432,
    "caption": "Renewable energy — offshore wind to PEM station"
   }
  ],

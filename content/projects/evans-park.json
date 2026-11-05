@@ -51,6 +51,8 @@
  "images": [
   {
    "file": "evans-park/pf-14.webp",
+   "w": 3400,
+   "h": 2310,
    "caption": "Two concepts — dam removal and dam retained",
    "drawing_type": "Portfolio spread",
    "scale": "",
@@ -58,6 +60,8 @@
   },
   {
    "file": "evans-park/pf-13.webp",
+   "w": 1700,
+   "h": 2310,
    "caption": "Evans Park opener — concept 1, dam removal",
    "drawing_type": "Portfolio spread",
    "scale": "",
@@ -67,22 +71,32 @@
  "gallery": [
   {
    "file": "evans-park/g-h23_f1.webp",
+   "w": 1478,
+   "h": 1446,
    "caption": "Concept 1 — dam removed, wetland corridor restored"
   },
   {
    "file": "evans-park/g-h24_f2.webp",
+   "w": 1478,
+   "h": 1094,
    "caption": "Concept 1 — wetland loop and crossings, plan detail"
   },
   {
    "file": "evans-park/g-h24_f0.webp",
+   "w": 722,
+   "h": 677,
    "caption": "Concept 1 — bridge crossing over the restored wetland"
   },
   {
    "file": "evans-park/g-h24_f1.webp",
+   "w": 722,
+   "h": 715,
    "caption": "Concept 1 — promenade along the wetland edge"
   },
   {
    "file": "evans-park/g-h25_f1.webp",
+   "w": 1478,
+   "h": 1285,
    "caption": "Concept 2 — dam retained, plaza on the impoundment"
   }
  ],

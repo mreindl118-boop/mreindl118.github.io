@@ -27,6 +27,8 @@
  "images": [
   {
    "file": "lunkenheimer-lot/pf-11.webp",
+   "w": 1700,
+   "h": 2310,
    "caption": "Redevelopment plan — bowl, street course, stage, and planted edges, with terrain models",
    "drawing_type": "Portfolio spread",
    "scale": "",
@@ -36,14 +38,20 @@
  "gallery": [
   {
    "file": "lunkenheimer-lot/g-h20_f1.webp",
+   "w": 1473,
+   "h": 642,
    "caption": "Redevelopment plan — bowl, street course, stage, and planted edges"
   },
   {
    "file": "lunkenheimer-lot/g-h20_f2.webp",
+   "w": 722,
+   "h": 623,
    "caption": "Site model"
   },
   {
    "file": "lunkenheimer-lot/g-h20_f3.webp",
+   "w": 722,
+   "h": 585,
    "caption": "Model detail — bowl, terraced seating, covered stage"
   }
  ],

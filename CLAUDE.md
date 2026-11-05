@@ -135,6 +135,10 @@ listed projects), so keep that form when captions change. Portfolio spreads also
 (`content/projects/<slug>/pf-NN.webp`), and the individual figures cut from the
 boards (`content/projects/<slug>/g-*.webp`, `gallery` + `focus` in each JSON)
 fill both the Projects-page blowouts and each project page's "Drawings" section.
+Each `gallery` and `images` entry carries `w`/`h`, the file's pixel size, so the
+page holds the figure's box (and a phone's drawing stage its shape) before the
+image arrives; set them (Pillow's `Image.open(f).size`) when adding or replacing
+a file. An entry without them still shows, it just moves the page as it loads.
 That section leaves out any gallery file already on the page (`images`, `models`,
 compare views, plus the `ON_PAGE` list in `assets/js/project.js`: Proctor's
 inline master plan and Evans's two concept plans). Proctor's master plan is not

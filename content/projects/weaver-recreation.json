@@ -27,6 +27,8 @@
  "images": [
   {
    "file": "weaver-recreation/pf-08.webp",
+   "w": 3400,
+   "h": 2310,
    "caption": "Site plan, amphitheater rings and planted rooms; aerials",
    "drawing_type": "Portfolio spread",
    "scale": "",
@@ -34,6 +36,8 @@
   },
   {
    "file": "weaver-recreation/pf-09.webp",
+   "w": 3400,
+   "h": 2310,
    "caption": "Laser-cut chipboard site model",
    "drawing_type": "Portfolio spread",
    "scale": "",
@@ -43,18 +47,26 @@
  "gallery": [
   {
    "file": "weaver-recreation/g-h16_f1.webp",
+   "w": 1478,
+   "h": 1484,
    "caption": "Site plan — amphitheater rings and planted rooms"
   },
   {
    "file": "weaver-recreation/model-01.webp",
+   "w": 1536,
+   "h": 1318,
    "caption": "Laser-cut chipboard model — amphitheater rings, plaza pavilions, and planted rooms"
   },
   {
    "file": "weaver-recreation/g-h17_f0.webp",
+   "w": 1478,
+   "h": 897,
    "caption": "Aerial — pavilion and path rings"
   },
   {
    "file": "weaver-recreation/g-h17_f1.webp",
+   "w": 1478,
+   "h": 894,
    "caption": "Amphitheater seating from the street edge"
   }
  ],

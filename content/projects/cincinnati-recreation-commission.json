@@ -19,6 +19,8 @@
  "images": [
   {
    "file": "cincinnati-recreation-commission/pf-10.webp",
+   "w": 3400,
+   "h": 2310,
    "caption": "GIS inventory and planting installation",
    "drawing_type": "Portfolio spread",
    "scale": "",
@@ -28,22 +30,32 @@
  "gallery": [
   {
    "file": "cincinnati-recreation-commission/g-h19_p1.webp",
+   "w": 1458,
+   "h": 1237,
    "caption": "Installed entry planting"
   },
   {
    "file": "cincinnati-recreation-commission/g-h19_p2.webp",
+   "w": 1458,
+   "h": 641,
    "caption": "Tree planting day"
   },
   {
    "file": "cincinnati-recreation-commission/g-h18_f1.webp",
+   "w": 921,
+   "h": 713,
    "caption": "Citywide tree cover and impervious surface"
   },
   {
    "file": "cincinnati-recreation-commission/g-h18_f2.webp",
+   "w": 594,
+   "h": 459,
    "caption": "GIS analysis, series A"
   },
   {
    "file": "cincinnati-recreation-commission/g-h18_f3.webp",
+   "w": 594,
+   "h": 459,
    "caption": "GIS analysis, series B"
   }
  ],

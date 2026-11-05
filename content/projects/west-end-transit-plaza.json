@@ -21,6 +21,8 @@
  "images": [
   {
    "file": "west-end-transit-plaza/pf-07.webp",
+   "w": 3400,
+   "h": 2310,
    "caption": "Site plan, canopy and bus bays beside Laurel Playground; street views",
    "drawing_type": "Portfolio spread",
    "scale": "",
@@ -30,14 +32,20 @@
  "gallery": [
   {
    "file": "west-end-transit-plaza/g-h14_f1.webp",
+   "w": 1478,
+   "h": 1484,
    "caption": "Site plan — canopy and bus bays beside Laurel Playground"
   },
   {
    "file": "west-end-transit-plaza/g-h15_f0.webp",
+   "w": 1478,
+   "h": 897,
    "caption": "Street view along the bus bays"
   },
   {
    "file": "west-end-transit-plaza/g-h15_f1.webp",
+   "w": 1478,
+   "h": 894,
    "caption": "Canopy and planted plaza from the crossing"
   }
  ],

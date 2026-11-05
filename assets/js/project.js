@@ -11,11 +11,15 @@
   var PHONE = window.matchMedia('(max-width: 640px)');
 
   /* On phones the stage takes the drawing's own shape (up to 70svh, site.css) instead of a
-     fixed-height letterbox, so a landscape spread isn't floating in empty paper. */
+     fixed-height letterbox, so a landscape spread isn't floating in empty paper. The drawing's
+     w/h in the JSON give that shape before it arrives, so nothing below moves when it lands (and
+     a late load of an earlier drawing can't re-shape the stage); without them, its own size. */
   function dwShape() {
-    var stage = $('dw-stage'), im = dw.img;
-    if (PHONE.matches && im && im.naturalWidth) {
-      stage.style.aspectRatio = im.naturalWidth + ' / ' + im.naturalHeight;
+    var stage = $('dw-stage'), cur = dw.project && dw.project.images[dw.idx], im = dw.img;
+    var w = cur && +cur.w, h = cur && +cur.h;
+    if (!(w && h) && im && im.naturalWidth) { w = im.naturalWidth; h = im.naturalHeight; }
+    if (PHONE.matches && w && h) {
+      stage.style.aspectRatio = w + ' / ' + h;
       stage.style.height = 'auto';
     } else {
       stage.style.aspectRatio = '';
@@ -49,6 +53,7 @@
         esc(im.drawing_type) + ' — drawing coming soon</span></div>';
     };
     surface.appendChild(img);
+    dwShape();
     $('dw-num').textContent = String(dw.idx + 1).padStart(2, '0');
     $('dw-caption').textContent = clean(im.caption);
     var scale = clean(im.scale);
@@ -605,9 +610,14 @@
       sec.innerHTML = '<h2 class="h-head" id="p-figs-title" style="font-size:26px; margin:48px 0 14px">Drawings</h2>' +
         '<div style="display:flex; flex-direction:column; gap:26px; max-width:960px">' +
         figs.map(function (g) {
-          var cap = clean(g.caption);
+          var cap = clean(g.caption), gw = +g.w, gh = +g.h, sized = gw > 0 && gh > 0;
+          // with its w/h from the JSON a figure holds its box before it arrives: its own width
+          // (the border outside it, so the drawing keeps its own pixels), at most the column
           return '<figure style="margin:0">' +
-            '<img src="content/projects/' + esc(g.file) + '" alt="' + esc(cap) + '" loading="lazy" onerror="US.imgPh(this,\'figure\')" style="max-width:100%; width:auto; height:auto; display:block; border:1px solid var(--line); background:#FFF">' +
+            '<img src="content/projects/' + esc(g.file) + '"' + (sized ? ' width="' + gw + '" height="' + gh + '"' : '') +
+            ' alt="' + esc(cap) + '" loading="lazy" onerror="US.imgPh(this,\'figure\')" style="' +
+            (sized ? 'box-sizing:content-box; max-width:calc(100% - 2px); height:auto' : 'max-width:100%; width:auto; height:auto') +
+            '; display:block; border:1px solid var(--line); background:#FFF">' +
             '<figcaption class="fig-cap">' + esc(cap) + '</figcaption></figure>';
         }).join('') + '</div>';
       var nImages = (p.images || []).length;

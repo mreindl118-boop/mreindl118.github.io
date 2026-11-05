@@ -3,34 +3,50 @@
  "gallery": [
   {
    "file": "miscellaneous/g-h28_f0.webp",
+   "w": 726,
+   "h": 585,
    "caption": "Rome–Union Park, preliminary design"
   },
   {
    "file": "miscellaneous/g-h28_f2.webp",
+   "w": 307,
+   "h": 546,
    "caption": "Railroad Avenue pocket park, plan"
   },
   {
    "file": "miscellaneous/g-h28_f3.webp",
+   "w": 726,
+   "h": 584,
    "caption": "Streetscape planting plan"
   },
   {
    "file": "miscellaneous/g-h29_f0.webp",
+   "w": 1478,
+   "h": 955,
    "caption": "Little Miami Trail — lowland crossings and open space"
   },
   {
    "file": "miscellaneous/g-h28_f4.webp",
+   "w": 1478,
+   "h": 428,
    "caption": "Foam-core contour model in progress"
   },
   {
    "file": "miscellaneous/g-h29_f1.webp",
+   "w": 726,
+   "h": 862,
    "caption": "Clay terrain study"
   },
   {
    "file": "miscellaneous/g-h28_f1.webp",
+   "w": 724,
+   "h": 585,
    "caption": "Flying pig — illustration practice"
   },
   {
    "file": "miscellaneous/g-h29_f2.webp",
+   "w": 726,
+   "h": 862,
    "caption": "Portrait study, charcoal"
   }
  ],

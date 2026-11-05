@@ -27,6 +27,8 @@
  "images": [
   {
    "file": "parc-des-buttes-chaumont/pf-06.webp",
+   "w": 3400,
+   "h": 2310,
    "caption": "Precedent study — terrain models, contour map, and section",
    "drawing_type": "Portfolio spread",
    "scale": "",
@@ -36,22 +38,32 @@
  "gallery": [
   {
    "file": "parc-des-buttes-chaumont/g-h12_f1.webp",
+   "w": 1478,
+   "h": 1484,
    "caption": "Terrain study model — carved contours around the lake basin"
   },
   {
    "file": "parc-des-buttes-chaumont/g-h13_f0.webp",
+   "w": 722,
+   "h": 571,
    "caption": "Contour map of the lake and belvedere island"
   },
   {
    "file": "parc-des-buttes-chaumont/g-h13_f1.webp",
+   "w": 722,
+   "h": 610,
    "caption": "Cast terrain model"
   },
   {
    "file": "parc-des-buttes-chaumont/g-h13_f2.webp",
+   "w": 722,
+   "h": 612,
    "caption": "Fold-out chipboard contour model"
   },
   {
    "file": "parc-des-buttes-chaumont/g-h13_f3.webp",
+   "w": 1444,
+   "h": 479,
    "caption": "Section through the belvedere cliff"
   }
  ],

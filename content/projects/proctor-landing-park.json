@@ -45,6 +45,8 @@
  "images": [
   {
    "file": "proctor-landing-park/hydrology.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Floodplain and hydrology analysis, FEMA NFHL overlay",
    "drawing_type": "Analysis map",
    "scale": "[confirm scale]",
@@ -52,6 +54,8 @@
   },
   {
    "file": "proctor-landing-park/circulation.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Diagram evolution — bridge, creek, loop, and anchors",
    "drawing_type": "Diagram",
    "scale": "NTS",
@@ -59,6 +63,8 @@
   },
   {
    "file": "proctor-landing-park/eco-core.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Ecological core — restoration and gravitational draw",
    "drawing_type": "Plan + perspective",
    "scale": "NTS",
@@ -66,6 +72,8 @@
   },
   {
    "file": "proctor-landing-park/civic-details.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Civic and active design details — entry, splash pad, courts",
    "drawing_type": "Design details",
    "scale": "NTS",
@@ -73,6 +81,8 @@
   },
   {
    "file": "proctor-landing-park/planting-matrix.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Planting matrices, woodland / upland / wetland / riparian",
    "drawing_type": "Planting plan",
    "scale": "[confirm scale]",
@@ -80,6 +90,8 @@
   },
   {
    "file": "proctor-landing-park/bridge-dd.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Timber bridge and culvert design development",
    "drawing_type": "Design development",
    "scale": "[confirm scale]",
@@ -87,6 +99,8 @@
   },
   {
    "file": "proctor-landing-park/central-planting.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Central planting — contemplative core, perspective sequence",
    "drawing_type": "Rendering",
    "scale": "NTS",
@@ -101,58 +115,86 @@
  "gallery": [
   {
    "file": "proctor-landing-park/master-plan.webp",
+   "w": 3760,
+   "h": 2313,
    "caption": "Master plan, full corridor with Paddy Creek ecological core"
   },
   {
    "file": "proctor-landing-park/g-bus-stop-watercolor.webp",
+   "w": 1536,
+   "h": 1024,
    "caption": "Bus stop and bike station at the wetland edge, watercolor"
   },
   {
    "file": "proctor-landing-park/g-performance-framework.webp",
+   "w": 978,
+   "h": 592,
    "caption": "Performance framework: public health, social, and ecological measures for each design element"
   },
   {
    "file": "proctor-landing-park/g-conflict-mitigation.webp",
+   "w": 978,
+   "h": 393,
    "caption": "Conflict mitigation: how competing uses on the site plan are resolved"
   },
   {
    "file": "proctor-landing-park/g-flood-hazard-context.webp",
+   "w": 1600,
+   "h": 1235,
    "caption": "Flood hazard context: 1% and 0.2% annual-chance floodplains, Lawrence County"
   },
   {
    "file": "proctor-landing-park/g-engagement-levels.webp",
+   "w": 1600,
+   "h": 390,
    "caption": "Three levels of engagement: zones, movement, and the activity loop (design phase)"
   },
   {
    "file": "proctor-landing-park/g-bridge-watercolor.webp",
+   "w": 1600,
+   "h": 1313,
    "caption": "Paddy Creek bridge, watercolor"
   },
   {
    "file": "proctor-landing-park/hydrology.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Floodplain and hydrology analysis, FEMA NFHL overlay"
   },
   {
    "file": "proctor-landing-park/circulation.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Diagram evolution — bridge, creek, loop, and anchors"
   },
   {
    "file": "proctor-landing-park/eco-core.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Ecological core — restoration and gravitational draw"
   },
   {
    "file": "proctor-landing-park/civic-details.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Civic and active design details — entry, splash pad, courts"
   },
   {
    "file": "proctor-landing-park/planting-matrix.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Planting matrices, woodland / upland / wetland / riparian"
   },
   {
    "file": "proctor-landing-park/bridge-dd.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Timber bridge and culvert design development"
   },
   {
    "file": "proctor-landing-park/central-planting.webp",
+   "w": 1275,
+   "h": 1650,
    "caption": "Central planting — contemplative core, perspective sequence"
   }
  ]
