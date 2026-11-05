@@ -28,8 +28,6 @@ object Notifier {
     const val CH_MIND = "mind"
     /** Check-ins buzz in their own pattern (short, short, long) so they feel different from everything else. */
     val MIND_BUZZ = longArrayOf(0, 90, 140, 90, 140, 500)
-    /** Used until the plan has a "### mind" box. */
-    private val MIND_FALLBACK = listOf("3 slow breaths", "Drop your shoulders", "Feel your feet", "Unclench your jaw", "Look far away")
     const val ID_TODAY = 1
 
     fun channels(ctx: Context) {
@@ -177,16 +175,8 @@ object Notifier {
                 val step = box?.steps?.getOrNull(slot.breakIndex)
                 val nb = NotificationCompat.Builder(ctx, CH_MIND).setSmallIcon(R.drawable.ic_stat).setColor(0xFF12A383.toInt())
                     .setAutoCancel(true).setCategory(NotificationCompat.CATEGORY_REMINDER).setPriority(NotificationCompat.PRIORITY_HIGH).setVibrate(MIND_BUZZ)
-                if (day == null || box == null || step == null) {
-                    // No "### mind" box in the plan yet: two built-in check-ins a day.
-                    if (slot == Slot.MIND_3 || (day != null && day.boxes.any { it.key == "mind" })) return false
-                    val p = MIND_FALLBACK[(today.dayOfYear * 2 + slot.breakIndex) % MIND_FALLBACK.size]
-                    nb.setContentTitle(p).setContentText("1 min").setContentIntent(openApp(ctx))
-                        .addAction(action(ctx, "✓ Done", "mind", slot, notif = id))
-                        .addAction(action(ctx, "In 15 min", "snooze", slot, minutes = 15, notif = id))
-                    post(ctx, id, nb)
-                    return true
-                }
+                // Check-ins come only from a "### mind" box in the day, like move breaks.
+                if (day == null || box == null || step == null) return false
                 if (Store.stepDone(day, step) || LogDoc.skipped(log, today.toString(), "mind")) return false
                 val journal = step.links.any { it.url == "app:journal" }
                 val q = com.mattlabs.planlab.ui.MindSheet.question(step.label)
