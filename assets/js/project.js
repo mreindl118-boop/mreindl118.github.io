@@ -27,7 +27,7 @@
     img.src = 'content/projects/' + im.file;
     img.alt = clean(im.caption);
     img.draggable = false;
-    img.onload = function () { dw.pz.fit(); };
+    img.onload = function () { dw.pz.fit(true); };
     img.onerror = function () {
       surface.innerHTML =
         '<div style="width:900px; max-width:86vw; aspect-ratio:16/10; background:repeating-linear-gradient(45deg,#EDE9DB 0 8px,#F3F0E8 8px 16px); border:1px solid #C7C1AE; display:flex; align-items:center; justify-content:center">' +
@@ -39,7 +39,7 @@
     $('dw-caption').textContent = clean(im.caption);
     var scale = clean(im.scale);
     $('dw-meta').textContent = [im.drawing_type, scale, im.software].filter(Boolean).join(' · ');
-    dw.pz.fit();
+    dw.pz.fit(true);
     Array.prototype.forEach.call($('dw-thumbs').children, function (b, i) {
       b.classList.toggle('active', i === dw.idx);
     });
@@ -254,7 +254,7 @@
     var units = bkUnits();
     bk.idx = Math.min(Math.max(n, 0), Math.max(units.length - 1, 0));
     bk.failed = false;
-    bk.pz.fit();
+    bk.pz.fit(true);
     $('bk-scrub').value = bk.idx;
     bkEnsureCurrent();
     bkPaint();

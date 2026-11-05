@@ -61,7 +61,7 @@
     </div>
     <div class="vstage tall" id="pf-stage">
       <div class="vsurface" id="pf-surface"></div>
-      <div class="vbadge" id="pf-badge">100% · drag to pan</div>
+      <div class="vbadge" id="pf-badge">100%</div>
     </div>
     <div class="vscrub">
       <span class="end">01</span>
@@ -114,9 +114,9 @@
       if (want !== idx) return;
       if (sf.firstChild && sf.firstChild.tagName === 'SPAN') sf.firstChild.remove();
       img.style.visibility = 'visible';
-      pz.fit();
+      pz.fit(true);
     };
-    pz.fit();
+    pz.fit(true);
     $('pf-num').textContent = PF.label(idx);
     $('pf-caption').textContent = PF.spreads[idx].caption;
     $('pf-scrub').value = idx;

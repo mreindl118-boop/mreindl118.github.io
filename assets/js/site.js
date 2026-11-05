@@ -121,36 +121,59 @@
       '</a>';
   }
 
-  /* Generic zoom/pan controller for a .vstage / .vsurface pair. */
+  /* Generic zoom/pan controller for a .vstage / .vsurface pair. At fit (100% or less)
+     the stage takes no drag, so a finger on it scrolls the page (site.css: touch-action
+     pan-y pinch-zoom); once zoomed in, the stage is .zoomed and one pointer pans it. */
   function panZoom(stage, surface, badge, opts) {
     opts = opts || {};
     var st = { zoom: 1, tx: 0, ty: 0, drag: null };
     function apply() {
       surface.style.transform = 'translate(' + st.tx + 'px,' + st.ty + 'px) scale(' + st.zoom + ')';
-      if (badge) badge.textContent = Math.round(st.zoom * 100) + '% · drag to pan';
+      stage.classList.toggle('zoomed', st.zoom > 1);
+      if (badge) badge.textContent = Math.round(st.zoom * 100) + '%' + (st.zoom > 1 ? ' · drag to pan' : '');
       if (opts.onZoom) opts.onZoom(st.zoom);
     }
     stage.addEventListener('pointerdown', function (e) {
       if (opts.enabled && !opts.enabled()) return;
+      // nothing to pan at fit, and a second finger never takes over (or jumps) the drag
+      if (st.zoom <= 1 || st.drag) return;
       e.preventDefault();
       stage.setPointerCapture(e.pointerId);
-      st.drag = { x: e.clientX, y: e.clientY, tx: st.tx, ty: st.ty };
+      st.drag = { id: e.pointerId, x: e.clientX, y: e.clientY, tx: st.tx, ty: st.ty };
       surface.classList.add('dragging');
     });
     stage.addEventListener('pointermove', function (e) {
-      if (!st.drag) return;
+      if (!st.drag || e.pointerId !== st.drag.id) return;
       st.tx = st.drag.tx + e.clientX - st.drag.x;
       st.ty = st.drag.ty + e.clientY - st.drag.y;
       apply();
     });
-    function endDrag() { st.drag = null; surface.classList.remove('dragging'); }
+    function endDrag(e) {
+      if (st.drag && e && e.pointerId !== st.drag.id) return;
+      st.drag = null; surface.classList.remove('dragging');
+    }
     stage.addEventListener('pointerup', endDrag);
     stage.addEventListener('pointerleave', endDrag);
+    stage.addEventListener('pointercancel', endDrag);
+    stage.addEventListener('lostpointercapture', endDrag);
     apply();
     return {
       zoomIn: function () { st.zoom = Math.min(st.zoom * 1.4, opts.max || 6); apply(); },
       zoomOut: function () { st.zoom = Math.max(st.zoom / 1.4, 0.4); apply(); },
-      fit: function () { st.zoom = 1; st.tx = 0; st.ty = 0; apply(); },
+      /* fit(true) lands at fit with no transition: a new page or drawing must appear at
+         fit, not shrink from the last one's zoom. The FIT button calls fit() and eases. */
+      fit: function (instant) {
+        st.zoom = 1; st.tx = 0; st.ty = 0; st.drag = null;
+        if (instant === true) {
+          surface.classList.add('dragging');
+          apply();
+          void surface.offsetWidth;
+          surface.classList.remove('dragging');
+        } else {
+          surface.classList.remove('dragging');
+          apply();
+        }
+      },
       set: function (z) { st.zoom = z; apply(); },
       state: st
     };

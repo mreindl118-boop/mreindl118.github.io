@@ -215,6 +215,11 @@ Diagonal hatching marks placeholders.
 - **Primary:** pine fill, paper text, IBM Plex Sans 500 15px, 26px side padding.
 - **Hover / Focus:** fill shifts to ink; 2px pine focus ring offset 3px.
 - **Outline:** 1.5px ink border; hover turns border and text clay.
+- **Hover is for mice, press is for everyone.** Every hover colour sits behind
+  `@media (hover: hover) and (pointer: fine)`, so a tap never leaves a clay button behind, and has
+  an `:active` twin that shows the same colour only while a finger or button is down. The browser's
+  tap flash is off (`-webkit-tap-highlight-color: transparent`). Viewer buttons, drawing tabs and
+  chips have no hover; they press to clay (border and text), like the outline button.
 - **Mono link:** uppercase mono 12px pine link with an arrow ("View project →"). The arrow says
   where it goes: → opens a page, ↓ downloads a file ("Download PDF ↓", "vCard ↓"), ↗ leaves the site.
 
@@ -244,6 +249,20 @@ Diagonal hatching marks placeholders.
 Drawing set, portfolio book, capstone booklet and lightbox share one viewer: an ink-bordered
 panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page counter
 ("PP. 12–13 / 35"), a scrubber and a caption footer.
+
+- **At fit the stage is part of the page.** It takes no drag at 100% or less, so a finger on it
+  scrolls the page and the phone's own pinch works (`touch-action: pan-y pinch-zoom`); the badge
+  reads just "100%". Zoomed in, the stage is `.zoomed`, keeps every gesture and one pointer pans it
+  ("140% · drag to pan"); a second finger never takes over the drag. The full-screen lightbox's
+  stage always keeps its gestures, so the page behind it never scrolls.
+- **Motion:** the zoom buttons and FIT ease over 180ms on `cubic-bezier(0.23, 1, 0.32, 1)` (none
+  under reduced motion). A new page or drawing (arrows, scrubber, tabs, keys) lands at fit with no
+  transition, never shrinking from the last one's zoom.
+- **Controls are not content:** viewer buttons, tabs and chips take `touch-action: manipulation`
+  (quick taps flip pages, not zoom the page) and `user-select: none`; page zoom stays enabled.
+- **Phones:** the drawing set's toolbar sits on one row from about 383px (10px padding, 6px gaps).
+  The portfolio and booklet toolbars keep their spacing: their counters change width between
+  single pages and spreads, so a tighter bar would flip between one and two rows as you page.
 
 The Projects page's blowout is the lightbox panel without a stage: it opens on the project's
 first figure, then the mono meta line, a mono link to the full project page (named for what

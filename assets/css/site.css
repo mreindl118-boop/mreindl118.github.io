@@ -22,7 +22,7 @@
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
 /* anchors land clear of the sticky nav; --nav-h is its measured height (set by site.js) */
 html { scroll-padding-top: calc(var(--nav-h, 66px) + 18px); }
 body {
@@ -33,7 +33,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 a { color: var(--pine); text-decoration-thickness: 1px; text-underline-offset: 3px; }
-a:hover { color: var(--clay); }
 img { max-width: 100%; }
 
 .wrap { max-width: 1240px; margin: 0 auto; padding-inline: 32px; }
@@ -59,7 +58,6 @@ img { max-width: 100%; }
 }
 @media (max-width: 640px) { .nav-inner { padding: 10px 18px; } }
 .brand { text-decoration: none; color: var(--ink); display: flex; align-items: center; gap: 12px; }
-.brand:hover { color: var(--ink); }
 .brand-mark { flex-shrink: 0; display: block; }
 .brand-lockup { display: flex; flex-direction: column; gap: 4px; }
 .brand-name { font-family: var(--sans); font-weight: 700; font-size: 18px; letter-spacing: -.02em; line-height: 1; }
@@ -74,7 +72,6 @@ img { max-width: 100%; }
   letter-spacing: .1em; text-transform: uppercase; color: var(--ink);
   display: flex; flex-direction: column; gap: 6px; padding: 12px 0 10px; line-height: 1;
 }
-.navlinks a:hover { color: var(--clay); }
 .navlinks a .ind { display: flex; align-items: center; width: 100%; opacity: 0; }
 .navlinks a.active .ind { opacity: 1; }
 /* the current-tab indicator carries the logo's three colours: pine square, leaf line, clay ring */
@@ -116,13 +113,11 @@ main .rule-motif .ci { border-color: var(--clay); }
   background: var(--pine); color: var(--paper); text-decoration: none;
   font-weight: 500; font-size: 15px; border: none; cursor: pointer; font-family: var(--sans);
 }
-.btn:hover { background: var(--ink); color: var(--paper); }
 .btn-outline {
   display: inline-flex; align-items: center; min-height: 46px; padding: 0 26px;
   border: 1.5px solid var(--ink); color: var(--ink); background: transparent;
   text-decoration: none; font-weight: 500; font-size: 15px; cursor: pointer; font-family: var(--sans);
 }
-.btn-outline:hover { border-color: var(--clay); color: var(--clay); }
 .link-mono {
   font-family: var(--mono); font-size: 12px; letter-spacing: .08em;
   text-transform: uppercase; color: var(--pine);
@@ -133,7 +128,6 @@ main .rule-motif .ci { border-color: var(--clay); }
   text-decoration: none; color: var(--ink); display: block;
   border-top: 1px solid var(--ink); padding-top: 16px;
 }
-.card:hover { color: var(--clay); }
 .cover {
   aspect-ratio: 4 / 3; border: 1px solid var(--line); overflow: hidden;
   display: flex; align-items: center; justify-content: center; background: var(--panel);
@@ -188,7 +182,6 @@ main .rule-motif .ci { border-color: var(--clay); }
 .h-head { font-family: var(--sans); font-weight: 700; letter-spacing: -.02em; margin: 0; }
 .rowhead { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
 .rowhead .link-mono { text-decoration: none; }
-.rowhead .link-mono:hover { color: var(--clay); }
 
 /* ---------- Viewers (drawing set + booklet) ---------- */
 .viewer { border: 1px solid var(--ink); background: var(--panel); }
@@ -197,25 +190,35 @@ main .rule-motif .ci { border-color: var(--clay); }
   padding: 10px 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap;
 }
 .vgroup { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+/* phones: the drawing set's toolbar sits on one row from about 383px (its counter, DWG 01 / 08,
+   never changes width, so the row count never changes on a flip) */
+@media (max-width: 640px) { #dw-section .vbar { padding: 10px; gap: 6px; } #dw-section .vgroup { gap: 6px; } }
 .vbtn {
   width: 40px; height: 40px; border: 1px solid var(--line-mid); background: transparent;
   cursor: pointer; font-size: 15px; font-family: inherit; color: var(--ink);
   display: inline-flex; align-items: center; justify-content: center; padding: 0;
 }
 .vbtn-wide { width: auto; padding: 0 14px; font-family: var(--mono); font-size: 11px; height: 40px; }
+/* controls are not content: no double-tap zoom, no long-press text selection */
+.vbtn, .thumbbtn, .chip, .cmp-chips button { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 .vcount { font-family: var(--mono); font-size: 12px; margin-left: 6px; }
 .vstatus { font-family: var(--mono); font-size: 11px; color: var(--faint); }
 .vstage {
   height: min(62vh, 560px); overflow: hidden; position: relative;
-  cursor: grab; touch-action: none; background: var(--paper);
+  cursor: grab; touch-action: pan-y pinch-zoom; background: var(--paper);
 }
 .vstage.tall { height: min(68vh, 640px); }
 .vstage:active { cursor: grabbing; }
+/* at fit a finger scrolls the page past the stage (site.js panZoom takes no drag there);
+   zoomed, and always in the full-screen lightbox, the stage keeps every gesture */
+.vstage.zoomed, .lightbox .vstage { touch-action: none; }
+.vstage:not(.zoomed), .vstage:not(.zoomed):active { cursor: default; }
 .vsurface {
   position: absolute; inset: 16px; display: flex; align-items: center; justify-content: center;
-  transform-origin: center; transition: transform .15s ease;
+  transform-origin: center; transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .vsurface.dragging { transition: none; }
+@media (prefers-reduced-motion: reduce) { .vsurface { transition: none; } }
 .vsurface img {
   max-width: 100%; max-height: 100%; width: auto; height: auto;
   display: block; background: #FFF; user-select: none; -webkit-user-drag: none;
@@ -316,7 +319,6 @@ main .rule-motif .ci { border-color: var(--clay); }
 .foot-sub { font-family: var(--mono); font-size: 12px; color: #B8B4A6; margin-top: 6px; }
 .foot-links { display: flex; gap: 26px; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; }
 .foot a { color: var(--paper); }
-.foot a:hover { color: var(--moss); }
 .foot-base {
   border-top: 1px solid var(--line-dark); margin-top: 26px; padding-top: 14px;
   font-family: var(--mono); font-size: 11px; color: var(--faint);
@@ -328,7 +330,6 @@ main .rule-motif .ci { border-color: var(--clay); }
 }
 .foot-slim .foot-brand { font-family: var(--sans); font-weight: 700; font-size: 18px; letter-spacing: -.02em; }
 .foot-slim a { color: var(--paper); }
-.foot-slim a:hover { color: var(--moss); }
 
 /* ---------- Hero (home) ---------- */
 .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
@@ -364,7 +365,6 @@ main .rule-motif .ci { border-color: var(--clay); }
 
 /* ---------- Featured band + contact close (home) ---------- */
 .feature-link { display: block; color: var(--ink); text-decoration: none; border-top: 1px solid var(--ink); padding-top: 18px; }
-.feature-link:hover { color: var(--clay); }
 .feature-cover { aspect-ratio: 21 / 9; min-height: 260px; max-width: 100%; border: 1px solid var(--line); overflow: hidden; background: var(--panel); }
 .feature-cover img { width: 100%; height: 100%; object-fit: cover; object-position: center 38%; display: block; }
 .feature-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 14px; flex-wrap: wrap; }
@@ -378,7 +378,6 @@ main .rule-motif .ci { border-color: var(--clay); }
 /* a class, not inline styles, so the clay hover applies; sized to its text (not the column) so the
    link and its focus ring are the address itself; on a 320px screen it breaks before the @ */
 .contact-mail { justify-self: start; font-weight: 700; font-size: clamp(28px, 4.4vw, 56px); letter-spacing: -.02em; color: var(--ink); text-decoration-thickness: 2px; overflow-wrap: anywhere; }
-.contact-mail:hover { color: var(--clay); }
 @media (max-width: 640px) { .contact-close { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- Meta grid (project page) ---------- */
@@ -475,3 +474,30 @@ main:focus { outline: none; }
 .pf-band-cover { display: block; border: 1px solid var(--line); background: #FFF; }
 .pf-band-cover img { display: block; width: 100%; height: auto; }
 @media (max-width: 640px) { .pf-band { grid-template-columns: minmax(0, 112px) minmax(0, 1fr); gap: 14px 18px; align-items: start; } }
+
+/* ---------- Hover (mouse only) and press (every pointer) ---------- */
+/* A tap fakes a hover that sticks until the next tap, so the hover colours are for mice only
+   (the focus rings stay outside). Each has an :active twin, shown only while a finger or button
+   is down; the viewer controls, which have no hover, press to clay like the outline button. */
+@media (hover: hover) and (pointer: fine) {
+  a:hover { color: var(--clay); }
+  .brand:hover { color: var(--ink); }
+  .navlinks a:hover { color: var(--clay); }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn-outline:hover { border-color: var(--clay); color: var(--clay); }
+  .card:hover { color: var(--clay); }
+  .rowhead .link-mono:hover { color: var(--clay); }
+  .foot a:hover { color: var(--moss); }
+  .foot-slim a:hover { color: var(--moss); }
+  .feature-link:hover { color: var(--clay); }
+  .contact-mail:hover { color: var(--clay); }
+}
+a:active { color: var(--clay); }
+.brand:active { color: var(--ink); }
+.navlinks a:active { color: var(--clay); }
+.btn:active { background: var(--ink); color: var(--paper); }
+.btn-outline:active { border-color: var(--clay); color: var(--clay); }
+.card:active, .feature-link:active, .contact-mail:active, .rowhead .link-mono:active { color: var(--clay); }
+.foot a:active, .foot-slim a:active { color: var(--moss); }
+.vbtn:active, .thumbbtn:active, .cmp-chips button:active { border-color: var(--clay); color: var(--clay); }
+.chip:active { color: var(--clay); }
