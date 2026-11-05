@@ -151,6 +151,19 @@ object Store {
 
     fun nibbles(date: LocalDate): Pair<Int, Int> = Foods.nibbles(foodOn(date))
 
+    /** What Matt eats most (last 14 days, not planned meals or nibbles), for one-tap "again". */
+    fun recentFoods(today: LocalDate = LocalDate.now()): List<FoodEntry> =
+        (0L..13L).flatMap { foodOn(today.minusDays(it)) }.filter { it.plan.isEmpty() && it.src != "nibble" && it.kcal > 0 }
+            .groupBy { it.name.lowercase() }.values.sortedByDescending { it.size }.map { it.first() }.take(8)
+
+    /** Logs the same thing again, with the same numbers. */
+    fun relog(date: LocalDate, e: FoodEntry) {
+        count("food"); count("food:again")
+        val n = e.copy(id = newId(), at = nowAt(), meal = Foods.mealNow(), plan = "")
+        addOps(LogDoc.foodOp(date.toString(), n.id, n.toJson()))
+        syncNutritionSoon()
+    }
+
     /** One tap on a planned meal: logs it with the plan's numbers and ticks its step (the morning run reads the tick). */
     fun logPlanned(day: Day, step: Box) {
         val d = day.date.toString()

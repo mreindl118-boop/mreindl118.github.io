@@ -134,10 +134,10 @@ fun NibbleRow(date: LocalDate, onLogged: (Macros) -> Unit) {
 
 /** Today's Eat card: numbers, the plan's meals as one-tap logs, what's been logged, and the food box. */
 @Composable
-fun EatCard(day: Day?, date: LocalDate) {
+fun EatCard(day: Day?, date: LocalDate, alwaysOpen: Boolean = false) {
     val tk = t()
     val st by Store.state.collectAsState()
-    var open by remember { mutableStateOf(false) }
+    var open by remember { mutableStateOf(alwaysOpen) }
     val entries = remember(st.version, st.log, date) { Store.foodOn(date) }
     PCard {
         EatTotals(date)
@@ -174,7 +174,7 @@ fun EatCard(day: Day?, date: LocalDate) {
             }
         }
         Spacer(Modifier.height(10.dp))
-        if (open) FoodLogger(date, autoFocus = true) { open = false }
+        if (open || alwaysOpen) FoodLogger(date, autoFocus = !alwaysOpen) { open = false }
         else PButton("+  Track food", Modifier.fillMaxWidth(), tk.eat) { Store.count("screen:food"); open = true }
     }
 }
