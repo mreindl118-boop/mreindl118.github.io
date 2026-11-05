@@ -240,8 +240,15 @@ main .rule-motif .ci { border-color: var(--clay); }
 #pf-caption { line-height: 24px; }
 #pf-caption a { display: inline-block; }
 .vstage:active { cursor: grabbing; }
-/* the stage takes focus (site.js panZoom): arrows pan when zoomed, + and - zoom, 0 fits */
-.vstage:focus-visible { outline: 2px solid var(--pine); outline-offset: -3px; }
+/* the stage takes focus (site.js panZoom): arrows pan when zoomed, + and - zoom, 0 fits. The ring
+   is an overlay, so a zoomed (transformed) drawing can't paint over it: 2px pine, 1px inside the
+   stage's edge (where the outline sat), above the drawing and its overlays, under the badge */
+.vstage:focus-visible { outline: none; }
+.vstage:focus-visible::after {
+  content: ""; position: absolute; inset: 1px; border: 2px solid var(--pine);
+  pointer-events: none; z-index: 1;
+}
+.vstage .vbadge { z-index: 2; }
 /* at fit a finger scrolls the page past the stage (site.js panZoom takes no drag there);
    zoomed, and always in the full-screen lightbox, the stage keeps every gesture */
 .vstage.zoomed, .lightbox .vstage { touch-action: none; }

@@ -309,8 +309,10 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
   transition, never shrinking from the last one's zoom.
 - **Controls are not content:** viewer buttons, tabs and chips take `touch-action: manipulation`
   (quick taps flip pages, not zoom the page) and `user-select: none`; page zoom stays enabled.
-- **Keyboard:** each stage is focusable (Tab reaches it after the toolbar; a 2px pine ring inset
-  3px) and is a group named "Drawing viewer. Arrow keys pan when zoomed, plus and minus zoom, 0
+- **Keyboard:** each stage is focusable (Tab reaches it after the toolbar; a 2px pine ring just
+  inside its edge, drawn as an overlay above the drawing so a zoomed sheet never hides it, under
+  the badge, which reads "140% · drag or arrow keys to pan" while the stage has keyboard focus)
+  and is a group named "Drawing viewer. Arrow keys pan when zoomed, plus and minus zoom, 0
   fits." Zoomed in, the arrow keys pan a tenth of the stage; at fit, ← and → turn the viewer's own
   pages (drawing set, portfolio book, booklet); + or = and − zoom, 0 fits. None of it animates
   (no motion on keyboard actions). The portfolio's page-wide ← and → skip form fields and a

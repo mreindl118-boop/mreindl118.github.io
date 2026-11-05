@@ -170,9 +170,19 @@
     function apply() {
       surface.style.transform = 'translate(' + st.tx + 'px,' + st.ty + 'px) scale(' + st.zoom + ')';
       stage.classList.toggle('zoomed', st.zoom > 1);
-      if (badge) badge.textContent = Math.round(st.zoom * 100) + '%' + (st.zoom > 1 ? ' · drag to pan' : '');
+      badgeText();
       if (opts.onZoom) opts.onZoom(st.zoom);
     }
+    // while the stage has keyboard focus the arrow keys pan it too, so the badge says so
+    function badgeText() {
+      if (!badge) return;
+      var keys = false;
+      try { keys = stage.matches(':focus-visible'); } catch (e) { /* a browser without :focus-visible */ }
+      badge.textContent = Math.round(st.zoom * 100) + '%' +
+        (st.zoom > 1 ? (keys ? ' · drag or arrow keys to pan' : ' · drag to pan') : '');
+    }
+    stage.addEventListener('focus', badgeText);
+    stage.addEventListener('blur', badgeText);
     // apply a change with the surface's transition switched off for that one step
     function instant(change) {
       surface.classList.add('dragging');
