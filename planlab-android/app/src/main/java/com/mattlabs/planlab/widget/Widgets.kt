@@ -109,6 +109,16 @@ class AtePlanAction : ActionCallback {
     }
 }
 
+/** One tap: a nibble ("a bite", about 80 kcal). The ones that don't feel like they count. */
+class NibbleAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        Store.init(context)
+        Store.count("widget:nibble")
+        Store.addNibble(LocalDate.now())
+        Widgets.updateAll(context)
+    }
+}
+
 class TodayWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -192,6 +202,13 @@ private fun TodayContent() {
             Box(GlanceModifier.defaultWeight().height(40.dp).background(WC.kind("meals")).cornerRadius(20.dp)
                 .clickable(actionStartActivity<FoodActivity>(actionParametersOf(FROM to "widget"))), contentAlignment = Alignment.Center) {
                 Ico("eat", WC.white, 22.dp)
+            }
+            Spacer(GlanceModifier.width(8.dp))
+            // Nibbles: one tap each, the count shows so the bites can't hide.
+            val nib = Store.nibbles(today).first
+            Box(GlanceModifier.width(64.dp).height(40.dp).background(WC.sunk).cornerRadius(20.dp)
+                .clickable(actionRunCallback<NibbleAction>()), contentAlignment = Alignment.Center) {
+                Text(if (nib > 0) "🤏 $nib" else "🤏", style = TextStyle(color = WC.fg, fontSize = 16.sp, fontWeight = FontWeight.Bold))
             }
             Spacer(GlanceModifier.width(8.dp))
             Box(GlanceModifier.defaultWeight().height(40.dp).background(WC.kind("clean")).cornerRadius(20.dp)

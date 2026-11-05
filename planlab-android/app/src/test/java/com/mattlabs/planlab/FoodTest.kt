@@ -75,4 +75,16 @@ class FoodTest {
         assertEquals(560, LogDoc.food(d, "2030-03-04")[0].kcal)
         assertEquals(JSONObject.NULL, d.getJSONObject("food").getJSONObject("2030-03-04").get("w1"))
     }
+
+    @Test fun nibblesAreOneTapAndCounted() {
+        // The table's list matches the built-in fallback, so the phone and the web page log the same numbers.
+        assertEquals(Foods.NIBBLES, db.nibbles)
+        assertEquals(Foods.NIBBLES, FoodDb.parse("""{"foods":[]}""").nibbles)
+        val bite = db.nibbles.first { it.id == "bite" }
+        val e = Foods.nibbleEntry(bite, "n1", "21:05")
+        assertEquals(listOf("nibble", "snack", 80, "A bite"), listOf(e.src, e.meal, e.kcal, e.name))
+        val meal = Foods.entryOf(Foods.lookup("2 coneys skyline", db)[0], "a1", "12:00", "lunch")
+        assertEquals(2 to 160, Foods.nibbles(listOf(e, meal, e.copy(id = "n2"))))
+        assertEquals(720, Foods.totals(listOf(e, meal, e.copy(id = "n2"))).kcal)
+    }
 }

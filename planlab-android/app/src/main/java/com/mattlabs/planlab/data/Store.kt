@@ -140,6 +140,17 @@ object Store {
         syncNutritionSoon()
     }
 
+    /** One tap: a nibble (a bite, a handful, a sweet) is logged with its typical number. */
+    fun addNibble(date: LocalDate, id: String = "bite") {
+        val n = _state.value.foods.nibbles.firstOrNull { it.id == id } ?: _state.value.foods.nibbles.first()
+        count("food"); count("food:nibble")
+        val e = Foods.nibbleEntry(n, newId(), nowAt())
+        addOps(LogDoc.foodOp(date.toString(), e.id, e.toJson()))
+        syncNutritionSoon()
+    }
+
+    fun nibbles(date: LocalDate): Pair<Int, Int> = Foods.nibbles(foodOn(date))
+
     /** One tap on a planned meal: logs it with the plan's numbers and ticks its step (the morning run reads the tick). */
     fun logPlanned(day: Day, step: Box) {
         val d = day.date.toString()

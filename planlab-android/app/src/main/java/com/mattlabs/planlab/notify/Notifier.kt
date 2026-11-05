@@ -134,6 +134,17 @@ object Notifier {
                 nb.addAction(action(ctx, "In 1 hour", "snooze", slot, minutes = 60, notif = id))
                 post(ctx, id, nb)
             }
+            Slot.NIBBLES -> {
+                // Grace calories: ask once, late, with one tap per bite. Each tap brings the banner back with the new count.
+                val (count, kcal) = Store.nibbles(today)
+                val nb = base(ctx, CH_NUDGE, "Any nibbles today?", if (count > 0) "🤏 $count logged · ${kcal} kcal. Tap once per bite." else "A bite, a handful, a taste? Tap once each.")
+                    .setContentIntent(foodIntent(ctx))
+                listOf("bite", "handful", "sweet").forEach { k ->
+                    val n = st.foods.nibbles.firstOrNull { it.id == k } ?: return@forEach
+                    nb.addAction(action(ctx, "+ ${n.icon} ${n.name}", "nibble", slot, k, notif = id))
+                }
+                post(ctx, id, nb)
+            }
             Slot.ELEVATE_1, Slot.ELEVATE_2, Slot.ELEVATE_3 -> {
                 if (b.phase != Phase.NWB) return false
                 post(ctx, id, base(ctx, CH_NUDGE, "Elevate 20 min", "Foot above your heart. Good time for a show or seated practice.")

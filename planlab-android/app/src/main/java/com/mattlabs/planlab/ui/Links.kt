@@ -8,7 +8,7 @@ import com.mattlabs.planlab.data.Store
 
 /**
  * Where a step's link goes. "app:bugs" opens the capture sheet; other "app:" targets (body, pelvic, piano, voice,
- * recipe/<slug>, cook/<slug>, kroger, freezer, calendar, inbox, wish) open that view of the planner inside the app;
+ * recipe/<slug>, cook/<slug>, kroger, kitchen, freezer, calendar, inbox, wish) open that view of the planner inside the app;
  * https links open in their own app (YouTube, Spotify, Maps…) or the browser.
  */
 object Links {

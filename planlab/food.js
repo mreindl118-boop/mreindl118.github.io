@@ -28,8 +28,16 @@ function table(json) {
   for (const [b, al] of Object.entries(json.brands || {})) for (const a of [b, ...al]) brands.push({ brand: b, t: toks(a) });
   brands.sort((x, y) => y.t.length - x.t.length);
   const foods = (json.foods || []).map(r => food(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0] ? "chain" : "table"));
-  return { brands, foods };
+  const nibbles = (json.nibbles || []).map(r => ({ id: r[0], icon: r[1], name: r[2], kcal: +r[3] || 0, protein_g: +r[4] || 0, carbs_g: +r[5] || 0, fat_g: +r[6] || 0 }));
+  return { brands, foods, nibbles: nibbles.length ? nibbles : NIBBLES };
 }
+
+// Nibbles: the bites that feel like they don't count. Used when foods.json has no "nibbles" list; keep in step with Foods.NIBBLES.
+const NIBBLES = [["bite", "🤏", "A bite", 80, 2, 9, 4], ["handful", "✊", "Handful", 150, 3, 16, 8], ["sweet", "🍪", "Sweet", 120, 1, 17, 5],
+  ["cheese", "🧀", "Cheese", 100, 6, 1, 8], ["spoon", "🥄", "Spoon of PB", 95, 4, 3, 8], ["sip", "🥤", "Sweet drink", 140, 0, 36, 0]]
+  .map(r => ({ id: r[0], icon: r[1], name: r[2], kcal: r[3], protein_g: r[4], carbs_g: r[5], fat_g: r[6] }));
+function nibbleEntry(n, at) { return { at, text: "nibble: " + n.id, name: n.name, qty: 1, kcal: n.kcal, protein_g: n.protein_g, carbs_g: n.carbs_g, fat_g: n.fat_g, src: "nibble", meal: "snack", plan: "" }; }
+function nibbles(list) { const n = list.filter(e => e && e.src === "nibble"); return { n: n.length, kcal: n.reduce((a, e) => a + (e.kcal || 0), 0) }; }
 function food(brand, name, serving, kcal, p, c, f, aliases, src) {
   const names = [name, ...String(aliases || "").split("|").filter(Boolean)];
   return { brand: brand || "", name, serving: serving || "1 serving", kcal: +kcal || 0, p: +p || 0, c: +c || 0, f: +f || 0, src, keys: names.map(toks).filter(t => t.length) };
@@ -180,6 +188,6 @@ async function openFoodFacts(q) {
   }).filter(Boolean).slice(0, 5);
 }
 
-const api = { norm, toks, table, mine, lookup, entryOf, planned, mealNow, totals, targets, openFoodFacts, qtyOf, splitText };
+const api = { norm, toks, table, NIBBLES, nibbleEntry, nibbles, mine, lookup, entryOf, planned, mealNow, totals, targets, openFoodFacts, qtyOf, splitText };
 if (typeof module !== "undefined" && module.exports) module.exports = api; else root.PlanFood = api;
 })(typeof window !== "undefined" ? window : globalThis);
