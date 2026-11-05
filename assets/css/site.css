@@ -428,9 +428,6 @@ main .rule-motif .ci { border-color: var(--clay); }
 .feature-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 14px; flex-wrap: wrap; }
 /* an h2 on Home: the class sets every font property itself, so only the UA margin needs resetting */
 .feature-title { font-family: var(--sans); font-weight: 700; font-size: 20px; letter-spacing: -.02em; margin: 0; }
-/* Home's one big picture: the whole master plan at container width, title and sentence under it */
-.feature-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 12px 48px; align-items: start; margin-top: 20px; }
-@media (max-width: 640px) { .feature-body { grid-template-columns: minmax(0, 1fr); } }
 /* Home ends on contact: the address set as a headline (two-thirds), a line and two links beside it */
 .contact-close { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px 48px; align-items: end; }
 /* a class, not inline styles, so the clay hover applies; sized to its text (not the column) so the

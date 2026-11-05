@@ -159,7 +159,7 @@ lettering does the annotating.
   is a full sentence, so it takes the semibold weight.
 - **Headline** (700, 24–60px, -0.02em): page and section titles (`.h-head`).
 - **Title** (700, 17–20px, -0.01 to -0.02em): project card and lightbox titles; Home's featured
-  project title (an h2) runs at 30px under its full-width plan, and the Projects lead card's at 28px. The footer name (26px) and brand (18px) use the same face at -0.02em.
+  project title (an h2) and the Projects lead card's run at 28px. The footer name (26px) and brand (18px) use the same face at -0.02em.
 - **Body** (400, 14.5–18px, ~1.6): reading text, held to about 66–68ch. A project page's
   summary sentence, under its title, runs larger: 19px ink (17px on phones), 1.55, 60ch.
 - **Notes and captions** (400, sans, muted): a sentence-length note under a heading is
@@ -192,9 +192,8 @@ the nav's measured height (`--nav-h`, set by `site.js`; 66px, 53px at 476–640p
 at 474px and below), so sections carry no scroll margins of their own. The jump glides (`scroll-behavior:
 smooth`) only for visitors who haven't asked for reduced motion.
 
-On Home the featured project is the page's one full-width picture: its whole master plan at the
-container width (never cropped), with the title in the left third and its sentence in the right
-two-thirds underneath (one column on phones), so it doesn't repeat the hero's text-and-picture split.
+On Home the featured project sits under the hero: its title (an h2), one ink sentence and
+"View project →" on the left, its plan on the right (one column on phones).
 Home ends on contact, not a list: on the panel ground under the rule motif, "Get in Touch" sets the
 email address as a Headline-weight link (700, clamp(28px, 4.4vw, 56px)) in the left two-thirds, with
 one ink line and the Résumé and Portfolio book links in the right third (one column on phones).
