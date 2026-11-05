@@ -23,6 +23,12 @@ object Fixtures {
 - Practice: piano 25 min · voice 10 min · guitar 5 min
 - Coming up: test thing Tue
 - [ ] meals  [x] body  [ ] piano  [ ] voice  [ ] stew frozen
+### piano
+- [ ] Warm-up: five-finger pattern, 3 min
+- [x] G major scale, hands separate
+- [ ] Test piece, bars 1-4, slow
+### stretch
+- [ ] Hamstring, 30 s each side
 
 ## Tue 03-05
 - Eat: eggs · salad
@@ -30,6 +36,8 @@ object Fixtures {
 - Practice: piano 20 min
 - Coming up: nothing
 - [ ] meals  [ ] body  [ ] piano
+  - [ ] body: walk to the test corner
+  - [ ] body: stretch 5 min
 """.trimIndent()
 
     val CAL = """
@@ -51,6 +59,7 @@ object Fixtures {
 ## Before the big day
 
 - [ ] Buy a test chair · Thu 03-07
+  - [ ] measure the test desk
 - [x] Call someone · 2030-03-05
 """.trimIndent()
 

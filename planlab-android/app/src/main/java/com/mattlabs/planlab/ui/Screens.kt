@@ -12,6 +12,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import kotlinx.coroutines.launch
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -67,7 +68,7 @@ fun open(ctx: Context, url: String) = runCatching { ctx.startActivity(Intent(Int
 /** The full web planner (workout player, cook mode, groceries, recipes), signed in with the app's key. */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun PlannerScreen(onBack: () -> Unit) {
+fun PlannerScreen(onBack: () -> Unit, go: String? = null, goN: Int = 0) {
     val key = Store.token() ?: ""
     var web by remember { mutableStateOf<WebView?>(null) }
     BackHandler { val w = web; if (w != null && w.canGoBack()) w.goBack() else onBack() }
@@ -85,10 +86,16 @@ fun PlannerScreen(onBack: () -> Unit) {
                     view.evaluateJavascript("(function(){try{if(localStorage.getItem('planlab-key')!==${JSONObject.quote(key)}){localStorage.setItem('planlab-key',${JSONObject.quote(key)});location.reload();}}catch(e){}})()", null)
                 }
             }
-            loadUrl(GitHub.WEB)
+            loadUrl(GitHub.WEB + (go?.let { "#go/$it" } ?: ""))
             web = this
         }
     })
+    // A step's link opened the planner at a view: jump there without reloading.
+    val firstN = remember { goN }
+    androidx.compose.runtime.LaunchedEffect(goN) {
+        val w = web
+        if (goN != firstN && go != null && w != null) w.evaluateJavascript("location.hash=${JSONObject.quote("#go/$go")}", null)
+    }
 }
 
 @Composable
@@ -186,9 +193,18 @@ fun SettingsScreen(onBack: () -> Unit) {
         item {
             Label("App")
             PCard {
+                val scope = androidx.compose.runtime.rememberCoroutineScope()
+                var upd by remember { mutableStateOf("Updates install on their own.") }
                 Text("planLAB ${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.titleMedium, color = tk.fg)
+                Text(upd, color = tk.muted, fontSize = 13.sp)
                 Spacer(Modifier.height(10.dp))
-                PButton("Get the newest version", Modifier.fillMaxWidth(), tk.sunk, tk.fg) { open(ctx, Updater.APK) }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PButton("Check now", Modifier.weight(1f), tk.sunk, tk.fg) {
+                        upd = "Checking…"
+                        scope.launch { upd = com.mattlabs.planlab.update.AutoUpdate.check(ctx, 0)?.let { "Installing $it…" } ?: "You have the newest version." }
+                    }
+                    PButton("Download", Modifier.weight(1f), tk.sunk, tk.fg) { open(ctx, com.mattlabs.planlab.update.AutoUpdate.APK) }
+                }
             }
         }
     }

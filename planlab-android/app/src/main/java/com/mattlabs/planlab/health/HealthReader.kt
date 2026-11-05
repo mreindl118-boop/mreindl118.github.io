@@ -57,7 +57,8 @@ class HealthReader(private val ctx: Context) {
             BodyTemperatureRecord::class, BloodGlucoseRecord::class, HydrationRecord::class, NutritionRecord::class,
         )
         val READ: Set<String> = TYPES.map { HealthPermission.getReadPermission(it) }.toSet()
-        val ALL: Set<String> = READ + BACKGROUND
+        /** Writing nutrition lets the food log show up in Fitbit and anything else reading Health Connect. */
+        val ALL: Set<String> = READ + BACKGROUND + FoodWriter.WRITE
 
         fun status(ctx: Context): Int = HealthConnectClient.getSdkStatus(ctx)
         fun available(ctx: Context): Boolean = status(ctx) == HealthConnectClient.SDK_AVAILABLE

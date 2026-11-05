@@ -14,6 +14,18 @@ import com.mattlabs.planlab.core.HealthData
 import com.mattlabs.planlab.core.LogDoc
 import com.mattlabs.planlab.core.Md
 import com.mattlabs.planlab.core.Plan
+import com.mattlabs.planlab.core.Earned
+import com.mattlabs.planlab.core.Food
+import com.mattlabs.planlab.core.FoodDb
+import com.mattlabs.planlab.core.FoodEntry
+import com.mattlabs.planlab.core.FoodRow
+import com.mattlabs.planlab.core.Foods
+import com.mattlabs.planlab.core.Macros
+import com.mattlabs.planlab.core.Planned
+import com.mattlabs.planlab.core.Level
+import com.mattlabs.planlab.core.Progress
+import com.mattlabs.planlab.core.ProgressCalc
+import com.mattlabs.planlab.core.Rewards
 import com.mattlabs.planlab.health.HealthReader
 import com.mattlabs.planlab.notify.Notifier
 import com.mattlabs.planlab.widget.Widgets
@@ -43,6 +55,17 @@ data class UiState(
     val synced: Boolean = false,
     val pending: Int = 0,
     val version: Long = 0,
+    val rewards: Rewards = Rewards(),
+    val progress: Progress? = null,
+    /** Open "bugs me" captures: issue number to text (0 = not sent yet). */
+    val bugs: List<Pair<Int, String>> = emptyList(),
+    /** The last XP gain, for the "+5" that pops up, and a level just reached. */
+    val gain: Int = 0,
+    val gainAt: Long = 0,
+    val levelUp: Level? = null,
+    /** The food table (built in, refreshed from the site) and Matt's own foods (meals/foods.md). */
+    val foods: FoodDb = FoodDb.EMPTY,
+    val mine: List<Food> = emptyList(),
 )
 
 /** One place for the plan, Matt's taps and his health numbers. Screens, widgets and notifications all read it. */
@@ -55,8 +78,8 @@ object Store {
     val state: StateFlow<UiState> get() = _state
     private var files: Map<String, String> = emptyMap()
 
-    val MAIN = listOf("meals", "body", "piano", "voice")
-    val LABEL = mapOf("meals" to "Eat", "body" to "Body", "piano" to "Piano", "voice" to "Voice")
+    val MAIN = listOf("body", "piano", "voice", "clean")
+    val LABEL = mapOf("meals" to "Eat", "body" to "Body", "piano" to "Piano", "voice" to "Voice", "clean" to "Clean", "move" to "Move", "mind" to "Mind")
 
     @Synchronized
     fun init(context: Context) {
@@ -69,7 +92,182 @@ object Store {
         }.getOrDefault(emptyMap())
         val health = HealthData.fromJson(runCatching { File(app.filesDir, "health.json").readText() }.getOrNull())
         val plan = Md.plan(files, LocalDate.now(), prefs.getLong("built", 0))
-        _state.value = UiState(hasKey = token() != null, plan = plan, log = view(), health = health, synced = prefs.getBoolean("synced", false), pending = ops().length())
+        val rewards = Rewards.parse(files["rewards.md"], LocalDate.now())
+        val log = view()
+        _state.value = UiState(hasKey = token() != null, plan = plan, log = log, health = health, synced = prefs.getBoolean("synced", false), pending = ops().length(),
+            rewards = rewards, progress = progressOf(plan, log, rewards), bugs = bugsShown(log), foods = loadFoods(), mine = Foods.mine(files["meals/foods.md"]))
+    }
+
+    // ---------- food: tracked, not ticked. Entries go to log/app.json food[date][id] and, if allowed, Health Connect.
+    private const val FOODS_URL = "https://www.understorydesignstudio.com/planlab/data/foods.json"
+
+    private fun loadFoods(): FoodDb {
+        val cached = File(app.filesDir, "foods.json").takeIf { it.exists() }?.let { FoodDb.parse(it.readText()) }
+        if (cached != null && cached.foods.isNotEmpty()) return cached
+        return FoodDb.parse(runCatching { app.assets.open("foods.json").bufferedReader().use { it.readText() } }.getOrNull())
+    }
+
+    /** Once a day, the newest food table from the site (new chains and fixes land without an app update). */
+    private fun refreshFoods() {
+        val today = LocalDate.now().toString()
+        if (prefs.getString("foods_day", "") == today) return
+        val c = java.net.URL(FOODS_URL).openConnection() as java.net.HttpURLConnection
+        c.connectTimeout = 10000; c.readTimeout = 15000; c.setRequestProperty("User-Agent", "planLAB-Android")
+        val text = try { if (c.responseCode == 200) c.inputStream.use { it.readBytes().toString(Charsets.UTF_8) } else null } finally { c.disconnect() }
+        val db = FoodDb.parse(text)
+        if (db.foods.size >= 50) {
+            File(app.filesDir, "foods.json").writeText(text!!)
+            prefs.edit().putString("foods_day", today).apply()
+            _state.value = _state.value.copy(foods = db)
+        }
+    }
+
+    fun lookup(text: String): List<FoodRow> = Foods.lookup(text, _state.value.foods, _state.value.mine)
+    fun foodOn(date: LocalDate): List<FoodEntry> = LogDoc.food(_state.value.log, date.toString())
+    fun eaten(date: LocalDate): Macros = Foods.totals(foodOn(date))
+    fun foodTargets(date: LocalDate = LocalDate.now()): Macros = Foods.targets(files["me/profile.md"], brief(date).protein)
+    fun planned(step: Box): Planned = Foods.planned(step.label, _state.value.foods, _state.value.mine)
+
+    private fun newId(): String = java.lang.Long.toString(System.currentTimeMillis(), 36) + (1000..9999).random()
+    private fun nowAt(): String = LocalTime.now().withSecond(0).withNano(0).toString().take(5)
+
+    /** Logs what Matt typed, already looked up (and maybe adjusted) on screen. */
+    fun addFood(date: LocalDate, rows: List<FoodRow>) {
+        if (rows.isEmpty()) return
+        val meal = Foods.mealNow(); val at = nowAt()
+        rows.forEach { count("food") }
+        addOps(*rows.map { r -> val e = Foods.entryOf(r, newId(), at, meal); LogDoc.foodOp(date.toString(), e.id, e.toJson()) }.toTypedArray())
+        syncNutritionSoon()
+    }
+
+    /** One tap: a nibble (a bite, a handful, a sweet) is logged with its typical number. */
+    fun addNibble(date: LocalDate, id: String = "bite") {
+        val n = _state.value.foods.nibbles.firstOrNull { it.id == id } ?: _state.value.foods.nibbles.first()
+        count("food"); count("food:nibble")
+        val e = Foods.nibbleEntry(n, newId(), nowAt())
+        addOps(LogDoc.foodOp(date.toString(), e.id, e.toJson()))
+        syncNutritionSoon()
+    }
+
+    fun nibbles(date: LocalDate): Pair<Int, Int> = Foods.nibbles(foodOn(date))
+
+    /** What Matt eats most (last 14 days, not planned meals or nibbles), for one-tap "again". */
+    fun recentFoods(today: LocalDate = LocalDate.now()): List<FoodEntry> =
+        (0L..13L).flatMap { foodOn(today.minusDays(it)) }.filter { it.plan.isEmpty() && it.src != "nibble" && it.kcal > 0 }
+            .groupBy { it.name.lowercase() }.values.sortedByDescending { it.size }.map { it.first() }.take(8)
+
+    /** Logs the same thing again, with the same numbers. */
+    fun relog(date: LocalDate, e: FoodEntry) {
+        count("food"); count("food:again")
+        val n = e.copy(id = newId(), at = nowAt(), meal = Foods.mealNow(), plan = "")
+        addOps(LogDoc.foodOp(date.toString(), n.id, n.toJson()))
+        syncNutritionSoon()
+    }
+
+    /** One tap on a planned meal: logs it with the plan's numbers and ticks its step (the morning run reads the tick). */
+    fun logPlanned(day: Day, step: Box) {
+        val d = day.date.toString()
+        val existing = foodOn(day.date).firstOrNull { it.plan == step.key }
+        if (existing != null) { deleteFood(day.date, existing.id); return }
+        val p = planned(step)
+        count("food"); count("food:plan")
+        val e = FoodEntry(newId(), nowAt(), step.label, p.name, 1.0, p.m.kcal, p.m.protein, p.m.carbs, p.m.fat, p.src, p.meal.ifEmpty { Foods.mealNow() }, step.key)
+        addOps(LogDoc.foodOp(d, e.id, e.toJson()), LogDoc.tickOp(d, step.key, true))
+        syncNutritionSoon()
+    }
+
+    fun deleteFood(date: LocalDate, id: String) {
+        val e = foodOn(date).firstOrNull { it.id == id }
+        val ops = mutableListOf(LogDoc.foodOp(date.toString(), id, null))
+        if (e != null && e.plan.isNotEmpty()) ops += LogDoc.tickOp(date.toString(), e.plan, false)
+        addOps(*ops.toTypedArray())
+        syncNutritionSoon()
+    }
+
+    /** The next planned meal not logged yet today (for the widget and the dinner reminder). */
+    fun nextPlanned(date: LocalDate = LocalDate.now()): Box? {
+        val day = _state.value.plan.day(date) ?: return null
+        val logged = foodOn(date).map { it.plan }.toSet()
+        val open = day.meals.filter { it.key !in logged && !LogDoc.ticked(_state.value.log, date.toString(), it.key, it.done) && planned(it).meal.isNotEmpty() }
+        val now = Foods.mealNow()
+        return open.firstOrNull { planned(it).meal == now } ?: open.firstOrNull()
+    }
+
+    private fun syncNutritionSoon() { scope.launch { runCatching { com.mattlabs.planlab.health.FoodWriter(app).sync(_state.value.log) } } }
+
+    // ---------- XP and levels, worked out from the log. Days the phone no longer has the plan for keep what they earned.
+    @Synchronized
+    private fun progressOf(plan: Plan, log: JSONObject, r: Rewards): Progress {
+        val cache = runCatching { JSONObject(prefs.getString("xp_cache", "{}")) }.getOrDefault(JSONObject())
+        val all = mutableMapOf<String, Earned>()
+        for (k in cache.keys()) runCatching { all[k] = Earned.fromJson(cache.getJSONObject(k)) }
+        for ((k, v) in ProgressCalc.earned(plan, log, r)) if (v.second || k !in all) { all[k] = v.first; cache.put(k, v.first.toJson()) }
+        prefs.edit().putString("xp_cache", cache.toString()).apply()
+        return ProgressCalc.progress(all, r, log, LocalDate.now())
+    }
+
+    fun milestone(key: String, value: Boolean) { if (value) count("milestone"); addOps(LogDoc.tickOp("milestones", key, value)) }
+
+    // ---------- "this bugs me": queued on the phone, sent as an issue (plus an optional photo) when online
+    private fun bugQueue(): JSONArray = runCatching { JSONArray(prefs.getString("bug_q", "[]")) }.getOrDefault(JSONArray())
+    private fun bugsShown(log: JSONObject = _state.value.log): List<Pair<Int, String>> {
+        val fixed = log.optJSONObject("ticks")?.optJSONObject("bugs")
+        val q = bugQueue()
+        val queued = (0 until q.length()).map { 0 to q.getJSONObject(it).optString("text").ifBlank { "Photo" } }
+        val open = runCatching { JSONArray(prefs.getString("bugs_open", "[]")) }.getOrDefault(JSONArray())
+        val sent = (0 until open.length()).map { open.getJSONArray(it).let { a -> a.getInt(0) to a.getString(1) } }.filter { fixed?.opt(it.first.toString()) != true }
+        return queued + sent
+    }
+
+    fun addBug(text: String, photo: File?) {
+        count("bug")
+        val now = java.time.LocalDateTime.now()
+        synchronized(this) {
+            val q = bugQueue()
+            q.put(JSONObject().put("text", text.trim()).put("at", now.withNano(0).toString()).put("photo", photo?.absolutePath ?: ""))
+            prefs.edit().putString("bug_q", q.toString()).apply()
+        }
+        addCount(now.toLocalDate(), "bug")
+        _state.value = _state.value.copy(bugs = bugsShown())
+        scope.launch { token()?.let { k -> runCatching { pushBugs(GitHub(k)) } }; _state.value = _state.value.copy(bugs = bugsShown()) }
+    }
+
+    fun fixBug(number: Int) {
+        if (number <= 0) return
+        count("bug_fixed")
+        addOps(LogDoc.tickOp("bugs", number.toString(), true))
+    }
+
+    private suspend fun pushBugs(gh: GitHub) = syncLock.withLock {
+        while (true) {
+            val item = synchronized(this) { bugQueue().optJSONObject(0) } ?: break
+            val at = item.getString("at")
+            val stamp = at.replace("-", "").replace(":", "").replace("T", "-").take(15)
+            val text = item.optString("text").ifBlank { "(photo)" }
+            var photoPath = ""
+            item.optString("photo").takeIf { it.isNotBlank() }?.let { File(it) }?.takeIf { it.exists() }?.let { f ->
+                photoPath = "bugs/$stamp.jpg"
+                gh.putBytes(photoPath, Photos.shrink(f), "planLAB app: bugs-me photo $stamp")
+            }
+            val body = buildString {
+                append("Captured in the planLAB app at ${at.replace('T', ' ')}.\n\n")
+                if (photoPath.isNotEmpty()) append("Photo: [${photoPath}](https://github.com/${GitHub.REPO}/blob/main/${GitHub.DIR}/$photoPath)\n\n")
+                append("Claude: turn this into steps (home/bugs-me.md and the week's ### clean), and a habit if it keeps coming back. Close it once Matt marks it fixed in the app (log/app.json ticks.bugs).")
+            }
+            val n = gh.issue("${GitHub.BUG} ${text.take(80)}", body)
+            synchronized(this) {
+                val q = bugQueue(); val rest = JSONArray(); for (i in 1 until q.length()) rest.put(q.get(i))
+                val open = runCatching { JSONArray(prefs.getString("bugs_open", "[]")) }.getOrDefault(JSONArray())
+                open.put(JSONArray().put(n).put(text))
+                prefs.edit().putString("bug_q", rest.toString()).putString("bugs_open", open.toString()).apply()
+            }
+            item.optString("photo").takeIf { it.isNotBlank() }?.let { runCatching { File(it).delete() } }
+        }
+    }
+
+    private fun pullBugs(gh: GitHub) {
+        val open = gh.openBugs()
+        prefs.edit().putString("bugs_open", JSONArray(open.map { JSONArray().put(it.first).put(it.second) }).toString()).apply()
     }
 
     fun token(): String? = prefs.getString("key", null)?.takeIf { it.isNotBlank() }
@@ -99,14 +297,19 @@ object Store {
         schedulePush()
     }
 
-    fun tick(list: String, key: String, value: Boolean) = addOps(LogDoc.tickOp(list, key, value))
+    fun tick(list: String, key: String, value: Boolean) { if (value) count("tick"); addOps(LogDoc.tickOp(list, key, value)) }
     fun addMinutes(date: LocalDate, key: String, n: Int) = addOps(LogDoc.addOp("mins", date.toString(), key, n))
+    fun journal(date: LocalDate, q: String, a: String) { count("journal"); addOps(LogDoc.journalOp(date.toString(), q, a)) }
+    /** A plan file as last pulled (e.g. "mind/anywhere.md"). */
+    fun file(path: String): String? = files[path]
     fun pelvicSet(date: LocalDate) = addOps(LogDoc.addOp("ticks", "pf-$date", "n", 1))
+    fun pelvicUndo(date: LocalDate) { if (LogDoc.pelvic(_state.value.log, date.toString()) > 0) addOps(LogDoc.addOp("ticks", "pf-$date", "n", -1)) }
     fun skip(date: LocalDate, key: String) = addOps(LogDoc.tickOp("skip-$date", key, true))
     fun addCount(date: LocalDate, name: String) = addOps(LogDoc.addOp("ticks", "$name-$date", "n", 1))
 
     /** Marks a day's box done, logging the planned minutes for piano and voice if none were logged. */
     fun done(date: LocalDate, key: String, minutes: Int? = null) {
+        count("tick")
         val ops = mutableListOf(LogDoc.tickOp(date.toString(), key, true))
         val d = _state.value.plan.day(date)
         if (key == "piano" || key == "voice") {
@@ -116,17 +319,109 @@ object Store {
         addOps(*ops.toTypedArray())
     }
 
-    fun isDone(day: Day, box: Box): Boolean = LogDoc.ticked(_state.value.log, day.date.toString(), box.key, box.done)
+    /** Ticked directly, or (when it has steps and was never ticked directly) all its steps ticked. */
+    fun isDone(day: Day, box: Box): Boolean {
+        LogDoc.tick(_state.value.log, day.date.toString(), box.key)?.let { return it }
+        if (box.steps.isNotEmpty() && box.steps.all { stepDone(day, it) }) return true
+        return box.done
+    }
+    fun stepDone(day: Day, step: Box): Boolean = LogDoc.ticked(_state.value.log, day.date.toString(), step.key, step.done)
+    fun nextStep(day: Day, box: Box): Box? = box.steps.firstOrNull { !stepDone(day, it) }
+    fun stepsDone(day: Day, box: Box): Int = box.steps.count { stepDone(day, it) }
     fun toggle(day: Day, box: Box) = if (isDone(day, box)) tick(day.date.toString(), box.key, false) else done(day.date, box.key)
+
+    /** Ticks one step; ticking the last open step ticks its box too, and unticking a step unticks the box. */
+    fun setStep(day: Day, box: Box, step: Box, value: Boolean) {
+        val d = day.date.toString()
+        if (value) count("tick")
+        val ops = mutableListOf(LogDoc.tickOp(d, step.key, value))
+        if (value && box.steps.all { it.key == step.key || stepDone(day, it) }) {
+            ops += LogDoc.tickOp(d, box.key, true)
+            if (box.key == "piano" || box.key == "voice") {
+                val m = day.plannedMinutes(box.key)
+                if (m > 0 && LogDoc.minutes(_state.value.log, d, box.key) == 0) ops += LogDoc.addOp("mins", d, box.key, m)
+            }
+        }
+        if (!value && LogDoc.tick(_state.value.log, d, box.key) == true) ops += LogDoc.tickOp(d, box.key, false)
+        addOps(*ops.toTypedArray())
+    }
+
+    /** Ticks the next open step of [key] on [date] (from a widget or a notification button). */
+    fun doNextStep(date: LocalDate, key: String, stepKey: String? = null) {
+        val day = _state.value.plan.day(date) ?: return
+        val box = day.boxes.firstOrNull { it.key == key } ?: return
+        if (box.steps.isEmpty()) { done(date, key); return }
+        val step = stepKey?.let { k -> box.steps.firstOrNull { it.key == k } } ?: nextStep(day, box) ?: return
+        setStep(day, box, step, true)
+    }
+
+    // ---------- insights (log/insights.json, from tools/insights.py) and the 1-tap feel check-in
+    private var insCache: Pair<String, JSONObject?> = "" to null
+    /** [plan] is only there so screens redraw when a new pull lands. */
+    @Suppress("UNUSED_PARAMETER")
+    fun insights(plan: Plan): JSONObject? {
+        val raw = files["log/insights.json"] ?: return null
+        if (insCache.first != raw) insCache = raw to runCatching { JSONObject(raw) }.getOrNull()
+        return insCache.second
+    }
+    fun feel(log: JSONObject, date: LocalDate): Int =
+        log.optJSONObject("ticks")?.optJSONObject("feel-$date")?.let { o -> (1..5).firstOrNull { o.optBoolean(it.toString()) } } ?: 0
+    fun setFeel(date: LocalDate, n: Int) {
+        count("feel")
+        addOps(*(1..5).map { LogDoc.tickOp("feel-$date", it.toString(), it == n) }.toTypedArray())
+    }
 
     fun brief(date: LocalDate = LocalDate.now()): Coach.Brief = Coach.brief(_state.value.plan, _state.value.health, date, LocalTime.now())
 
     /** Re-emits state and redraws everything that shows it. */
     private fun publish() {
-        _state.value = _state.value.copy(log = view(), pending = ops().length(), version = _state.value.version + 1)
+        val s = _state.value
+        val log = view()
+        val p = progressOf(s.plan, log, s.rewards)
+        val old = s.progress
+        val gained = if (old != null && p.xp > old.xp) p.xp - old.xp else 0
+        _state.value = s.copy(log = log, pending = ops().length(), version = s.version + 1, progress = p, bugs = bugsShown(log),
+            gain = if (gained > 0) gained else s.gain, gainAt = if (gained > 0) System.currentTimeMillis() else s.gainAt,
+            levelUp = if (old != null && p.level.n > old.level.n) p.level else s.levelUp)
         scope.launch {
             runCatching { Widgets.updateAll(app) }
             runCatching { Notifier.refreshPinned(app) }
+        }
+    }
+
+    // ---------- engagement: counts only (what got used, what got ignored), so Claude can make planLAB easier to use
+    @Synchronized
+    fun count(event: String, date: LocalDate = LocalDate.now()) {
+        if (!::app.isInitialized) return
+        val o = runCatching { JSONObject(prefs.getString("eng", "{}")) }.getOrDefault(JSONObject())
+        val d = o.optJSONObject(date.toString()) ?: JSONObject().also { o.put(date.toString(), it) }
+        d.put(event, d.optInt(event, 0) + 1)
+        prefs.edit().putString("eng", o.toString()).apply()
+    }
+
+    private fun pushEngagement(gh: GitHub) {
+        val pending = synchronized(this) {
+            val o = runCatching { JSONObject(prefs.getString("eng", "{}")) }.getOrDefault(JSONObject())
+            if (o.length() == 0) return
+            prefs.edit().putString("eng", "{}").apply(); o
+        }
+        try {
+            val remote = gh.json("log/engagement.json")
+            val doc = remote?.first ?: JSONObject().put("v", 1)
+            val days = doc.optJSONObject("days") ?: JSONObject().also { doc.put("days", it) }
+            for (date in pending.keys()) {
+                val add = pending.getJSONObject(date)
+                val d = days.optJSONObject(date) ?: JSONObject().also { days.put(date, it) }
+                for (e in add.keys()) d.put(e, d.optInt(e, 0) + add.getInt(e))
+            }
+            val cutoff = LocalDate.now().minusDays(60).toString()
+            days.keys().asSequence().toList().filter { it < cutoff }.forEach { days.remove(it) }
+            doc.put("updated", System.currentTimeMillis()).put("app", com.mattlabs.planlab.BuildConfig.VERSION_NAME)
+            gh.put("log/engagement.json", doc.toString(1), remote?.second, "planLAB app: usage ${LocalDate.now()}")
+        } catch (e: Exception) {
+            // Put the counts back for the next try.
+            synchronized(this) { for (date in pending.keys()) { val add = pending.getJSONObject(date); for (ev in add.keys()) repeat(add.getInt(ev)) { count(ev, LocalDate.parse(date)) } } }
+            throw e
         }
     }
 
@@ -149,9 +444,16 @@ object Store {
         if (k != null) {
             val gh = GitHub(k)
             if (full) err = runCatching { pullPlan(gh) }.exceptionOrNull()?.let(::describe) ?: ""
+            // Break times come from the plan, so re-set the alarms once it's fresh.
+            if (full) runCatching { com.mattlabs.planlab.notify.Alarms.scheduleAll(app) }
             runCatching { pushLog(gh) }.exceptionOrNull()?.let { if (err.isEmpty()) err = describe(it) }
+            runCatching { pushEngagement(gh) }
+            runCatching { pushBugs(gh) }
+            if (full) runCatching { pullBugs(gh) }
         }
+        runCatching { refreshFoods() }
         runCatching { readHealth() }
+        runCatching { com.mattlabs.planlab.health.FoodWriter(app).sync(_state.value.log) }
         if (k != null) runCatching { pushHealth(GitHub(k)) }
         _state.value = _state.value.copy(loading = false, error = err)
         publish()
@@ -173,7 +475,8 @@ object Store {
 
     private fun pullPlan(gh: GitHub) {
         val out = mutableMapOf<String, String>()
-        for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md")) gh.file(n)?.let { out[n] = it }
+        for (n in listOf("social/calendar.md", "inbox.md", "me/recovery.md", "me/profile.md", "rewards.md", "meals/foods.md", "body/moves.md", "mind/anywhere.md")) gh.file(n)?.let { out[n] = it }
+        runCatching { gh.file("log/insights.json") }.getOrNull()?.let { out["log/insights.json"] = it }
         val today = LocalDate.now()
         // Only the weeks that matter now: last week, this week and anything ahead.
         val thisWeek = today.minusWeeks(1).let { "%d-W%02d".format(it.get(java.time.temporal.IsoFields.WEEK_BASED_YEAR), it.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR)) }
@@ -182,7 +485,7 @@ object Store {
         val now = System.currentTimeMillis()
         File(app.filesDir, "plan_files.json").writeText(JSONObject(out as Map<*, *>).toString())
         prefs.edit().putLong("built", now).apply()
-        _state.value = _state.value.copy(plan = Md.plan(out, today, now))
+        _state.value = _state.value.copy(plan = Md.plan(out, today, now), rewards = Rewards.parse(out["rewards.md"], today), mine = Foods.mine(out["meals/foods.md"]))
     }
 
     private suspend fun pushLog(gh: GitHub) = syncLock.withLock {
@@ -225,6 +528,8 @@ object Store {
         gh.put("log/health.json", doc.toString(1), sha, "planLAB app: health summary $today")
         prefs.edit().putString("health_pushed", slot).apply()
     }
+
+    fun clearLevelUp() { _state.value = _state.value.copy(levelUp = null) }
 
     fun sendWish(text: String, done: (Boolean) -> Unit) {
         val k = token() ?: return done(false)

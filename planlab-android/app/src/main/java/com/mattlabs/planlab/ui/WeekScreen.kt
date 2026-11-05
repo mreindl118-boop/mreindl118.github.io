@@ -50,7 +50,7 @@ fun WeekScreen() {
             if (w?.phase?.isNotBlank() == true) Pill(w.phase.replace(Regex("""\s*\(.*\)"""), "").replaceFirstChar { it.uppercase() }, tk.muted, tk.sunk, Modifier.padding(top = 6.dp))
             Spacer(Modifier.height(14.dp))
         }
-        if (w == null) { item { PCard { Text("No week planned yet.", color = tk.muted) } }; return@LazyColumn }
+        if (w == null) { item { PCard { Text("No plan yet", color = tk.muted) } }; return@LazyColumn }
         item {
             PCard(pad = PaddingValues(10.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -68,7 +68,6 @@ fun WeekScreen() {
                     }
                 }
             }
-            if (w.focus.isNotBlank()) Text(w.focus.replaceFirstChar { it.uppercase() }, Modifier.padding(top = 12.dp, start = 4.dp, end = 4.dp), color = tk.fg, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
         }
         w.days.firstOrNull { it.date == sel }?.let { d ->
             item {
@@ -76,10 +75,10 @@ fun WeekScreen() {
                 PCard(pad = PaddingValues(horizontal = 16.dp, vertical = 6.dp)) {
                     for (box in d.boxes) {
                         val on = Store.isDone(d, box)
-                        RowItem(lead = { CheckDot(on, tk.kind(box.key), 28.dp) { Store.toggle(d, box) } }, title = Store.LABEL[box.key] ?: box.label.replaceFirstChar { it.uppercase() },
-                            sub = when (box.key) { "body" -> d.body; "meals" -> d.eat.lastOrNull(); "piano", "voice" -> d.practice.firstOrNull { it.lowercase().startsWith(box.key) }; else -> null })
+                        RowItem(lead = { CheckDot(on, tk.kind(box.key), 28.dp) { Store.toggle(d, box) } }, title = Store.LABEL[box.key] ?: box.label.replaceFirstChar { it.uppercase() }) {
+                            if (box.steps.isNotEmpty()) Text("${Store.stepsDone(d, box)}/${box.steps.size}", color = tk.muted, fontWeight = FontWeight.Bold)
+                        }
                     }
-                    for (c in d.coming) RowItem(lead = { Dot(tk.line) }, title = c.replaceFirstChar { it.uppercase() })
                 }
             }
         }
@@ -97,17 +96,11 @@ fun WeekScreen() {
                 Total("Voice min", "$voice/$voicePlan", tk.voice, Modifier.weight(1f))
             }
         }
-        if (w.glance.isNotEmpty()) item {
-            Label("At a glance")
-            PCard(pad = PaddingValues(horizontal = 16.dp, vertical = 6.dp)) {
-                for ((label, text) in w.glance) RowItem(title = label.replace(Regex("""\s*\(.*\)"""), ""), sub = text)
-            }
-        }
         item {
             Spacer(Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (weekIdx > 0) PButton("‹ Last week", Modifier.weight(1f), tk.sunk, tk.fg) { weekIdx-- } else Spacer(Modifier.weight(1f))
-                if (weekIdx < st.plan.weeks.size - 1) PButton("Next week ›", Modifier.weight(1f), tk.sunk, tk.fg) { weekIdx++ } else Spacer(Modifier.weight(1f))
+                if (weekIdx > 0) PButton("‹", Modifier.weight(1f), tk.sunk, tk.fg) { weekIdx-- } else Spacer(Modifier.weight(1f))
+                if (weekIdx < st.plan.weeks.size - 1) PButton("›", Modifier.weight(1f), tk.sunk, tk.fg) { weekIdx++ } else Spacer(Modifier.weight(1f))
             }
         }
     }

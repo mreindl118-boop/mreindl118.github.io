@@ -67,7 +67,7 @@ fun openHealthConnectStore(ctx: Context) {
 }
 
 @Composable
-fun HealthScreen(onSettings: () -> Unit) {
+fun HealthScreen(onSettings: () -> Unit, onInsights: () -> Unit = {}) {
     val st by Store.state.collectAsState()
     val tk = t()
     val connect = rememberHealthConnect()
@@ -108,11 +108,10 @@ fun HealthScreen(onSettings: () -> Unit) {
                             for (why in r.reasons) Text("· $why", color = tk.muted, style = MaterialTheme.typography.bodyMedium)
                         }
                     }
-                    Spacer(Modifier.height(10.dp))
-                    Text("So today: ${b.body.title.lowercase()}. ${b.body.detail}", color = tk.fg, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
+        item { Spacer(Modifier.height(12.dp)); InsightHead(onInsights) }
         for (group in listOf("Sleep", "Heart", "Move", "Body", "Food")) {
             val ms = shown.filter { it.group == group }
             if (ms.isEmpty()) continue
@@ -127,7 +126,7 @@ fun HealthScreen(onSettings: () -> Unit) {
         }
         if (h.takenAt > 0) item {
             val at = Instant.ofEpochMilli(h.takenAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("h:mm a"))
-            Text("Read from Health Connect at $at. A daily summary goes to your private planner so Claude plans with it.", Modifier.padding(top = 12.dp), color = tk.muted, fontSize = 12.sp)
+            Text("Health Connect · $at", Modifier.padding(top = 12.dp), color = tk.muted, fontSize = 12.sp)
         }
     }
 }
@@ -151,9 +150,9 @@ private fun MetricCard(m: Metric, modifier: Modifier) {
             val d = v - base
             val good = m.higherIsBetter?.let { if (it) d >= 0 else d <= 0 }
             val pct = if (base != 0.0) d / base * 100 else 0.0
-            if (kotlin.math.abs(pct) >= 3) Text("${if (d > 0) "▲" else "▼"} ${kotlin.math.abs(pct).toInt()}% vs usual", fontSize = 12.sp, fontWeight = FontWeight.Bold,
+            if (kotlin.math.abs(pct) >= 3) Text("${if (d > 0) "▲" else "▼"} ${kotlin.math.abs(pct).toInt()}%", fontSize = 12.sp, fontWeight = FontWeight.Bold,
                 color = when (good) { true -> tk.ok; false -> tk.warn; null -> tk.muted })
-            else Text("About usual", fontSize = 12.sp, color = tk.muted)
+            else Text("Usual", fontSize = 12.sp, color = tk.muted)
         } else Spacer(Modifier.height(16.dp))
         Spacer(Modifier.height(6.dp))
         Spark(h.series(today, m), color, Modifier.fillMaxWidth().height(30.dp))

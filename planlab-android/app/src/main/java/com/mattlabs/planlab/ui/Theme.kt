@@ -20,21 +20,21 @@ import androidx.compose.ui.unit.sp
 data class Tokens(
     val bg: Color, val surface: Color, val sunk: Color, val fg: Color, val muted: Color, val line: Color,
     val accent: Color, val accentSoft: Color, val ok: Color, val okSoft: Color, val warn: Color, val warnSoft: Color, val bad: Color,
-    val eat: Color, val body: Color, val piano: Color, val voice: Color, val dark: Boolean,
+    val eat: Color, val body: Color, val piano: Color, val voice: Color, val home: Color, val dark: Boolean,
 ) {
-    fun kind(k: String): Color = when (k) { "meals" -> eat; "body" -> body; "piano" -> piano; "voice" -> voice; else -> accent }
+    fun kind(k: String): Color = when (k) { "meals" -> eat; "body", "move", "mind" -> body; "piano" -> piano; "voice" -> voice; "clean", "home", "bugs" -> home; else -> accent }
     fun score(s: Int): Color = when { s >= 80 -> ok; s >= 65 -> accent; s >= 50 -> warn; else -> bad }
 }
 
 val LightTokens = Tokens(
     bg = Color(0xFFF2F5F9), surface = Color.White, sunk = Color(0xFFE8EDF3), fg = Color(0xFF0E1620), muted = Color(0xFF5B6979), line = Color(0xFFD9E1EA),
     accent = Color(0xFF2F7DE1), accentSoft = Color(0xFFE2EFFC), ok = Color(0xFF17875A), okSoft = Color(0xFFDCF2E7), warn = Color(0xFFB4690E), warnSoft = Color(0xFFFBEFD9), bad = Color(0xFFC2410C),
-    eat = Color(0xFFE08A1E), body = Color(0xFF12A383), piano = Color(0xFF6E56CF), voice = Color(0xFFE5484D), dark = false,
+    eat = Color(0xFFE08A1E), body = Color(0xFF12A383), piano = Color(0xFF6E56CF), voice = Color(0xFFE5484D), home = Color(0xFF0E8FB0), dark = false,
 )
 val DarkTokens = Tokens(
     bg = Color(0xFF0B1016), surface = Color(0xFF141B23), sunk = Color(0xFF1B242E), fg = Color(0xFFE8EDF3), muted = Color(0xFF93A2B2), line = Color(0xFF25303D),
     accent = Color(0xFF69B4F4), accentSoft = Color(0xFF15314A), ok = Color(0xFF4CC38A), okSoft = Color(0xFF173327), warn = Color(0xFFE0B25A), warnSoft = Color(0xFF3A2C12), bad = Color(0xFFFF8A4C),
-    eat = Color(0xFFF2A94A), body = Color(0xFF3FD1AE), piano = Color(0xFF9E8CFC), voice = Color(0xFFFF7A7F), dark = true,
+    eat = Color(0xFFF2A94A), body = Color(0xFF3FD1AE), piano = Color(0xFF9E8CFC), voice = Color(0xFFFF7A7F), home = Color(0xFF4FC7E3), dark = true,
 )
 
 val LocalTokens = staticCompositionLocalOf { LightTokens }

@@ -26,6 +26,15 @@ function stripMd(s) {
   return String(s).replace(/\*\*(.+?)\*\*/g, "$1").replace(/`([^`]+)`/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\s*\(?\b[\w./-]+\.md\)?/g, "").trim();
 }
+// Links on a step: "text · [Practice](app:piano) · [Tutorial](https://…)", a step whose text is itself a link, or a bare
+// URL at the end. The key comes from the text before the first " · [", so adding or changing links never loses a tick.
+function splitLinks(s) {
+  s = String(s);
+  const links = [...s.matchAll(/\[([^\]]+)\]\(([^)\s]+)\)/g)].map(m => ({ label: stripMd(m[1]), url: m[2] }));
+  let t = s; const i = t.indexOf(" · ["); if (i >= 0) t = t.slice(0, i);
+  const bare = t.match(/\s+(https?:\/\/\S+)\s*$/); if (bare) { links.push({ label: "Open", url: bare[1] }); t = t.slice(0, bare.index); }
+  return { text: t, links };
+}
 const keyOf = s => stripMd(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
 function isoMonday(id) { const [y, w] = id.split("-W").map(Number); const j4 = new Date(y, 0, 4); const d = new Date(j4); d.setDate(j4.getDate() - ((j4.getDay() + 6) % 7) + (w - 1) * 7); return d; }
 function guessDate(y, m, d, explicit) { let s = `${y}-${pad(m)}-${pad(d)}`; if (!explicit && daysBetween(s, todayIso()) > 120) s = `${y+1}-${pad(m)}-${pad(d)}`; return s; }
@@ -44,14 +53,27 @@ function parseWeek(id, text) {
     const dm = head.match(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+(\d\d)-(\d\d)/); if (!dm) continue;
     const month = +dm[2], year = mon.getMonth() === 11 && month === 1 ? mon.getFullYear() + 1 : mon.getFullYear();
     const d = { date: `${year}-${dm[2]}-${dm[3]}`, label: head, eat: [], body: "", practice: [], coming: [], boxes: [] };
-    for (let line of body.split("\n")) {
-      line = line.trim(); if (!line.startsWith("- ")) continue; line = line.slice(2);
+    // Sub-steps (same rules as the Android app): "### piano" then "- [ ] step" lines (key "piano/<step>"),
+    // or an indented "  - [ ] piano: step" under the box row (key = the whole label).
+    const steps = {}, heads = {}; let area = null;
+    for (const raw of body.split("\n")) {
+      const t = raw.trim();
+      if (t.startsWith("### ")) { area = keyOf(t.slice(4)); heads[area] = stripMd(t.slice(4)); continue; }
+      const one = raw.match(/^\s*- \[( |x|X)\]\s*(.+)/);
+      const sp = one ? splitLinks(one[2]) : null;
+      if (one && area) { const label = stripMd(sp.text); (steps[area] = steps[area] || []).push({ key: `${area}/${keyOf(label)}`, label, done: one[1].toLowerCase() === "x", links: sp.links }); continue; }
+      if (one && /^\s/.test(raw)) { const full = stripMd(sp.text), c = full.indexOf(":"); const parent = c > 0 ? keyOf(full.slice(0, c)) : d.boxes.at(-1)?.key; if (!parent) continue;
+        (steps[parent] = steps[parent] || []).push({ key: keyOf(full), label: c > 0 ? full.slice(c + 1).trim() : full, done: one[1].toLowerCase() === "x", links: sp.links }); continue; }
+      let line = t; if (!line.startsWith("- ")) continue; line = line.slice(2);
       if (line.startsWith("[")) { for (const b of line.matchAll(/\[( |x|X)\]\s*([^\[]+)/g)) { const label = b[2].trim(); d.boxes.push({ key: keyOf(label), label, done: b[1].toLowerCase() === "x" }); } continue; }
       const c = line.indexOf(":"); if (c < 0) continue;
       const k = line.slice(0, c).trim().toLowerCase(), v = line.slice(c + 1);
       const parts = v.split(" · ").filter(p => p.trim()).map(stripMd);
       if (k === "eat") d.eat = parts; else if (k === "body") d.body = stripMd(v); else if (k === "practice") d.practice = parts; else if (k === "coming up") d.coming = parts;
     }
+    for (const [k, list] of Object.entries(steps)) { const b = d.boxes.find(x => x.key === k); if (b) b.steps = list; else d.boxes.push({ key: k, label: heads[k] || k.replace(/-/g, " "), done: false, steps: list }); }
+    // Eat is tracked, not ticked (Matt, 2026-11-04): the meals box leaves the task list; its steps are planned meals.
+    const mi = d.boxes.findIndex(b => b.key === "meals"); d.meals = mi >= 0 ? (d.boxes.splice(mi, 1)[0].steps || []) : [];
     w.days.push(d);
   }
   return w;
@@ -77,7 +99,9 @@ function parseChecklists(text) {
   const out = [];
   for (const [head, body] of sections(text)) {
     const items = [];
-    for (const line of body.split("\n")) { const m = line.match(/^\s*- \[( |x|X)\]\s*(.+)/); if (m) { const t = stripMd(m[2]); items.push({ key: keyOf(t), text: t, done: m[1].toLowerCase() === "x" }); } }
+    for (const line of body.split("\n")) { const m = line.match(/^\s*- \[( |x|X)\]\s*(.+)/); if (!m) continue; const sp = splitLinks(m[2]), t = stripMd(sp.text), it = { key: keyOf(t), text: t, done: m[1].toLowerCase() === "x", links: sp.links };
+      // An indented box is a step of the box above it.
+      if (/^(  |\t)/.test(line) && items.length) (items.at(-1).steps = items.at(-1).steps || []).push(it); else items.push(it); }
     if (items.length) out.push({ name: stripMd(head), items });
   }
   return out;
@@ -111,6 +135,40 @@ function parseMove(name, rx) {
   const time = !hold && /\bmin\b/.test(name + " " + rx) ? mins(name + " " + rx) * 60 : 0;
   return { key: keyOf(name), name, rx, sets, hold, perSide, time };
 }
+// body/moves.md: "## Dead bug" then "- **Do:** …", "- **Cues:** a · b", "- **Dose:** …", "- **Safe:** …", "- **Demo:** [Video](…)".
+function parseMoves(text) {
+  const out = {};
+  for (const [head, body] of sections(text || "")) {
+    const m = { key: keyOf(head), name: stripMd(head), f: {}, links: [] };
+    for (const l of body.split("\n")) { const g = l.trim().match(/^-\s+\*\*(.+?):\*\*\s*(.+)$/); if (!g) continue;
+      const sp = splitLinks(g[2]); m.links.push(...sp.links.map(x => ({ ...x, label: /^(video|demo)$/i.test(x.label) ? "Watch demo" : x.label })));
+      const t = stripMd(sp.text); if (t && !(sp.links.length && t === sp.links[0].label)) m.f[g[1].trim().toLowerCase()] = t; }
+    out[m.key] = m;
+  }
+  return out;
+}
+// "Break 1 at 10:30, 1 min: stand up" -> "Stand up", with a "Break · 1 min · 10:30" badge.
+const breakShort = l => /^break\b/i.test(l) && l.includes(": ") ? cap(l.slice(l.indexOf(": ") + 2)) : l;
+function stepBadge(boxKey, label) {
+  if (boxKey === "move" || /^break\b/i.test(label)) { const t = label.match(/\bat\s+(\d{1,2}:\d\d)/); return `Break · ${mins(label) || 1} min${t ? " · " + t[1] : ""}`; }
+  return "";
+}
+function findMove(label, links) {
+  const mv = S.plan?.moves || {}; const l = (links || []).find(x => x.url.startsWith("app:move/")); if (l && mv[l.url.slice(9)]) return mv[l.url.slice(9)];
+  const low = label.toLowerCase().replace(/^break \d+.*?:\s+/, ""); let best = null;
+  for (const m of Object.values(mv)) if (low.startsWith(m.name.toLowerCase()) && (!best || m.name.length > best.name.length)) best = m;
+  return best;
+}
+function drawMove(key) {
+  const m = (S.plan?.moves || {})[key]; if (!m) return sheetWrap("How to", "", `<p class="rs">No instructions for this one yet.</p>`);
+  const cues = (m.f.cues || "").split(/\s+·\s+|;\s+/).filter(Boolean);
+  return sheetWrap(m.name, m.f.dose || "", `
+    ${m.f.do ? `<p class="mv-do">${esc(m.f.do)}</p>` : ""}
+    ${cues.length ? `<ol class="mv-cues">${cues.map(c => `<li>${esc(cap(c))}</li>`).join("")}</ol>` : ""}
+    ${m.f.safe ? `<p class="mv-safe">⚠ ${esc(m.f.safe)}</p>` : ""}
+    ${m.links.length ? `<div class="seg two">${m.links.map(l => `<a class="segbtn" href="${esc(l.url)}" target="_blank" rel="noopener" data-ext="1">${esc(l.label)} ${IC.right}</a>`).join("")}</div>` : ""}`);
+}
+
 function parseProgram(text) {
   const out = { daily: null, workouts: {}, phases: [], goals: [] };
   for (const [head, body] of sections(text)) {
@@ -195,7 +253,9 @@ const KEY_RW = KEY_URL.replace("contents=read", "contents=write");
 const LOG_PATH = `${DIR}/log/app.json`;
 const S = { tab: "today", food: "list", setupStep: 1, day: todayIso(), plan: store.json("planlab-cache", null), loading: false, error: "", token: store.get("planlab-key"), msg: "", sync: store.get("planlab-sync") || "unknown" };
 S.log = store.json("planlab-log", null) || { v: 1, updated: 0, ticks: store.json("planlab-ticks", {}), mins: {}, freezer: {} };
-for (const k of ["ticks", "mins", "freezer"]) S.log[k] = S.log[k] || {};
+for (const k of ["ticks", "mins", "freezer", "food"]) S.log[k] = S.log[k] || {};
+// Food entries merge by id from both sides (the Android app logs too); a deleted entry is null and stays null.
+function mergeFood(a, b) { const out = JSON.parse(JSON.stringify(a || {})); for (const [d, ids] of Object.entries(b || {})) { out[d] = out[d] || {}; for (const [id, e] of Object.entries(ids || {})) if (!(id in out[d]) || e === null) out[d][id] = e; } return out; }
 const saveLocal = () => store.set("planlab-log", JSON.stringify(S.log));
 
 // ---------- GitHub
@@ -214,7 +274,7 @@ async function load() {
   if (!S.token) return;
   S.loading = true; render();
   try {
-    const names = ["social/calendar.md", "inbox.md", "me/recovery.md", "body/program.md", "music/piano.md", "music/voice.md", "music/guitar.md", "meals/freezer.md", "social/ideas.md", "social/trips.md", "me/profile.md"];
+    const names = ["social/calendar.md", "inbox.md", "me/recovery.md", "body/program.md", "music/piano.md", "music/voice.md", "music/guitar.md", "meals/freezer.md", "social/ideas.md", "social/trips.md", "me/profile.md", "meals/foods.md", "body/moves.md", "meals/pantry.md"];
     const [weekIds, groceryIds, recipeIds, ...txt] = await Promise.all([listDir("weeks"), listDir("groceries"), listDir("meals/recipes"), ...names.map(file)]);
     const T = Object.fromEntries(names.map((n, i) => [n, txt[i]]));
     const weeks = await Promise.all(weekIds.sort().map(async id => parseWeek(id, await file(`weeks/${id}.md`))));
@@ -224,10 +284,11 @@ async function load() {
     const setup = parseChecklists(T["me/recovery.md"])[0];
     S.plan = { v: 2, built: new Date().toISOString(), weeks, calendar: c.events, watching: c.watching, inbox: parseInbox(T["inbox.md"]), setup: setup ? setup.items : [], groceries, recipes,
       program: parseProgram(T["body/program.md"]), piano: parseMusic(T["music/piano.md"]), voice: parseMusic(T["music/voice.md"]), guitar: parseMusic(T["music/guitar.md"]),
-      freezer: parseFreezer(T["meals/freezer.md"]), recovery: parseRecovery(T["me/recovery.md"]), ideas: parseIdeas(T["social/ideas.md"]), trips: parseTrips(T["social/trips.md"]), profile: parseProfile(T["me/profile.md"]) };
+      freezer: parseFreezer(T["meals/freezer.md"]), recovery: parseRecovery(T["me/recovery.md"]), ideas: parseIdeas(T["social/ideas.md"]), trips: parseTrips(T["social/trips.md"]), profile: parseProfile(T["me/profile.md"]), profileMd: T["me/profile.md"], foodsMd: T["meals/foods.md"], kitchen: parseChecklists(T["meals/pantry.md"] || "").map(x => ({ ...x, items: x.items.map(i => ({ ...i, key: keyOf(i.text.split(" · ")[0]) })) })), moves: parseMoves(T["body/moves.md"]) };
     store.set("planlab-cache", JSON.stringify(S.plan));
     S.error = "";
     pullLog();
+    file("log/insights.json").then(t => { if (t) { S.ins = JSON.parse(t); store.set("planlab-ins", t); render(); } }).catch(() => {});
   } catch (e) {
     S.error = e.message === "key" || e.status === 403 ? "Your GitHub key didn't work. It may have expired or not include GeneralStorage." : "Couldn't reach GitHub. Showing the last copy you loaded.";
     if (e.message === "key" || e.status === 403) S.badKey = true;
@@ -243,7 +304,8 @@ async function pullLog() {
     const f = await gh(`contents/${LOG_PATH}`);
     logSha = f.sha;
     const remote = JSON.parse(b64d(f.content));
-    if ((remote.updated || 0) > (S.log.updated || 0)) { S.log = { ...S.log, ...remote }; saveLocal(); render(); }
+    if ((remote.updated || 0) > (S.log.updated || 0)) { const food = mergeFood(remote.food, S.log.food); S.log = { ...S.log, ...remote, food }; saveLocal(); render(); }
+    else if (remote.food) { S.log.food = mergeFood(S.log.food, remote.food); saveLocal(); }
     else if ((S.log.updated || 0) > (remote.updated || 0)) schedulePush(0);
     if (S.sync === "unknown") setSync("on");
   } catch (e) { if (e.status === 404 || e.status === 403) setSync("off"); }
@@ -253,6 +315,7 @@ async function pushLog(retry = true) {
   if (!S.token || S.sync === "off" || pushing) return;
   pushing = true;
   try {
+    try { const f = await gh(`contents/${LOG_PATH}`); logSha = f.sha; const remote = JSON.parse(b64d(f.content)); S.log.food = mergeFood(S.log.food, remote.food); saveLocal(); } catch {}
     const body = JSON.stringify({ message: `planLAB: Matt's ticks ${todayIso()}`, content: b64e(JSON.stringify(S.log, null, 1)), ...(logSha ? { sha: logSha } : {}) });
     const r = await gh(`contents/${LOG_PATH}`, { method: "PUT", body });
     logSha = r.content.sha; setSync("on");
@@ -262,6 +325,21 @@ async function pushLog(retry = true) {
   }
   pushing = false;
 }
+// ---------- usage counts (log/engagement.json, shared with the Android app): what gets used, so Claude can make it easier
+const ENG_PATH = `${DIR}/log/engagement.json`;
+function eng(name) { const d = todayIso(), e = store.json("planlab-eng", {}); e[d] = e[d] || {}; e[d][name] = (e[d][name] || 0) + 1; store.set("planlab-eng", JSON.stringify(e)); }
+async function pushEng() {
+  const e = store.json("planlab-eng", {}); if (!S.token || S.sync === "off" || !Object.keys(e).length) return;
+  store.set("planlab-eng", "{}");
+  try {
+    let doc = { v: 1, days: {} }, sha = null;
+    try { const f = await gh(`contents/${ENG_PATH}`); sha = f.sha; doc = JSON.parse(b64d(f.content)); doc.days = doc.days || {}; } catch (x) { if (x.status !== 404) throw x; }
+    for (const [d, ev] of Object.entries(e)) { doc.days[d] = doc.days[d] || {}; for (const [k, n] of Object.entries(ev)) doc.days[d][k] = (doc.days[d][k] || 0) + n; }
+    const cut = addDays(todayIso(), -60); for (const d of Object.keys(doc.days)) if (d < cut) delete doc.days[d];
+    doc.updated = Date.now();
+    await gh(`contents/${ENG_PATH}`, { method: "PUT", body: JSON.stringify({ message: `planLAB: usage ${todayIso()}`, content: b64e(JSON.stringify(doc, null, 1)), ...(sha ? { sha } : {}) }) });
+  } catch { const now = store.json("planlab-eng", {}); for (const [d, ev] of Object.entries(e)) { now[d] = now[d] || {}; for (const [k, n] of Object.entries(ev)) now[d][k] = (now[d][k] || 0) + n; } store.set("planlab-eng", JSON.stringify(now)); }
+}
 function touch() { S.log.updated = Date.now(); saveLocal(); schedulePush(); }
 
 // ---------- plan helpers
@@ -270,9 +348,11 @@ const findDay = date => allDays().find(d => d.date === date);
 const weekOf = date => (S.plan?.weeks || []).find(w => date >= w.start && date <= addDays(w.start, 6));
 const bigDay = () => (S.plan?.calendar || []).find(e => e.big && daysBetween(todayIso(), e.date) > -60) || (S.plan?.calendar || []).find(e => e.big);
 const bigName = e => e.what.replace(/\s*\(.*\)$/, "").toLowerCase();
-function tickGet(list, item) { const t = S.log.ticks[list]; return t && typeof t[item.key] === "boolean" ? t[item.key] : !!item.done; }
+function tickGet(list, item) { const t = S.log.ticks[list]; if (t && typeof t[item.key] === "boolean") return t[item.key]; if (item.steps?.length && item.steps.every(x => tickGet(list, x))) return true; return !!item.done; }
+const withSteps = items => items.flatMap(i => [i, ...(i.steps || [])]);
+const stepsDone = (list, item) => (item.steps || []).filter(x => tickGet(list, x)).length;
 function tickPut(list, key, v) { S.log.ticks[list] = { ...(S.log.ticks[list] || {}), [key]: v }; touch(); }
-function tickSet(list, item) { tickPut(list, item.key, !tickGet(list, item)); render(); }
+function tickSet(list, item) { if (!tickGet(list, item)) eng("web_tick"); tickPut(list, item.key, !tickGet(list, item)); render(); }
 const dayCount = d => ({ n: d.boxes.length, done: d.boxes.filter(b => tickGet(d.date, b)).length });
 const inboxItems = () => (S.plan?.inbox || []).flatMap(g => g.items.map(i => ({ ...i, group: g.name })));
 const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
@@ -366,7 +446,7 @@ const IC = {
   map: I('<path d="M9 4L3.5 6v14L9 18l6 2 5.5-2V4L15 6zM9 4v14M15 6v14"/>'),
 };
 const TABS = [["today", "Today"], ["week", "Week"], ["soon", "Coming up"], ["food", "Food"], ["you", "You"]];
-const KIND = { meals: "Eat", body: "Body", piano: "Piano", voice: "Voice" };
+const KIND = { body: "Body", piano: "Piano", voice: "Voice" };
 
 // ---------- small pieces
 const ring = (done, n, size = 64) => {
@@ -385,14 +465,51 @@ function bigPill(date) {
   return pill(`Day ${-n} after ${esc(name)}`, "soft");
 }
 const checkRow = (attrs, checked, label, sub, tail = "") => `<div class="row has-tail"><button class="check rowbtn" role="checkbox" aria-checked="${checked}" ${attrs}><span class="box">${IC.check}</span><span class="rt"><span class="rl">${label}</span>${sub ? `<span class="rs">${sub}</span>` : ""}</span></button>${tail}</div>`;
+// A step's links as small buttons: app: links open a planLAB view, the rest open in a new tab.
+const linkBtns = it => (it.links || []).length ? `<span class="lbtns">${it.links.slice(0, 3).map(l => {
+  const name = esc(l.label === (it.label || it.text) ? "Open" : l.label);
+  return l.url.startsWith("app:") ? `<a class="lbtn" href="#go/${esc(l.url.slice(4))}" data-go="${esc(l.url.slice(4))}">${name}</a>` : `<a class="lbtn" href="${esc(l.url)}" target="_blank" rel="noopener" data-ext="1">${name} ↗</a>`;
+}).join("")}</span>` : "";
 const unset = v => !v || /^\(.*\)$/.test(v) || /\?\)?$/.test(v);
 function tileDetail(day, key) {
+  const sb = day.boxes.find(b => b.key === key);
+  if (sb?.steps?.length && !tickGet(day.date, sb)) { const nx = sb.steps.find(x => !tickGet(day.date, x)); return `${stepsDone(day.date, sb)}/${sb.steps.length} · ${esc(nx.label)}`; }
   if (key === "meals") { const p = dayProtein(day), t = S.plan?.profile?.protein; return p ? `${p} g protein${t ? ` of ${t}` : ""}` : `${day.eat.length} meals`; }
   if (key === "body") { const w = workoutFor(day); return esc(w ? `${w.moves.length} moves · ${w.minutes || mins(day.body)} min` : day.body.replace(/\s*\(.*\)/, "")); }
   const done = minsOn(day.date, key), plan = plannedMins(day, key);
   return done ? `${done} of ${plan || "?"} min` : plan ? `${plan} min · tap to start` : "";
 }
 const MEAL = ["Breakfast", "Lunch", "Dinner", "Also"];
+
+// ---------- insights (log/insights.json, written by tools/insights.py in the private repo)
+S.ins = store.json("planlab-ins", null);
+const FEEL = ["Rough", "Low", "OK", "Good", "Great"];
+const feelOf = d => { const o = S.log.ticks["feel-" + d] || {}; return +(Object.keys(o).find(k => o[k] === true) || 0); };
+function feelRow(date) {
+  const f = feelOf(date);
+  return `<div class="card feel"><span class="rl">How do you feel?</span><div class="feel-b">${FEEL.map((l, i) => `<button data-feel="${i + 1}" aria-pressed="${f === i + 1}" aria-label="${l}"${f === i + 1 ? ' class="on"' : ""}><b>${i + 1}</b><span>${l}</span></button>`).join("")}</div></div>`;
+}
+function insightCard() {
+  const h = S.ins?.headline; if (!h) return "";
+  return `<button class="card ins-head" data-tab="you"><span class="eyebrow">${h.kind === "waiting" ? "Learning you" : h.kind === "likely" ? "This week's insight" : h.kind === "hint" ? "An early hint" : "This week"}</span><span class="rl">${esc(h.text)}</span>${h.try ? `<span class="rs">${esc(h.try)}</span>` : ""}</button>`;
+}
+function spark(vals, cls) {
+  const pts = vals.map((v, i) => [i, v]).filter(p => p[1] != null); if (pts.length < 2) return "";
+  const lo = Math.min(...pts.map(p => p[1])), hi = Math.max(...pts.map(p => p[1])), sp = hi - lo || 1, W = 120, H = 32, n = vals.length - 1 || 1;
+  const xy = ([i, v]) => `${(i / n * W).toFixed(1)},${(H - 3 - (v - lo) / sp * (H - 6)).toFixed(1)}`;
+  return `<svg class="spark ${cls}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts.map(xy).join(" ")}"/></svg>`;
+}
+function viewInsights() {
+  const I = S.ins; if (!I) return `<section class="sec">${lab("What we're learning")}<div class="card list"><div class="row"><span class="rt"><span class="rl">Insights arrive after the first nightly run.</span><span class="rs">They come from your ticks, check-ins and health data.</span></span></div></div></section>`;
+  const c = I.counts || {};
+  let h = `<section class="sec">${lab("What we're learning")}${insightCard().replace('data-tab="you"', "")}</section>`;
+  if (I.findings?.length) h += `<section class="sec">${lab("Patterns in your days")}<div class="card list">${I.findings.slice(0, 5).map(f => `<div class="row"><span class="rt"><span class="rl">${esc(f.text)}</span>${f.groups?.length === 2 && f.id.includes("~did:") ? `<span class="bars">${f.groups.map((g, i) => `<span class="bar${i ? " b" : ""}"><i style="width:${Math.round(g.value * 100)}%"></i></span>`).join("")}</span>` : ""}${f.try ? `<span class="rs">${esc(f.try)}</span>` : ""}</span>${pill(f.kind_of === "likely" ? "Likely" : "Hint", f.kind_of === "likely" ? "ok" : "soft")}</div>`).join("")}</div></section>`;
+  const sr = I.series || {}, tr = (I.trends || []).filter(t => t.text);
+  if (tr.length) h += `<section class="sec">${lab("This week vs your usual")}<div class="card list">${tr.map(t => `<div class="row"><span class="rt"><span class="rl">${esc(t.text)}</span></span>${spark((sr[t.key] || []).slice(-28), t.good === true ? "up" : t.good === false ? "down" : "")}</div>`).join("")}</div></section>`;
+  if (I.waiting?.length) h += `<section class="sec"><div class="labrow">${lab("Coming soon")}<span class="rs">${c.planner_days || 0} planner days · ${c.sleep_days || 0} nights of sleep</span></div><div class="card list">${I.waiting.slice(0, 4).map(w => `<div class="row"><span class="rt"><span class="rl">${esc(w.label)}</span><span class="prog"><i style="width:${Math.round(100 * w.have / (w.have + w.need || 1))}%"></i></span><span class="rs">${w.need} more day${w.need === 1 ? "" : "s"}${w.short_side ? ` (needs more ${esc(w.short_side)})` : ""}</span></span></div>`).join("")}</div></section>`;
+  if (I.note) h += `<p class="rs legend">${esc(I.note)}</p>`;
+  return h;
+}
 
 // ---------- views
 function viewSetup() {
@@ -433,10 +550,16 @@ function viewToday() {
     return `<div class="tile k-${b.key}${on ? " on" : ""}"><button class="tile-main" data-open="${b.key}" aria-label="Open ${KIND[b.key]}">
       <span class="tile-ic">${IC[b.key]}</span><span class="tile-name">${KIND[b.key]}</span><span class="tile-sub">${tileDetail(day, b.key)}</span></button>
       <button class="tile-check" role="checkbox" aria-checked="${on}" aria-label="${KIND[b.key]} done" data-list="${date}" data-item="${b.key}"><span class="box">${IC.check}</span></button></div>`; }).join("")}</div>`;
-  if (other.length) h += `<div class="card list">${other.map(b => checkRow(`data-list="${date}" data-item="${b.key}"`, tickGet(date, b), recipeLinks(cap(b.label)), "")).join("")}</div>`;
+  if (date === t) h += feelRow(date) + insightCard();
+  const stepped = day.boxes.filter(b => b.steps?.length);
+  for (const b of stepped) { const n = stepsDone(date, b);
+    h += `<section class="sec">${lab(`${esc(KIND[b.key] || cap(b.label))} <span class="cnt">${n === b.steps.length ? "done" : `${n} of ${b.steps.length}`}</span>`)}<div class="card list compact">${b.steps.map(x => checkRow(`data-list="${date}" data-item="${x.key}"`, tickGet(date, x), recipeLinks(cap(breakShort(x.label))), stepBadge(b.key, x.label), linkBtns(x))).join("")}</div></section>`; }
+  const plain = other.filter(b => !b.steps?.length);
+  if (plain.length) h += `<div class="card list">${plain.map(b => checkRow(`data-list="${date}" data-item="${b.key}"`, tickGet(date, b), recipeLinks(cap(b.label)), "")).join("")}</div>`;
   const pf = S.plan?.program?.daily;
   if (pf) h += `<button class="card strip-card" data-open="pelvic"><span class="tag-ic">${IC.heart}</span><span class="rt"><span class="rl">${esc(cap(pf.title.replace(/\s*\(.*\)/, "")))}</span><span class="rs">Twice a day · ${pf.reps.map(r => `${r.n} ${r.name}`).join(", ")}</span></span>${pill(`${(S.log.ticks["pf-" + date] || {}).n || 0}/2`, ((S.log.ticks["pf-" + date] || {}).n || 0) >= 2 ? "ok" : "soft")}</button>`;
-  if (day.eat.length) h += `<section class="sec">${lab("Meals")}<div class="card list">${day.eat.map((m, i) => `<div class="row"><span class="tag">${MEAL[Math.min(i, 3)]}</span><span class="rt"><span class="rl n">${recipeLinks(m.replace(/\s*\(~?\d+ g protein\)/, ""))}</span></span></div>`).join("")}</div></section>`;
+  h += viewEat(day, date);
+  if (!day.meals?.length && day.eat.length) h += `<section class="sec">${lab("Meals")}<div class="card list">${day.eat.map((m, i) => `<div class="row"><span class="tag">${MEAL[Math.min(i, 3)]}</span><span class="rt"><span class="rl n">${recipeLinks(m.replace(/\s*\(~?\d+ g protein\)/, ""))}</span></span></div>`).join("")}</div></section>`;
   const extra = day.practice.filter(p => !day.boxes.some(b => p.toLowerCase().startsWith(b.key)));
   const radar = [...day.coming, ...extra.map(x => cap(x) + " (if you feel like it)")];
   const due = inboxItems().filter(i => i.date === date);
@@ -444,10 +567,90 @@ function viewToday() {
   if (due.length || radar.length || ev.length) {
     h += `<section class="sec">${lab("On your radar")}<div class="card list">
       ${ev.map(e => `<div class="row"><span class="dot warm"></span><span class="rt"><span class="rl">${esc(e.what)}</span>${e.notes ? `<span class="rs">${esc(e.notes)}</span>` : ""}</span></div>`).join("")}
-      ${due.map(i => checkRow(`data-list="inbox" data-item="${i.key}"`, tickGet("inbox", i), esc(i.what), "Due today")).join("")}
+      ${due.map(i => checkRow(`data-list="inbox" data-item="${i.key}"`, tickGet("inbox", i), esc(i.what), i.steps?.length ? `Due today · ${stepsDone("inbox", i)} of ${i.steps.length} steps` : "Due today") + (i.steps || []).map(x => checkRow(`data-list="inbox" data-item="${x.key}"`, tickGet("inbox", x), "↳ " + esc(x.text), "", linkBtns(x))).join("")).join("")}
       ${radar.map(x => `<div class="row"><span class="dot"></span><span class="rt"><span class="rl n">${recipeLinks(cap(x))}</span></span></div>`).join("")}</div></section>`;
   }
   return h;
+}
+
+// ---------- Eat: tracked, not ticked. Planned meals are one tap; anything else is typed and looked up on the spot.
+let FOODDB = null;
+fetch("data/foods.json").then(r => r.json()).then(j => { FOODDB = PlanFood.table(j); if (S.tab === "today") render(); }).catch(() => {});
+const mineFoods = () => { const t = S.plan?.foodsMd || ""; if (mineFoods.t !== t) { mineFoods.t = t; mineFoods.v = PlanFood.mine(t); } return mineFoods.v; };
+const foodOn = date => Object.entries(S.log.food[date] || {}).filter(([, e]) => e).map(([id, e]) => ({ id, ...e })).sort((a, b) => (a.at + a.id).localeCompare(b.at + b.id));
+const foodTargets = () => PlanFood.targets(S.plan?.profileMd, S.plan?.profile?.protein);
+const fmtN = n => Math.round(n).toLocaleString("en-US");
+const nowAt = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const newId = () => Date.now().toString(36) + Math.floor(1000 + Math.random() * 9000);
+function putFood(date, id, e) { S.log.food[date] = { ...(S.log.food[date] || {}), [id]: e }; touch(); }
+const plannedOf = step => PlanFood.planned(step.label, FOODDB, mineFoods());
+function macroBar(label, have, want, unit, tone) { const f = want ? Math.min(1, have / want) : 0; return `<div class="mac"><span class="mac-l ${tone}">${label}</span><span class="mac-n">${fmtN(have)} / ${fmtN(want)} ${unit}</span><div class="bar"><i class="${tone}" style="width:${(f * 100).toFixed(1)}%"></i></div></div>`; }
+function eatTotals(date) {
+  const have = PlanFood.totals(foodOn(date)), want = foodTargets();
+  return `<div class="eat-top"><div class="hero-ring eat-ring">${ring(have.kcal, want.kcal, 88)}<span class="ring-n">${fmtN(have.kcal)}<small>of ${fmtN(want.kcal)}</small></span></div>
+    <div class="macs">${macroBar("Protein", have.protein_g, want.protein_g, "g", "t-eat")}${macroBar("Carbs", have.carbs_g, want.carbs_g, "g", "t-acc")}${macroBar("Fat", have.fat_g, want.fat_g, "g", "t-fat")}</div></div>`
+    + nibbleLine(date);
+}
+function nibbleLine(date) { const nb = PlanFood.nibbles(foodOn(date)); return nb.n ? `<p class="nibline">🤏 ${nb.n} ${nb.n === 1 ? "nibble" : "nibbles"} · ${fmtN(nb.kcal)} kcal of it</p>` : ""; }
+// One tap per nibble: the bites, handfuls and tastes that don't feel like they count.
+function nibbleChips() { const list = (FOODDB && FOODDB.nibbles) || PlanFood.NIBBLES;
+  return `<div class="nibs" role="group" aria-label="Nibbles">${list.map(n => `<button class="nib" data-nib="${esc(n.id)}"><span class="nib-i">${n.icon}</span><span class="nib-n">${esc(n.name)}</span><span class="nib-k">${n.kcal}</span></button>`).join("")}</div>`; }
+function addNibble(id) {
+  const list = (FOODDB && FOODDB.nibbles) || PlanFood.NIBBLES, n = list.find(x => x.id === id) || list[0];
+  putFood(S.day, newId() + Math.floor(Math.random() * 10), PlanFood.nibbleEntry(n, nowAt())); eng("web_nibble"); render();
+}
+function viewEat(day, date) {
+  const list = foodOn(date);
+  const planned = (day.meals || []).map(x => {
+    const p = plannedOf(x);
+    if (!p.meal) return checkRow(`data-list="${date}" data-item="${x.key}"`, tickGet(date, x), esc(cap(x.label)), "");
+    const on = list.some(e => e.plan === x.key);
+    return checkRow(`data-ate="${esc(x.key)}"`, on, `${cap(p.meal)} · ${esc(p.name)}`, `${p.protein_g} g protein · ${p.src === "plan-est" ? "~" : ""}${fmtN(p.kcal)} kcal${on ? " · logged" : " · tap when eaten"}`);
+  }).join("");
+  const nibs = list.filter(e => e.src === "nibble");
+  const nibRow = nibs.length ? `<div class="row has-tail"><span class="nib-i">🤏</span><span class="rt"><span class="rl">${nibs.length} ${nibs.length === 1 ? "nibble" : "nibbles"}</span><span class="rs">${fmtN(nibs.reduce((a, e) => a + e.kcal, 0))} kcal · ${Object.entries(nibs.reduce((m, e) => (m[e.name] = (m[e.name] || 0) + 1, m), {})).map(([k, v]) => `${v} ${esc(k.toLowerCase())}`).join(", ")}</span></span><button class="tailbtn" data-delfood="${esc(nibs.at(-1).id)}" aria-label="Remove one">−</button></div>` : "";
+  const extra = list.filter(e => !e.plan && e.src !== "nibble").map(e => `<div class="row has-tail"><span class="dot eat"></span><span class="rt"><span class="rl">${esc(e.name)}${e.qty !== 1 ? ` ×${+(+e.qty).toFixed(2)}` : ""}</span><span class="rs">${esc(e.at)} · ${fmtN(e.kcal)} kcal · ${e.protein_g} g protein${e.src === "guess" ? " · not found, Claude checks it" : ""}</span></span><button class="tailbtn" data-delfood="${esc(e.id)}" aria-label="Remove">${IC.close}</button></div>`).join("");
+  return `<section class="sec">${lab("Eat")}<div class="card eat">${eatTotals(date)}
+    ${planned || extra || nibRow ? `<div class="list compact">${planned}${extra}${nibRow}</div>` : ""}
+    ${nibbleChips()}
+    <form id="foodform" class="foodform"><input id="food-text" autocomplete="off" placeholder="What did you eat? e.g. skyline 3-way, 2 coneys" aria-label="What did you eat?"><div id="food-preview"></div></form></div></section>`;
+}
+let FOODROWS = [], foodTimer = null;
+const OFF = {};
+function foodPreview() {
+  const box = document.getElementById("food-preview"), inp = document.getElementById("food-text"); if (!box || !inp) return;
+  const text = inp.value.trim();
+  if (!text || !FOODDB) { FOODROWS = []; box.innerHTML = text && !FOODDB ? `<p class="rs">Loading the food table…</p>` : ""; return; }
+  FOODROWS = PlanFood.lookup(text, FOODDB, mineFoods()).map(r => !r.food && OFF[r.text]?.length ? { ...r, food: OFF[r.text][0], alts: OFF[r.text], scale: r.qty } : r);
+  redrawRows();
+  // Anything the tables don't know: ask Open Food Facts once typing pauses.
+  clearTimeout(foodTimer);
+  const missing = FOODROWS.filter(r => !r.food && OFF[r.text] === undefined);
+  if (missing.length) foodTimer = setTimeout(async () => { for (const r of missing) OFF[r.text] = await PlanFood.openFoodFacts(r.text).catch(() => []); foodPreview(); }, 900);
+}
+function redrawRows() {
+  const box = document.getElementById("food-preview"); if (!box) return;
+  const tot = FOODROWS.reduce((t, r) => (r.food ? { k: t.k + r.food.kcal * r.scale, p: t.p + r.food.p * r.scale } : t), { k: 0, p: 0 });
+  box.innerHTML = FOODROWS.map((r, i) => { const f = r.food;
+    return `<div class="row frow"><button class="rt fpick" data-falt="${i}" ${r.alts.length > 1 ? "" : "disabled"}><span class="rl${f ? "" : " warnc"}">${esc(f ? (f.brand ? f.brand + " " : "") + f.name : r.text)}</span>
+      <span class="rs">${f ? `${fmtN(f.kcal * r.scale)} kcal · ${Math.round(f.p * r.scale)} g protein · ${+r.scale.toFixed(2)} × ${esc(f.serving)}${r.alts.length > 1 ? " · tap for others" : ""}` : OFF[r.text] === undefined ? "Looking it up…" : "Not found. Logged as a guess; Claude fills it in tomorrow."}</span></button>
+      ${f ? `<button class="stp" data-fq="${i}" data-d="-1" aria-label="Less">−</button><span class="fq">${+r.scale.toFixed(2)}</span><button class="stp" data-fq="${i}" data-d="1" aria-label="More">+</button>` : ""}</div>`; }).join("")
+    + (FOODROWS.length ? `<button class="btn wide eatbtn" form="foodform">Log it · ${fmtN(tot.k)} kcal · ${Math.round(tot.p)} g protein</button>` : "");
+}
+document.addEventListener("input", e => { if (e.target.id === "food-text") foodPreview(); });
+function logFood() {
+  const date = S.day, meal = PlanFood.mealNow(new Date()), at = nowAt();
+  if (!FOODROWS.length) return;
+  for (const r of FOODROWS) { const id = newId() + Math.floor(Math.random() * 10); putFood(date, id, PlanFood.entryOf(r, { at, meal, plan: "" })); }
+  eng("web_food"); FOODROWS = []; const inp = document.getElementById("food-text"); if (inp) inp.value = ""; render();
+}
+function atePlanned(key) {
+  const date = S.day, day = findDay(date), step = day?.meals?.find(x => x.key === key); if (!step) return;
+  const had = foodOn(date).find(e => e.plan === key);
+  if (had) { putFood(date, had.id, null); tickPut(date, key, false); render(); return; }
+  const p = plannedOf(step);
+  putFood(date, newId(), { at: nowAt(), text: step.label, name: p.name, qty: 1, kcal: p.kcal, protein_g: p.protein_g, carbs_g: p.carbs_g, fat_g: p.fat_g, src: p.src, meal: p.meal || PlanFood.mealNow(new Date()), plan: key });
+  eng("web_food:plan"); tickPut(date, key, true); render();
 }
 
 function viewWeek() {
@@ -500,7 +703,7 @@ function viewSoon() {
 
 function viewFood() {
   const mode = S.food || "list";
-  let h = hero("Eat well, cook less", "Food") + `<div class="seg three" role="tablist">${[["list", "Kroger list"], ["recipes", "Recipes"], ["freezer", "Freezer"]].map(([k, l]) => `<button role="tab" aria-selected="${mode === k}" data-food="${k}">${l}</button>`).join("")}</div>`;
+  let h = hero("Eat well, cook less", "Food") + `<div class="seg four" role="tablist">${[["list", "Kroger"], ["kitchen", "Kitchen"], ["recipes", "Recipes"], ["freezer", "Freezer"]].map(([k, l]) => `<button role="tab" aria-selected="${mode === k}" data-food="${k}">${l}</button>`).join("")}</div>`;
   if (mode === "list") {
     const g = (S.plan?.groceries || []).at(-1);
     if (!g) return h + `<div class="empty">${IC.food}<p>${!S.plan ? "Loading…" : "No list this week."}</p></div>`;
@@ -512,6 +715,18 @@ function viewFood() {
       const left = s.items.filter(i => !tickGet(id, i)).length;
       const kr = i => `<a class="tailbtn" href="https://www.kroger.com/search?query=${encodeURIComponent(krogerQuery(i.text))}" target="_blank" rel="noopener" aria-label="Find ${esc(krogerQuery(i.text))} at Kroger">${IC.search}</a>`;
       h += `<section class="sec">${lab(`${esc(s.name)} <span class="cnt">${left ? left + " left" : "done"}</span>`)}<div class="card list compact">${[...s.items.filter(i => !tickGet(id, i)), ...s.items.filter(i => tickGet(id, i))].map(i => checkRow(`data-list="${id}" data-item="${i.key}"`, tickGet(id, i), esc(i.text), "", /^already/i.test(s.name) ? "" : kr(i))).join("")}</div></section>`;
+    }
+  } else if (mode === "kitchen") {
+    // What's on hand. Claude keeps it from the Kroger list, what's cooked and what's logged; Matt only says what ran out.
+    const secs = S.plan?.kitchen || [], all = secs.flatMap(x => x.items), outs = S.log.ticks["pantry-out"] || {};
+    const extra = Object.keys(outs).filter(k => outs[k] === true && !all.some(i => i.key === k));
+    h += `<form id="outform" class="foodform"><input id="out-text" autocomplete="off" placeholder="Ran out of… e.g. olive oil" aria-label="Ran out of"></form>`;
+    if (extra.length) h += `<p class="rs">Out: ${extra.map(k => esc(k.replace(/-/g, " "))).join(", ")}. On the next Kroger list.</p>`;
+    if (!secs.length) return h + `<div class="empty">${IC.food}<p>${!S.plan ? "Loading…" : "Claude fills this in from your Kroger list."}</p></div>`;
+    h += `<p class="rs">Tap what ran out. It goes on the next Kroger list.</p>`;
+    for (const x of secs) {
+      const out = x.items.filter(i => tickGet("pantry-out", i)).length;
+      h += `<section class="sec">${lab(`${esc(x.name)}${out ? ` <span class="cnt">${out} out</span>` : ""}`)}<div class="card list compact">${[...x.items.filter(i => !tickGet("pantry-out", i)), ...x.items.filter(i => tickGet("pantry-out", i))].map(i => checkRow(`data-list="pantry-out" data-item="${i.key}"`, tickGet("pantry-out", i), esc(i.text), "")).join("")}</div></section>`;
     }
   } else if (mode === "recipes") {
     const rs = S.plan?.recipes || [];
@@ -530,7 +745,7 @@ function viewFood() {
 
 function viewYou() {
   const P = S.plan; if (!P) return hero("", "You") + `<div class="empty">${IC.you}<p>Loading…</p></div>`;
-  let h = hero("Progress and the long game", "You");
+  let h = hero("Progress and the long game", "You") + viewInsights();
   h += `<section class="sec">${lab("Streaks")}<div class="tiles four">${Object.entries(KIND).map(([k, l]) => { const n = streak(k); return `<div class="card streak${n ? " hot" : ""}"><span class="st-ic">${n ? IC.flame : IC[k]}</span><b>${n}</b><span>${l}${n === 1 ? " · 1 day" : n ? ` · ${n} days` : ""}</span></div>`; }).join("")}</div></section>`;
   // practice minutes, last 7 days
   const days = [...Array(7)].map((_, i) => addDays(todayIso(), i - 6));
@@ -591,7 +806,7 @@ function sessionTick() {
   const br = document.getElementById("breath"); if (br) { const st = SES.steps[SES.i]; const cyc = st.inn + st.out, ph = ((st.sec - left) % cyc + cyc) % cyc; const inh = ph < st.inn; br.dataset.phase = inh ? "in" : "out"; br.querySelector("b").textContent = inh ? "In" : "Out"; br.style.transform = `scale(${inh ? 0.6 + 0.4 * (ph / st.inn) : 1 - 0.4 * ((ph - st.inn) / st.out)})`; }
   if (left <= 0) { beep(2); nextStep(); }
 }
-function startSession(kind, steps) { unlockAudio(); keepAwake(true); Object.assign(SES, { on: true, kind, steps, i: 0, paused: 0, started: Date.now(), elapsed: 0 }); SES.end = Date.now() + steps[0].sec * 1000; clearInterval(SES.timer); SES.timer = setInterval(sessionTick, 200); refreshSheet(); }
+function startSession(kind, steps) { eng("web_session:" + kind); unlockAudio(); keepAwake(true); Object.assign(SES, { on: true, kind, steps, i: 0, paused: 0, started: Date.now(), elapsed: 0 }); SES.end = Date.now() + steps[0].sec * 1000; clearInterval(SES.timer); SES.timer = setInterval(sessionTick, 200); refreshSheet(); }
 function nextStep() {
   SES.elapsed += SES.steps[SES.i].sec - Math.max(0, (SES.end - Date.now()) / 1000);
   SES.i++;
@@ -695,26 +910,41 @@ function render() {
     <p class="tip"><a href="#today">Back to the planner</a></p></section></div>`; tabs.hidden = true; return; }
   tabs.hidden = false;
   const view = { today: viewToday, week: viewWeek, soon: viewSoon, food: viewFood, you: viewYou }[S.tab];
-  const draft = document.getElementById("capture-text")?.value;
+  const draft = document.getElementById("capture-text")?.value, foodDraft = document.getElementById("food-text")?.value, foodFocus = document.activeElement?.id === "food-text";
   const when = S.plan?.built ? new Date(S.plan.built).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
   const anim = S.lastTab !== S.tab ? " anim" : ""; S.lastTab = S.tab;
   app.innerHTML = `<div class="wrap v-${S.tab}${anim}">${view()}
     ${S.error ? `<p class="toast-inline" role="status">${esc(S.error)}${S.badKey ? ` <button class="link" id="reset-key">Set up a new key</button>` : ""}</p>` : ""}
     <p class="foot">${S.loading ? "Updating…" : when ? `Updated ${when}` : ""}${S.sync === "on" ? " · synced" : ""} <button class="link" id="refresh" aria-label="Refresh">${IC.refresh}</button></p></div>`;
   const ci = document.getElementById("capture-text"); if (ci && draft) ci.value = draft;
+  const fi = document.getElementById("food-text"); if (fi && foodDraft) { fi.value = foodDraft; const rows = FOODROWS; foodPreview(); if (rows.length === FOODROWS.length) { FOODROWS = rows; redrawRows(); } } if (fi && foodFocus) fi.focus();
   document.getElementById("tabs").innerHTML = TABS.map(([k, l]) => `<button data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ""}>${IC[k]}<span>${l}</span></button>`).join("");
   if (SH.kind) refreshSheet();
   drawTimers();
+  if (S.go && S.plan) { const g = S.go; S.go = null; setTimeout(() => goTarget(g)); }
 }
 const VALID = TABS.map(t => t[0]);
-const fromHash = () => { const h = location.hash.slice(1); if (VALID.includes(h)) S.tab = h; };
+const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)); if (h.startsWith("go/")) { S.go = h.slice(3); history.replaceState(null, "", "#" + S.tab); } else if (VALID.includes(h)) S.tab = h; };
+// app:<target> links from steps (and the Android app's "#go/<target>"): open the view where the step gets done.
+function goTarget(t) {
+  const [k, arg] = t.split("/"); eng("web_go:" + k);
+  if (["body", "pelvic", "piano", "voice", "meals"].includes(k)) { if (S.tab !== "today") goTab("today"); openKind(k); }
+  else if ((k === "recipe" || k === "cook") && arg) show("recipe", () => drawRecipe(arg));
+  else if (k === "move" && arg) show("move", () => drawMove(arg));
+  else if (k === "kroger" || k === "freezer" || k === "recipes" || k === "kitchen") { S.food = k === "kroger" ? "list" : k; goTab("food"); }
+  else if (k === "calendar" || k === "inbox" || k === "wish") { goTab("soon"); if (k === "wish") setTimeout(() => document.getElementById("capture-text")?.focus(), 50); }
+  else if (k === "bugs") { const text = prompt("What bugs you? A mess, a chore, anything you keep walking past."); if (text?.trim()) gh("issues", { method: "POST", body: JSON.stringify({ title: `Bugs me: ${text.trim().slice(0, 80)}`, body: `Captured on planLAB web on ${nice(todayIso())}. Claude: turn it into steps.` }) }).catch(() => alert("Couldn't send it. Try again online.")); }
+  else if (VALID.includes(k)) goTab(k);
+}
 fromHash();
 addEventListener("hashchange", () => { fromHash(); render(); });
-const goTab = k => { S.tab = k; history.replaceState(null, "", "#" + k); render(); scrollTo({ top: 0 }); };
+const goTab = k => { if (S.tab !== k) eng("web_tab:" + k); S.tab = k; history.replaceState(null, "", "#" + k); render(); scrollTo({ top: 0 }); };
 
 document.addEventListener("click", async e => {
   const q = s => e.target.closest(s);
   let el;
+  if ((el = q("[data-go]"))) { e.preventDefault(); goTarget(el.dataset.go); return; }
+  if ((el = q("[data-ext]"))) { eng("web_link"); return; }
   if ((el = q("[data-recipe]"))) { e.preventDefault(); const slug = el.dataset.recipe; show("recipe", () => drawRecipe(slug)); return; }
   if (q("#close-sheet") || e.target.id === "sheet") { closeSheet(); return; }
   if ((el = q("[data-timer]"))) { T.list = T.list.filter(t => t.id !== el.dataset.timer); runTimers(); return; }
@@ -724,6 +954,7 @@ document.addEventListener("click", async e => {
   if (q("#ses-pause")) { togglePause(); return; }
   if (q("#ses-next")) { nextStep(); return; }
   if (q("#ses-stop")) { finishSession(); return; }
+  if ((el = q("[data-feel]"))) { const n = +el.dataset.feel; S.log.ticks["feel-" + todayIso()] = Object.fromEntries([1, 2, 3, 4, 5].map(i => [String(i), i === n])); touch(); eng("feel"); try { navigator.vibrate && navigator.vibrate(8); } catch {} render(); return; }
   if ((el = q("[data-addmin]"))) { logMinutes(S.day, el.dataset.addmin, +el.dataset.m); render(); return; }
   if ((el = q("[data-set]"))) { const sk = "sets-" + S.day; S.log.ticks[sk] = { ...(S.log.ticks[sk] || {}), [el.dataset.set]: +el.dataset.n }; touch();
     const w = workoutFor(findDay(S.day)); if (w && w.moves.every(m => (S.log.ticks[sk][m.key] || 0) >= m.sets)) { tickPut(S.day, "body", true); beep(1); } render(); return; }
@@ -742,11 +973,16 @@ document.addEventListener("click", async e => {
   if ((el = q("[data-tab]"))) { if (el.dataset.tab === "today") S.day = todayIso(); goTab(el.dataset.tab); return; }
   if ((el = q("[data-food]"))) { S.food = el.dataset.food; render(); return; }
   if ((el = q("[data-go]"))) { S.day = addDays(S.day, +el.dataset.go); render(); return; }
+  if ((el = q("[data-ate]"))) { try { navigator.vibrate && navigator.vibrate(8); } catch {} atePlanned(el.dataset.ate); return; }
+  if ((el = q("[data-nib]"))) { try { navigator.vibrate && navigator.vibrate(8); } catch {} addNibble(el.dataset.nib); return; }
+  if ((el = q("[data-delfood]"))) { putFood(S.day, el.dataset.delfood, null); render(); return; }
+  if ((el = q("[data-falt]"))) { const r = FOODROWS[+el.dataset.falt]; if (r?.alts.length > 1) { const j = (r.alts.indexOf(r.food) + 1) % r.alts.length; r.food = r.alts[j]; r.scale = r.qty; redrawRows(); } return; }
+  if ((el = q("[data-fq]"))) { const r = FOODROWS[+el.dataset.fq]; if (r) { const s = r.scale; r.scale = +el.dataset.d > 0 ? (s < 1 ? s * 2 : s + 1) : (s > 1 ? s - 1 : Math.max(0.25, s / 2)); redrawRows(); } return; }
   if ((el = q("[data-pick]"))) { S.day = el.dataset.pick; render(); return; }
   if ((el = q("[data-jump]"))) { S.day = el.dataset.jump; goTab("today"); return; }
   if ((el = q("[data-list]"))) {
     const list = el.dataset.list, key = el.dataset.item;
-    const pool = list === "inbox" ? inboxItems() : list === "setup" ? S.plan.setup : list.startsWith("groceries-") ? (S.plan.groceries.find(g => `groceries-${g.week}` === list)?.sections.flatMap(s => s.items) || []) : (findDay(list)?.boxes || []);
+    const pool = withSteps(list === "inbox" ? inboxItems() : list === "setup" ? S.plan.setup : list === "pantry-out" ? (S.plan.kitchen || []).flatMap(x => x.items) : list.startsWith("groceries-") ? (S.plan.groceries.find(g => `groceries-${g.week}` === list)?.sections.flatMap(s => s.items) || []) : (findDay(list)?.boxes || []));
     const item = pool.find(x => x.key === key); if (!item) return;
     store.set("planlab-tip2", "1");
     try { navigator.vibrate && navigator.vibrate(8); } catch {}
@@ -759,6 +995,8 @@ document.addEventListener("submit", async e => {
     const v = document.getElementById("key-input").value.trim(); if (!v) { document.getElementById("key-input").focus(); return; }
     S.token = v; S.badKey = false; S.error = ""; setSync("unknown"); store.set("planlab-key", v); render(); load(); return;
   }
+  if (e.target.id === "foodform") { logFood(); return; }
+  if (e.target.id === "outform") { const inp = document.getElementById("out-text"), k = keyOf(inp.value.trim()); if (k) { tickPut("pantry-out", k, true); eng("web_out"); render(); } return; }
   if (e.target.id !== "capture") return;
   const inp = document.getElementById("capture-text"), text = inp.value.trim(); if (!text) { inp.focus(); return; }
   const btn = document.getElementById("capture-btn"); btn.disabled = true;
@@ -773,11 +1011,13 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet()
 let lastToday = todayIso();
 setInterval(() => { const t = todayIso(); if (t !== lastToday) { if (S.day === lastToday) S.day = t; lastToday = t; load(); } }, 60000);
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") { clearTimeout(pushTimer); pushLog(); }
-  else if (S.token && (!S.plan || Date.now() - new Date(S.plan.built) > 15 * 60000)) load();
+  if (document.visibilityState === "hidden") { clearTimeout(pushTimer); pushLog(); pushEng(); return; }
+  eng("web_open");
+  if (S.token && (!S.plan || Date.now() - new Date(S.plan.built) > 15 * 60000)) load();
 });
 
-if (S.plan && S.plan.v !== 2) S.plan = null;
+if (S.plan && (S.plan.v !== 2 || !S.plan.weeks?.[0]?.days?.[0]?.meals)) S.plan = null;
+eng("web_open");
 render();
 load();
 })();
