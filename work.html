@@ -46,7 +46,7 @@
 
   <div class="chips" id="chips" hidden></div>
 
-  <div id="grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:36px 28px"></div>
+  <div id="grid" class="work-grid"></div>
 
   <div class="rule-motif" style="margin:72px 0 28px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
   <section class="pf-band" aria-labelledby="pf-band-title">
@@ -102,6 +102,12 @@
   // owner-defined groups that each hold several projects).
   var SHOW_FILTERS = false;
 
+  // a summary's opening sentence: up to the first full stop followed by a capital
+  function firstSentence(s) {
+    var m = /^.*?[.!?](?=\s+[A-Z\u201C"]|$)/.exec(s);
+    return m ? m[0] : s;
+  }
+
   function render() {
     // Projects flagged "hidden" in their content JSON are unlisted here
     // (their direct project.html URLs still work).
@@ -118,7 +124,10 @@
       chips.hidden = true;
     }
     var filtered = active === 'All' ? visible : visible.filter(function (p) { return p.type === active; });
-    document.getElementById('grid').innerHTML = filtered.map(function (p) { return US.projectCard(p, true); }).join('');
+    // the first card (the capstone, by sortKey) leads the unfiltered grid with its opening sentence
+    document.getElementById('grid').innerHTML = filtered.map(function (p, i) {
+      return US.projectCard(p, true, i === 0 && active === 'All' ? firstSentence(US.clean(p.summary)) : null);
+    }).join('');
     document.getElementById('count').textContent = visible.length === 1
       ? '1 project.'
       : visible.length + ' projects.';

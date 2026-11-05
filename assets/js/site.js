@@ -103,17 +103,21 @@
   function yearOf(p) { return clean(p.yearLabel || (p.year != null ? String(p.year) : '')); }
   function roleShort(p) { return clean(p.role).split('—')[0].trim(); }
 
-  /* Project card markup shared by home + work pages. */
-  function projectCard(p, withSoftware) {
+  /* Project card markup shared by home + work pages. Passing `lede` (a sentence) makes it
+     the Projects page's lead card: the text is wrapped beside the cover and the sentence
+     added, shown only where the grid gives that card a full row (site.css .card-lead). */
+  function projectCard(p, withSoftware, lede) {
     var cover = p.cover
       ? '<div class="cover"><img src="content/projects/' + esc(p.cover) + '" alt="' + esc(p.title) + ' — cover drawing" loading="lazy" onerror="this.parentNode.classList.add(\'ph\');this.parentNode.innerHTML=\'<span class=&quot;ph-label&quot;>cover — coming soon</span>\'"></div>'
       : '<div class="cover ph"><span class="ph-label">cover — coming soon</span></div>';
-    return '<a class="card" href="project.html?slug=' + esc(p.slug) + '">' +
-      cover +
+    var lead = lede != null;
+    return '<a class="card' + (lead ? ' card-lead' : '') + '" href="project.html?slug=' + esc(p.slug) + '">' +
+      cover + (lead ? '<div class="card-text">' : '') +
       '<div class="card-type">' + [clean(p.type), clean(p.scale)].filter(Boolean).map(esc).join(' · ') + '</div>' +
       '<div class="card-titlerow"><span class="card-title">' + esc(p.title) + '</span><span class="card-year">' + esc(yearOf(p)) + '</span></div>' +
       '<div class="card-sub">' + [clean(p.location), roleShort(p)].filter(Boolean).map(esc).join(' · ') + '</div>' +
       (withSoftware ? '<div class="card-soft">' + esc((p.software || []).join(' · ')) + '</div>' : '') +
+      (lead ? (lede ? '<p class="card-lede">' + esc(lede) + '</p>' : '') + '</div>' : '') +
       '</a>';
   }
 

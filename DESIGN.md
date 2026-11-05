@@ -154,7 +154,7 @@ lettering does the annotating.
   is a full sentence, so it takes the semibold weight.
 - **Headline** (700, 24–60px, -0.02em): page and section titles (`.h-head`).
 - **Title** (700, 17–20px, -0.01 to -0.02em): project card and lightbox titles; Home's featured
-  project title (an h2) runs at 30px under its full-width plan. The footer name (26px) and brand (18px) use the same face at -0.02em.
+  project title (an h2) runs at 30px under its full-width plan, and the Projects lead card's at 28px. The footer name (26px) and brand (18px) use the same face at -0.02em.
 - **Body** (400, 14.5–18px, ~1.6): reading text, held to about 66–68ch.
 - **Label** (400–500, 9–12px, 0.06–0.24em tracking, uppercase): the annotation voice: kickers,
   meta labels, nav links, counters, dates, captions' figure numbers.
@@ -186,6 +186,12 @@ two-thirds underneath (one column on phones), so it doesn't repeat the hero's te
 Home ends on contact, not a list: on the panel ground under the rule motif, "Get in Touch" sets the
 email address as a Headline-weight link (700, clamp(28px, 4.4vw, 56px)) in the left two-thirds, with
 one ink line and the Résumé and Portfolio book links in the right third (one column on phones).
+
+On Projects the grid is the only control. From 960px it is three even columns and the first card
+(the capstone, by sortKey) takes the first row: its cover across two columns, and in the third
+its type, a 28px title with the year, the sub line and the summary's opening sentence (16px,
+ink); the other nine fill an even 3×3. Below 960px every card is the same size and the sentence
+is hidden.
 
 ## Elevation & Depth
 
