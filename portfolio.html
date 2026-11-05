@@ -115,14 +115,15 @@
       if (sf.firstChild && sf.firstChild.tagName === 'SPAN') sf.firstChild.remove();
       img.style.visibility = 'visible';
       pz.fit(true);
+      // the neighbours load once this spread is up, so they never share its bandwidth
+      [idx + 1, idx - 1].forEach(function (n) {
+        if (n >= 0 && n < N) { var pre = new Image(); pre.src = PF.src(n); }
+      });
     };
     pz.fit(true);
     $('pf-num').textContent = PF.label(idx);
     $('pf-caption').textContent = PF.spreads[idx].caption;
     $('pf-scrub').value = idx;
-    [idx + 1, idx - 1].forEach(function (n) {
-      if (n >= 0 && n < N) { var pre = new Image(); pre.src = PF.src(n); }
-    });
   }
   $('pf-prev').onclick = function () { show(idx - 1); };
   $('pf-next').onclick = function () { show(idx + 1); };

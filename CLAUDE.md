@@ -140,6 +140,14 @@ and prefetches the next part once that spread is drawn. Update parts.json
 whenever the booklet is re-exported (`pdfinfo` gives the counts); the console
 warns when a part disagrees with it.
 
+Some served images are derivatives of sources kept in `_drafts/originals/`
+(same paths): Home's hero drawing (`assets/img/hero-central-planting.webp`)
+and the older feature image (`content/projects/proctor-landing-park/feature.webp`,
+1200x753) are flattened onto white (no alpha; the pages draw them with
+`mix-blend-mode: multiply`, so white drops into the paper), and
+`assets/logos/segd.png` is a 600 px cut of the 2400 px logo. After replacing a
+source there, run `python3 _drafts/tools/derive_images.py` from the repo root.
+
 Pages are static HTML + `content/site.json` and `content/projects/*.json`
 (`index.json` lists slugs). `hidden: true` unlists a project everywhere while
 its direct project.html URL keeps working. `[CONFIRM ...]` markers in JSON are
