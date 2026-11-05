@@ -53,6 +53,10 @@ img { max-width: 100%; }
   text-transform: uppercase; color: var(--pine);
 }
 .mono-note { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+/* a sentence-length note: mono is for labels and counts, never running text (Title Block Rule) */
+.note-sans { font-family: var(--sans); font-size: 15px; line-height: 1.55; color: var(--muted); }
+/* figure captions, as the book sets them: the text in sans (a figure number would take mono pine) */
+.fig-cap { font: 13.5px/1.5 var(--sans); color: var(--muted); margin-top: 8px; }
 
 /* ---------- Navigation ---------- */
 .nav {
@@ -203,6 +207,9 @@ main .rule-motif .ci { border-color: var(--clay); }
 /* phones: the drawing set's toolbar sits on one row from about 383px (its counter, DWG 01 / 08,
    never changes width, so the row count never changes on a flip) */
 @media (max-width: 640px) { #dw-section .vbar { padding: 10px; gap: 6px; } #dw-section .vgroup { gap: 6px; } }
+/* phones: the drawing-set stage takes the drawing's shape (project.js sets the exact ratio
+   once the drawing loads; a spread's 3400 / 2310 holds the place until then) */
+@media (max-width: 640px) { #dw-stage { height: auto; aspect-ratio: 3400 / 2310; max-height: 70vh; max-height: 70svh; } }
 .vbtn {
   width: 40px; height: 40px; border: 1px solid var(--line-mid); background: transparent;
   cursor: pointer; font-size: 15px; font-family: inherit; color: var(--ink);
@@ -237,10 +244,14 @@ main .rule-motif .ci { border-color: var(--clay); }
 .cmp-stage {
   position: relative; overflow: hidden; background: var(--paper); cursor: ew-resize;
   touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  /* both plans whole under the nav: as wide as the screen's height allows (--ar = the view's w/h,
+     set by project.js), the scrubber below at the same width so its thumb tracks the divider */
+  width: min(100%, calc((100svh - 150px) * var(--ar, 99))); margin-inline: auto;
 }
+#cmp-range { flex: 0 1 auto; width: min(100%, calc((100svh - 150px) * var(--ar, 99))); margin-inline: auto; }
 .cmp-stage img { display: block; width: 100%; height: auto; -webkit-user-drag: none; }
 .cmp-stage .cmp-top { position: absolute; inset: 0; clip-path: inset(0 0 0 var(--cut, 50%)); }
-#cmp-section .vscrub { padding-left: 14px; padding-right: 14px; }
+#cmp-section .vscrub { padding-left: 14px; padding-right: 14px; justify-content: center; }
 .cmp-handle {
   position: absolute; top: 0; bottom: 0; left: var(--cut, 50%); width: 2px; margin-left: -1px;
   background: var(--paper); box-shadow: 0 0 0 1px rgba(38, 41, 43, .35); pointer-events: none;
@@ -412,6 +423,28 @@ main .rule-motif .ci { border-color: var(--clay); }
 }
 .meta-value { font-size: 14px; margin-top: 5px; }
 .meta-value.mono { font-family: var(--mono); font-size: 12px; }
+/* phones: two columns, the last cell (software) across both */
+@media (max-width: 640px) {
+  .meta-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 18px; }
+  .meta-grid > :last-child { grid-column: 1 / -1; }
+}
+
+/* ---------- Project page: the summary under the title, text sections as rows ---------- */
+.p-summary { font-size: 19px; line-height: 1.55; color: var(--ink); max-width: 60ch; margin: 24px 0 0; text-wrap: pretty; }
+@media (max-width: 640px) { .p-summary { font-size: 17px; } }
+.p-summary:empty { display: none; }
+#p-sections:not(:empty) { margin-top: 48px; }
+.p-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 8px 48px;
+  padding: 22px 0; border-top: 1px solid var(--line); margin: 0; max-width: none; align-items: baseline;
+}
+.p-row > .h-head { font-size: 22px; margin: 0; grid-column: 1; }
+.p-row > p { grid-column: 2; max-width: 64ch; font-size: 16px; line-height: 1.65; margin: 0; text-wrap: pretty; }
+.p-row > .p-row-logos { grid-column: 2; }
+@media (max-width: 640px) {
+  .p-row { grid-template-columns: minmax(0, 1fr); }
+  .p-row > .h-head, .p-row > p, .p-row > .p-row-logos { grid-column: 1; }
+}
 
 /* ---------- Info-list sections (about, skills, contact) ---------- */
 .rule-section { border-top: 1px solid var(--ink); padding-top: 16px; }

@@ -44,13 +44,6 @@
  ],
  "images": [
   {
-   "file": "proctor-landing-park/master-plan.webp",
-   "caption": "Master plan, full corridor with Paddy Creek ecological core",
-   "drawing_type": "Master plan",
-   "scale": "1\" = 300'-0\"",
-   "software": "AutoCAD + Illustrator"
-  },
-  {
    "file": "proctor-landing-park/hydrology.webp",
    "caption": "Floodplain and hydrology analysis, FEMA NFHL overlay",
    "drawing_type": "Analysis map",

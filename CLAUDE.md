@@ -129,9 +129,13 @@ Portfolio Book band's cover, spread 0 at 560 px wide; work.html hard-codes
 fix that label by hand when the PDF size changes, along with its copies in the
 load-failure note (`loadNote` in `assets/js/site.js`) and the `<noscript>` notes
 in work.html, project.html and portfolio.html. Portfolio spreads also feed the project pages
-(`content/projects/<slug>/pf-NN.webp`), and the Projects-page blowouts use
-individual figures cut from the boards (`content/projects/<slug>/g-*.webp`,
-`gallery` + `focus` in each JSON).
+(`content/projects/<slug>/pf-NN.webp`), and the individual figures cut from the
+boards (`content/projects/<slug>/g-*.webp`, `gallery` + `focus` in each JSON)
+fill both the Projects-page blowouts and each project page's "Drawings" section.
+That section leaves out any gallery file already on the page (`images`, `models`,
+compare views, plus the `ON_PAGE` list in `assets/js/project.js`: Proctor's
+inline master plan and Evans's two concept plans). Proctor's master plan is not
+in its `images` (it shows once, inline).
 
 The Proctor capstone booklet on its project page is 11 PDF parts
 (`assets/booklet/Part_NN.pdf`, pdf.js), with each part's page count in

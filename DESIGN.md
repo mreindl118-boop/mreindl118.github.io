@@ -159,7 +159,12 @@ lettering does the annotating.
 - **Headline** (700, 24–60px, -0.02em): page and section titles (`.h-head`).
 - **Title** (700, 17–20px, -0.01 to -0.02em): project card and lightbox titles; Home's featured
   project title (an h2) runs at 30px under its full-width plan, and the Projects lead card's at 28px. The footer name (26px) and brand (18px) use the same face at -0.02em.
-- **Body** (400, 14.5–18px, ~1.6): reading text, held to about 66–68ch.
+- **Body** (400, 14.5–18px, ~1.6): reading text, held to about 66–68ch. A project page's
+  summary sentence, under its title, runs larger: 19px ink (17px on phones), 1.55, 60ch.
+- **Notes and captions** (400, sans, muted): a sentence-length note under a heading is
+  `.note-sans` (15px, 1.55); figure and model captions are `.fig-cap` (13.5px, 1.5), as the book
+  sets them. Only a figure number in a caption would take the mono, in pine; `.mono-note` stays
+  for short labels and counts ("10 projects, newest first.").
 - **Label** (400–500, 9–12px, 0.06–0.24em tracking, uppercase): the annotation voice: kickers,
   meta labels, nav links, counters, dates, captions' figure numbers.
 
@@ -176,7 +181,8 @@ counters, figure numbers. It is never used for running text or headings.
 
 One centred container (1240px) with 32px gutters, 18px on phones (640px breakpoint). Grids use
 `auto-fit` with generous minimums (cards ~270–340px, meta cells 165px) and
-collapse to one column on phones; a minimum is written `min(<n>px, 100%)` so a track never outgrows
+collapse to one column on phones (the project meta grid keeps two, with its last cell, the
+software, across both; an empty field is left out, not shown as "—"); a minimum is written `min(<n>px, 100%)` so a track never outgrows
 a 320px screen. Sections are framed by a full-width ink rule or the rule motif
 above a header row (`.rowhead`: title left, a mono link right). The nav is sticky: a 96%-opaque
 paper bar with a light backdrop blur and a hairline underneath. It is the only sticky element.
@@ -196,6 +202,16 @@ On Projects the grid is the only control. From 960px it is three even columns an
 its type, a 28px title with the year, the sub line and the summary's opening sentence (16px,
 ink); the other nine fill an even 3×3. Below 960px every card is the same size and the sentence
 is hidden.
+
+A project page opens on its title (clamp(28px, 5vw, 56px), no kicker; an unlisted project's
+badge sits on its own line under it), the summary sentence, then the meta grid. The figures cut
+from the boards (the blowout's gallery) follow under "Drawings", one column at their own size
+(at most 960px, never upscaled), each with its caption; a figure whose drawing is already on the
+page is left out. They come straight after the meta grid when the drawing set is empty or a
+single portfolio spread (which then follows them as "Portfolio spread", without its one tab),
+and after the drawing set otherwise. Proctor's master plan appears once, as the inline sheet
+under the meta grid. The written sections are rows: the heading (22px) in the left third, the
+text (64ch) in the right two-thirds, each under a 1px line (one column on phones).
 
 ## Elevation & Depth
 
@@ -267,7 +283,10 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
   transition, never shrinking from the last one's zoom.
 - **Controls are not content:** viewer buttons, tabs and chips take `touch-action: manipulation`
   (quick taps flip pages, not zoom the page) and `user-select: none`; page zoom stays enabled.
-- **Phones:** the drawing set's toolbar sits on one row from about 383px (10px padding, 6px gaps).
+- **Phones:** the drawing set's toolbar sits on one row from about 383px (10px padding, 6px gaps),
+  and its stage takes the drawing's own shape (the image's aspect ratio, at most 70svh; a spread's
+  3400 / 2310 until it loads) instead of a fixed-height letterbox. It re-shapes and lands at fit
+  when the width changes, not when a phone's toolbar slides away.
   The portfolio and booklet toolbars keep their spacing: their counters change width between
   single pages and spreads, so a tighter bar would flip between one and two rows as you page.
 - **Loading:** the capstone booklet waits on its intro ("Open booklet") until the reader comes
@@ -281,10 +300,17 @@ that page adds, e.g. "Project page: compare slider + drawings →"), the summary
 shows" heading over the focus list, and the remaining figures. Its body is focusable and
 scrolls from the keyboard (the scroll keys also work from the toolbar buttons).
 
+Both lightboxes (the blowout and Proctor's full-screen master plan) behave as modal dialogs: on
+open, focus moves to the close button, Tab cycles inside, the page behind stops scrolling, and
+Escape or Close hands focus back to the control that opened it.
+
 ### Compare slider
 Two registered images wiped by a draggable divider with a round ink-ringed handle; keyboard
 operable through a range input; mono tags name each side. Each view's `w`/`h` in the JSON gives
-the stage its shape before the images arrive.
+the stage its shape before the images arrive, and its width: the stage is as wide as the screen's
+height allows, `min(100%, (100svh − 150px) × w/h)`, centred, so both plans show whole under the
+nav (about 838×750 at 1440×900); the range input below takes the same width so its thumb tracks
+the divider.
 
 ### Loading and failure states
 - **No jumps:** the containers the content JSON fills (`#grid`, `#p-meta`) hold a viewport of

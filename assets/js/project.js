@@ -7,7 +7,21 @@
   var clean = US.clean, esc = US.esc;
 
   /* ---------------- Drawing set viewer ---------------- */
-  var dw = { project: null, idx: 0, pz: null };
+  var dw = { project: null, idx: 0, pz: null, img: null, w: 0 };
+  var PHONE = window.matchMedia('(max-width: 640px)');
+
+  /* On phones the stage takes the drawing's own shape (up to 70svh, site.css) instead of a
+     fixed-height letterbox, so a landscape spread isn't floating in empty paper. */
+  function dwShape() {
+    var stage = $('dw-stage'), im = dw.img;
+    if (PHONE.matches && im && im.naturalWidth) {
+      stage.style.aspectRatio = im.naturalWidth + ' / ' + im.naturalHeight;
+      stage.style.height = 'auto';
+    } else {
+      stage.style.aspectRatio = '';
+      stage.style.height = '';
+    }
+  }
 
   function dwLabel(images, k) {
     var im = images[k];
@@ -27,7 +41,7 @@
     img.src = 'content/projects/' + im.file;
     img.alt = clean(im.caption);
     img.draggable = false;
-    img.onload = function () { dw.pz.fit(true); };
+    img.onload = function () { dw.img = img; dwShape(); dw.pz.fit(true); };
     img.onerror = function () {
       surface.innerHTML =
         '<div style="width:900px; max-width:86vw; aspect-ratio:16/10; background:repeating-linear-gradient(45deg,#EDE9DB 0 8px,#F3F0E8 8px 16px); border:1px solid #C7C1AE; display:flex; align-items:center; justify-content:center">' +
@@ -61,19 +75,54 @@
     $('dw-zin').onclick = dw.pz.zoomIn;
     $('dw-zout').onclick = dw.pz.zoomOut;
     $('dw-fit').onclick = dw.pz.fit;
+    // re-shape and re-fit when the width really changes (rotation, a resized window), not when
+    // a phone's toolbar slides away mid-scroll, which would throw away the reader's zoom
+    dw.w = window.innerWidth;
+    function reshape() {
+      if (window.innerWidth === dw.w) return;
+      dw.w = window.innerWidth;
+      dwShape();
+      dw.pz.fit(true);
+    }
+    window.addEventListener('resize', reshape);
+    window.addEventListener('orientationchange', reshape);
     dwShow(0);
   }
 
   /* ---------------- Master plan lightbox ---------------- */
   function mpInit() {
     var pz = US.panZoom($('mp-stage'), $('mp-surface'), $('mp-badge'));
-    function open() { $('mp-box').hidden = false; pz.fit(); }
-    function close() { $('mp-box').hidden = true; }
+    var opener = null;
+    // an aria-modal dialog takes focus, locks the page behind it and gives focus back on close
+    function open() {
+      opener = document.activeElement;
+      $('mp-box').hidden = false;
+      document.body.style.overflow = 'hidden';
+      pz.fit(true);
+      $('mp-close').focus();
+    }
+    function close() {
+      if ($('mp-box').hidden) return;
+      $('mp-box').hidden = true;
+      document.body.style.overflow = '';
+      if (opener && opener.focus) opener.focus();
+    }
     $('mp-open').onclick = open;
-    $('mp-inline').onclick = open;
+    $('mp-inline').onclick = open;   // a mouse shortcut; the Fullscreen button is its keyboard twin
     $('mp-close').onclick = close;
     $('mp-box').addEventListener('click', function (e) { if (e.target === $('mp-box')) close(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+    document.addEventListener('keydown', function (e) {
+      if ($('mp-box').hidden) return;
+      if (e.key === 'Escape') close();
+      if (e.key === 'Tab') {   // Tab cycles the box's buttons
+        var f = $('mp-box').querySelectorAll('button');
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        else if (!$('mp-box').contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+      }
+    });
     $('mp-zin').onclick = pz.zoomIn;
     $('mp-zout').onclick = pz.zoomOut;
     $('mp-fit').onclick = pz.fit;
@@ -392,6 +441,19 @@
   }
 
   /* ---------------- Page assembly ---------------- */
+  // shown elsewhere on its page: Proctor's master plan is the inline #mp-section sheet, and
+  // Evans's two concept plans are the compare slider's views (the same drawings, cut wider)
+  var ON_PAGE = {
+    'proctor-landing-park/master-plan.webp': 1,
+    'evans-park/g-h23_f1.webp': 1,
+    'evans-park/g-h25_f1.webp': 1
+  };
+  function projectFigures(p) {
+    var seen = {};
+    (p.images || []).concat(p.models || [], (p.compare && p.compare.views) || []).forEach(function (x) { seen[x.file] = 1; });
+    return (p.gallery || []).filter(function (g) { return g && g.file && !seen[g.file] && !ON_PAGE[g.file]; });
+  }
+
   function metaCell(label, value, mono) {
     return '<div><div class="meta-label">' + esc(label) + '</div>' +
       '<div class="meta-value' + (mono ? ' mono' : '') + '">' + esc(value) + '</div></div>';
@@ -414,7 +476,10 @@
     function apply() {
       var a = views[ia], b = views[ib];
       // the stage holds the plan's shape before the images arrive (w/h in the JSON)
-      if (a.w && a.h) stage.style.aspectRatio = a.w + ' / ' + a.h;
+      if (a.w && a.h) {
+        stage.style.aspectRatio = a.w + ' / ' + a.h;
+        $('cmp-section').style.setProperty('--ar', a.w / a.h);   // site.css sizes the stage to the screen
+      }
       $('cmp-img-a').src = 'content/projects/' + a.file;
       $('cmp-img-a').alt = clean(a.caption || a.label);
       $('cmp-img-b').src = 'content/projects/' + b.file;
@@ -469,11 +534,11 @@
       metaCell('Year', US.yearOf(p) || '—') +
       metaCell('Role', clean(p.role)) +
       metaCell('Scope / scale', clean(p.scale)) +
-      metaCell('Collaborators', clean(p.collaborators) || '—') +
+      (clean(p.collaborators) ? metaCell('Collaborators', clean(p.collaborators)) : '') +
       metaCell('Software', (p.software || []).join(' · '), true);
     $('p-summary').textContent = clean(p.summary);
 
-    var logos = '<div style="display:flex; gap:34px; align-items:center; flex-wrap:wrap; margin-top:20px; border-top:1px solid var(--line); padding-top:18px">' +
+    var logos = '<div class="p-row-logos" style="display:flex; gap:34px; align-items:center; flex-wrap:wrap; margin-top:12px; border-top:1px solid var(--line); padding-top:18px">' +
       '<img src="assets/logos/daapworks.jpg" alt="DAAPWorks" title="DAAPWorks" style="height:150px; width:auto; display:block; mix-blend-mode:multiply">' +
       '<img src="assets/logos/segd.png" alt="SEGD" title="SEGD" style="height:150px; width:auto; display:block; mix-blend-mode:multiply">' +
       '<img src="assets/logos/design-museum-chicago.png" alt="Design Museum of Chicago" title="Design Museum of Chicago" style="height:150px; width:auto; display:block; mix-blend-mode:multiply">' +
@@ -481,9 +546,10 @@
     $('p-sections').innerHTML = (p.sections || []).map(function (s) {
       var body = clean(s.body);
       if (!body) return '';
-      return '<div style="margin-top:32px; max-width:68ch">' +
-        '<h2 class="h-head" style="font-size:24px; margin:0 0 8px">' + esc(s.heading) + '</h2>' +
-        '<p style="font-size:16px; line-height:1.65; margin:0; text-wrap:pretty">' + esc(body) + '</p>' +
+      // a row: the heading in the left third, the text in the right two-thirds (site.css .p-row)
+      return '<div class="p-row">' +
+        '<h2 class="h-head">' + esc(s.heading) + '</h2>' +
+        '<p>' + esc(body) + '</p>' +
         (/recognition/i.test(s.heading) ? logos : '') +
         '</div>';
     }).join('');
@@ -512,6 +578,32 @@
       dwInit(p);
     }
 
+    // The figures cut from the boards (the Projects-page blowout's gallery), each at its own size.
+    // A file already on this page (drawing set, models, compare views, Proctor's inline master
+    // plan) is left out. They lead when the drawing set is one spread or none; otherwise they
+    // follow it, and a lone spread below them is titled for what it is.
+    var figs = projectFigures(p);
+    if (figs.length) {
+      var sec = document.createElement('section');
+      sec.id = 'p-figs';
+      sec.setAttribute('aria-labelledby', 'p-figs-title');
+      sec.innerHTML = '<h2 class="h-head" id="p-figs-title" style="font-size:26px; margin:48px 0 14px">Drawings</h2>' +
+        '<div style="display:flex; flex-direction:column; gap:26px; max-width:960px">' +
+        figs.map(function (g) {
+          var cap = clean(g.caption);
+          return '<figure style="margin:0">' +
+            '<img src="content/projects/' + esc(g.file) + '" alt="' + esc(cap) + '" loading="lazy" onerror="US.imgPh(this,\'figure\')" style="max-width:100%; width:auto; height:auto; display:block; border:1px solid var(--line); background:#FFF">' +
+            '<figcaption class="fig-cap">' + esc(cap) + '</figcaption></figure>';
+        }).join('') + '</div>';
+      var nImages = (p.images || []).length;
+      var after = nImages <= 1 ? $('p-meta') : $('dw-section');
+      after.parentNode.insertBefore(sec, after.nextSibling);
+      if (nImages === 1) {
+        $('dw-title').textContent = 'Portfolio spread';
+        $('dw-thumbs').hidden = true;
+      }
+    }
+
     // Models gallery: physical + digital models declared in the project JSON
     var models = p.models || [];
     if (models.length) {
@@ -520,7 +612,7 @@
         var cap = clean(m.caption);
         return '<figure style="margin:0">' +
           '<img src="content/projects/' + m.file + '" alt="' + esc(cap) + '" loading="lazy" onerror="US.imgPh(this,\'model photo\')" style="width:100%; display:block; border:1px solid var(--line); background:#FFF">' +
-          '<figcaption style="font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:8px; line-height:1.5">' + esc(cap) +
+          '<figcaption class="fig-cap">' + esc(cap) +
           (m.medium ? ' · ' + esc(clean(m.medium)) : '') + '</figcaption></figure>';
       }).join('');
     }

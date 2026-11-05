@@ -166,7 +166,7 @@
 
   function figure(g, eager) {
     return '<figure style="margin:0"><img src="content/projects/' + esc(g.file) + '" alt="' + esc(clean(g.caption)) + '" loading="' + (eager ? 'eager' : 'lazy') + '" onerror="US.imgPh(this,\'figure\')" style="width:100%; display:block; border:1px solid var(--line); background:#FFF">' +
-      '<figcaption style="font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:7px">' + esc(clean(g.caption)) + '</figcaption></figure>';
+      '<figcaption class="fig-cap">' + esc(clean(g.caption)) + '</figcaption></figure>';
   }
 
   // The blowout opens on the work: the first figure, then the meta line, the

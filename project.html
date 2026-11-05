@@ -37,19 +37,17 @@
   <a href="work.html" style="font-family:var(--mono); font-size:12px; text-decoration:none">← All work</a>
 
   <div style="margin-top:28px">
-    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap">
-      <div class="kicker">Project</div>
-      <span id="p-unlisted" hidden style="font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--clay); border:1px solid var(--clay); padding:3px 8px">Unlisted · In development</span>
-    </div>
-    <h1 id="p-title" class="h-head" style="font-size:clamp(28px,5vw,50px); margin:12px 0 0; line-height:1.08; max-width:24ch; text-wrap:balance"></h1>
+    <h1 id="p-title" class="h-head" style="font-size:clamp(28px,5vw,56px); margin:0; line-height:1.08; max-width:24ch; text-wrap:balance"></h1>
+    <div id="p-unlisted" hidden style="margin-top:10px"><span style="font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--clay); border:1px solid var(--clay); padding:3px 8px; display:inline-block">Unlisted · In development</span></div>
   </div>
+  <p id="p-summary" class="p-summary"></p>
   <noscript><div class="load-note" style="margin-top:30px; border-top:1px solid var(--ink); padding-top:16px"><p class="mono-note">Projects didn’t load.</p><div class="load-note-links"><a class="link-mono" href="portfolio.html">Flip through the portfolio book&nbsp;&rarr;</a><a class="link-mono" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf">Download PDF&nbsp;&darr; <span style="color:var(--faint); white-space:nowrap">(16&nbsp;MB)</span></a></div></div></noscript>
   <div class="meta-grid" id="p-meta"></div>
 
   <!-- Compare slider: same-frame views (existing site, concepts) declared as "compare" in the project JSON -->
   <section id="cmp-section" hidden aria-labelledby="cmp-title">
     <h2 class="h-head" id="cmp-title" style="font-size:26px; margin:48px 0 6px"></h2>
-    <p class="mono-note" id="cmp-note" style="margin:0 0 14px; max-width:70ch"></p>
+    <p class="note-sans" id="cmp-note" style="margin:0 0 14px; max-width:70ch"></p>
     <div class="viewer">
       <div class="cmp-pick" id="cmp-pick" hidden>
         <div class="cmp-side"><span class="cmp-lab" id="cmp-lab-a">Left</span><div class="cmp-chips" id="cmp-chips-a" role="group" aria-labelledby="cmp-lab-a"></div></div>
@@ -76,14 +74,13 @@
     <div class="rule-section" style="margin-top:40px">
       <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap">
         <div>
-          <div class="kicker" style="font-size:11px; letter-spacing:.12em">Drawing 01 · Full spread</div>
-          <div class="h-head" style="font-size:24px; margin-top:4px">Master plan</div>
-          <div style="font-size:14px; color:var(--muted); margin-top:4px">Seamless composite of booklet pp. 24–25 — no page fold.</div>
+          <h2 class="h-head" style="font-size:24px; margin:0">Master plan</h2>
+          <div style="font-size:14px; color:var(--muted); margin-top:4px">Booklet pages 24–25 joined into one sheet, without the fold.</div>
         </div>
         <button id="mp-open" class="vbtn vbtn-wide" style="min-height:44px; border-color:var(--pine); color:var(--pine)">Fullscreen ⤢</button>
       </div>
       <div id="mp-inline" style="margin-top:16px; cursor:zoom-in" title="Click for fullscreen zoom">
-        <img src="content/projects/proctor-landing-park/master-plan.webp" width="3760" height="2313" alt="Proctor Landing Park master plan — seamless composite of booklet pages 24–25" style="width:100%; height:auto; display:block; border:1px solid var(--line); background:#FFF" loading="lazy">
+        <img src="content/projects/proctor-landing-park/master-plan.webp" width="3760" height="2313" alt="Proctor Landing Park master plan, booklet pages 24–25 joined into one sheet" style="width:100%; height:auto; display:block; border:1px solid var(--line); background:#FFF" loading="lazy">
       </div>
     </div>
 
@@ -131,7 +128,7 @@
 
   <!-- Drawing set (hidden for projects that only have models) -->
   <div id="dw-section" hidden>
-  <h2 class="h-head" style="font-size:26px; margin:48px 0 14px">Drawing set</h2>
+  <h2 class="h-head" id="dw-title" style="font-size:26px; margin:48px 0 14px">Drawing set</h2>
   <div class="viewer">
     <div class="vbar">
       <div class="vgroup">
@@ -157,14 +154,13 @@
   <div class="thumbs" id="dw-thumbs"></div>
   </div>
 
-  <p id="p-summary" style="font-size:18px; line-height:1.65; max-width:66ch; margin:48px 0 0; text-wrap:pretty"></p>
   <div id="p-sections"></div>
 
   <!-- Physical + digital models; shown when the project declares any -->
   <div id="p-models" hidden>
     <div class="rule-motif" style="margin:56px 0 18px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
     <h2 class="h-head" style="font-size:26px; margin:0 0 4px">Models</h2>
-    <p class="mono-note" style="margin:0 0 18px">Physical and digital models — terrain, fabrication, and study pieces.</p>
+    <p class="note-sans" style="margin:0 0 18px">Physical and digital models — terrain, fabrication, and study pieces.</p>
     <div id="p-models-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:28px 24px"></div>
   </div>
 
@@ -185,7 +181,7 @@
         <button class="vbtn" id="mp-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
         <button class="vbtn" id="mp-zin" title="Zoom in"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
         <button class="vbtn vbtn-wide" id="mp-fit">FIT</button>
-        <button class="vbtn vbtn-close" id="mp-close" title="Close">✕</button>
+        <button class="vbtn vbtn-close" id="mp-close" title="Close" aria-label="Close master plan"><span aria-hidden="true">✕</span></button>
       </div>
     </div>
     <div class="vstage" id="mp-stage">
