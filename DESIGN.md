@@ -385,8 +385,9 @@ the divider.
 - **Unknown project:** h1 "Project not found" and "All projects →"; the page is `noindex`.
 - **A missing image:** a portfolio spread shows "Couldn’t load this spread" and a Retry button
   (44px) in the stage; blowout figures and model photos take the covers' hatched placeholder,
-  saying "Figure didn’t load" or "Model photo didn’t load" ("coming soon" is only for a cover the
-  data doesn't have yet).
+  saying "Figure didn’t load" or "Model photo didn’t load"; a card cover that fails says "Cover
+  didn’t load" and a drawing-set sheet "… drawing didn’t load" ("coming soon" is only for a cover
+  the data doesn't have yet).
 
 ## Do's and Don'ts
 

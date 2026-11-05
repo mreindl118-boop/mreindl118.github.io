@@ -57,7 +57,7 @@
   }
 
   /* A figure or model photo that fails to load takes the covers' hatched placeholder and says so
-     ("Figure didn't load"); "coming soon" stays for a cover the data doesn't have yet */
+     ("Figure didn't load"); "coming soon" stays only for a cover the data doesn't have yet */
   function imgPh(img, label) {
     var ph = document.createElement('div');
     ph.className = 'cover-ph img-ph';
@@ -145,7 +145,7 @@
   function projectCard(p, withSoftware, lede, level) {
     var h = 'h' + (level === 2 ? 2 : 3);
     var cover = p.cover
-      ? '<div class="cover"><img src="content/projects/' + esc(p.cover) + '" alt="" loading="lazy" onerror="this.parentNode.classList.add(\'ph\');this.parentNode.innerHTML=\'<span class=&quot;ph-label&quot;>cover — coming soon</span>\'"></div>'
+      ? '<div class="cover"><img src="content/projects/' + esc(p.cover) + '" alt="" loading="lazy" onerror="this.parentNode.classList.add(\'ph\');this.parentNode.innerHTML=\'<span class=&quot;ph-label&quot;>Cover didn\u2019t load</span>\'"></div>'
       : '<div class="cover ph"><span class="ph-label">cover — coming soon</span></div>';
     var lead = lede != null;
     return '<a class="card' + (lead ? ' card-lead' : '') + '" href="project.html?slug=' + esc(p.slug) + '">' +

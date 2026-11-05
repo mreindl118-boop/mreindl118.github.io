@@ -50,7 +50,7 @@
       surface.innerHTML =
         '<div style="width:900px; max-width:86vw; aspect-ratio:16/10; background:repeating-linear-gradient(45deg,#EDE9DB 0 8px,#F3F0E8 8px 16px); border:1px solid #C7C1AE; display:flex; align-items:center; justify-content:center">' +
         '<span style="font-family:var(--mono); font-size:12px; color:var(--muted); text-align:center; padding:0 20px">' +
-        esc(im.drawing_type) + ' — drawing coming soon</span></div>';
+        esc(im.drawing_type) + ' — drawing didn\u2019t load</span></div>';
     };
     surface.appendChild(img);
     dwShape();
