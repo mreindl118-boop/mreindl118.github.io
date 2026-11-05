@@ -92,10 +92,14 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
             item { PCard { Text(if (st.plan.weeks.isEmpty()) (if (loading) "Loading…" else "No plan yet") else "Nothing planned", color = tk.muted, fontSize = 18.sp, fontWeight = FontWeight.Bold) } }
             return@LazyColumn
         }
-        item { NextUpCard(day) }
+        item { NextUpCard(day) { flip(it) } }
         item {
             Spacer(Modifier.height(12.dp))
-            val tiles = TodayPick.order(day.boxes).map { box ->
+            // Each thing once: the area already shown big in Next up gets no ring, and the plan's
+            // pelvic floor box *is* the pelvic counter (no second tile).
+            val nextKey = TodayData.next(day)?.box?.key
+            val pelvicBox = day.boxes.firstOrNull { isPelvic(it.key, it.label) }
+            val tiles = TodayPick.order(day.boxes).filter { it.key != nextKey && it != pelvicBox }.map { box ->
                 val n = box.steps.size
                 val done = Store.isDone(day, box)
                 val name = TodayData.label(box)
@@ -107,8 +111,18 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
             val have = Store.eaten(date); val want = Store.foodTargets(date)
             tiles += RingTile("eat", if (want.protein > 0) have.protein / want.protein.toFloat() else 0f, "Eat", tk.eat) { flip("eat") }
             val pf = LogDoc.pelvic(st.log, date.toString())
-            tiles += RingTile("pelvic", pf / 2f, "Pelvic $pf/2", tk.ok, onLong = if (pf > 0) ({ Store.pelvicUndo(date); Undo.offer("Pelvic set removed") { Store.pelvicSet(date) } }) else null) {
-                if (pf >= 2) Undo.offer("Pelvic 2/2 · hold to undo", null) else { Store.pelvicSet(date); Undo.offer("✓ Pelvic floor set ${pf + 1}/2") { Store.pelvicUndo(date) } }
+            if (pelvicBox?.key != nextKey || pelvicBox == null) {
+                val boxDone = pelvicBox != null && Store.isDone(day, pelvicBox)
+                tiles += RingTile("pelvic", if (boxDone) 1f else pf / 2f, "Pelvic $pf/2", tk.ok,
+                    onLong = if (pf > 0) ({ Store.pelvicUndo(date); Undo.offer("Pelvic set removed") { Store.pelvicSet(date) } }) else null) {
+                    if (pf >= 2) Undo.offer("Pelvic 2/2 · hold to undo", null) else {
+                        Store.pelvicSet(date)
+                        // The second set also ticks the plan's pelvic box.
+                        val tick = pf + 1 >= 2 && pelvicBox != null && !Store.isDone(day, pelvicBox)
+                        if (tick) Store.toggle(day, pelvicBox!!)
+                        Undo.offer("✓ Pelvic floor set ${pf + 1}/2") { Store.pelvicUndo(date); if (tick) Store.toggle(day, pelvicBox!!) }
+                    }
+                }
             }
             RingGrid(tiles, openKey)
         }
