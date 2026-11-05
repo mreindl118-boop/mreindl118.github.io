@@ -76,7 +76,10 @@ object TodayData {
 }
 
 /** Each area's icon. */
-fun areaIcon(key: String): Int = when (key) {
+fun isPelvic(key: String, label: String = ""): Boolean =
+    key == "pf" || key.contains("pelvic") || key.contains("kegel") || label.lowercase().contains("pelvic")
+
+fun areaIcon(key: String): Int = if (isPelvic(key)) R.drawable.ic_a_pelvic else when (key) {
     "body" -> R.drawable.ic_a_body
     "move" -> R.drawable.ic_a_move
     "piano" -> R.drawable.ic_a_piano
@@ -105,7 +108,7 @@ fun RoundButton(icon: Int, color: Color, bg: Color, desc: String, size: Dp = 56.
 
 /** The one thing to do now: a big icon, four words, Done. */
 @Composable
-fun NextUpCard(day: Day) {
+fun NextUpCard(day: Day, onOpen: (String) -> Unit = {}) {
     val tk = t()
     val st by Store.state.collectAsState()
     val next = TodayData.next(day)
@@ -129,8 +132,9 @@ fun NextUpCard(day: Day) {
     val ctx = LocalContext.current
     PCard(pad = PaddingValues(24.dp)) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(Modifier.size(96.dp).clip(CircleShape).background(soft(color, tk.dark)), contentAlignment = Alignment.Center) {
-                AreaIcon(box.key, color, 52.dp)
+            // Tap the icon to see every step of this area.
+            Box(Modifier.size(96.dp).clip(CircleShape).background(soft(color, tk.dark)).clickable(enabled = box.steps.isNotEmpty()) { onOpen(box.key) }, contentAlignment = Alignment.Center) {
+                AreaIcon(if (isPelvic(box.key, box.label)) "pelvic" else box.key, color, 52.dp)
             }
             Spacer(Modifier.height(14.dp))
             Text(step?.let { TodayData.short(it) } ?: TodayData.label(box), fontSize = 30.sp, lineHeight = 34.sp, fontWeight = FontWeight.ExtraBold,
