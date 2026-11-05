@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -110,6 +111,25 @@ fun EatTotals(date: LocalDate) {
             MacroLine("Fat", have.fat, want.fat, "g", tk.piano)
         }
     }
+    val (nib, nibK) = remember(st.version, st.log, date) { Store.nibbles(date) }
+    if (nib > 0) Text("🤏 $nib ${if (nib == 1) "nibble" else "nibbles"} · ${n(nibK)} kcal of it", Modifier.padding(top = 8.dp), fontSize = 13.sp, color = tk.muted, fontWeight = FontWeight.SemiBold)
+}
+
+/** One tap per nibble: the bites, handfuls and tastes that feel like they don't count. */
+@Composable
+fun NibbleRow(date: LocalDate, onLogged: (Macros) -> Unit) {
+    val tk = t()
+    val st by Store.state.collectAsState()
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        for (nb in st.foods.nibbles) {
+            Column(Modifier.clip(RoundedCornerShape(16.dp)).background(tk.sunk).clickable { Store.addNibble(date, nb.id); onLogged(nb.m) }
+                .padding(horizontal = 12.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(nb.icon, fontSize = 20.sp)
+                Text(nb.name, fontSize = 11.sp, color = tk.fg, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                Text("${nb.m.kcal}", fontSize = 10.sp, color = tk.muted)
+            }
+        }
+    }
 }
 
 /** Today's Eat card: numbers, the plan's meals as one-tap logs, what's been logged, and the food box. */
@@ -137,7 +157,15 @@ fun EatCard(day: Day?, date: LocalDate) {
                 }
             }
         }
-        val extra = entries.filter { it.plan.isEmpty() }
+        val extra = entries.filter { it.plan.isEmpty() && it.src != "nibble" }
+        val nibs = entries.filter { it.src == "nibble" }
+        if (nibs.isNotEmpty()) {
+            Spacer(Modifier.height(4.dp))
+            RowItem(lead = { Text("🤏", fontSize = 20.sp) }, title = "${nibs.size} ${if (nibs.size == 1) "nibble" else "nibbles"}",
+                sub = "${n(nibs.sumOf { it.kcal })} kcal · " + nibs.groupBy { it.name }.entries.joinToString(", ") { "${it.value.size} ${it.key.lowercase()}" }) {
+                Text("−", Modifier.clip(CircleShape).clickable { Store.deleteFood(date, nibs.last().id) }.padding(horizontal = 12.dp, vertical = 6.dp), color = tk.muted, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            }
+        }
         if (extra.isNotEmpty()) {
             Spacer(Modifier.height(4.dp))
             for (e in extra) RowItem(lead = { Dot(tk.eat) }, title = e.name + if (e.qty != 1.0) " ×${fmtQty(e.qty)}" else "",
@@ -193,6 +221,8 @@ fun FoodLogger(date: LocalDate, autoFocus: Boolean, onLogged: (Macros) -> Unit) 
         onLogged(m)
     }
 
+    NibbleRow(date) { onLogged(it) }
+    Spacer(Modifier.height(10.dp))
     OutlinedTextField(text, { text = it }, Modifier.fillMaxWidth().focusRequester(focus),
         placeholder = { Text("skyline 3-way, 2 coneys") }, label = { Text("What did you eat?") },
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, imeAction = ImeAction.Done),
@@ -281,6 +311,10 @@ class FoodActivity : ComponentActivity() {
                 }
                 Spacer(Modifier.height(14.dp))
                 FoodLogger(today, autoFocus = next == null) { done(it) }
+                Spacer(Modifier.height(14.dp))
+                Text("🥫  Ran out of something?", Modifier.clip(RoundedCornerShape(12.dp)).clickable {
+                    Store.count("food:kitchen"); runCatching { startActivity(Links.intent(this@FoodActivity, "app:kitchen", "food")) }; finish()
+                }.padding(vertical = 8.dp), color = tk.accent, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
         }
     }

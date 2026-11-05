@@ -274,7 +274,7 @@ async function load() {
   if (!S.token) return;
   S.loading = true; render();
   try {
-    const names = ["social/calendar.md", "inbox.md", "me/recovery.md", "body/program.md", "music/piano.md", "music/voice.md", "music/guitar.md", "meals/freezer.md", "social/ideas.md", "social/trips.md", "me/profile.md", "meals/foods.md", "body/moves.md"];
+    const names = ["social/calendar.md", "inbox.md", "me/recovery.md", "body/program.md", "music/piano.md", "music/voice.md", "music/guitar.md", "meals/freezer.md", "social/ideas.md", "social/trips.md", "me/profile.md", "meals/foods.md", "body/moves.md", "meals/pantry.md"];
     const [weekIds, groceryIds, recipeIds, ...txt] = await Promise.all([listDir("weeks"), listDir("groceries"), listDir("meals/recipes"), ...names.map(file)]);
     const T = Object.fromEntries(names.map((n, i) => [n, txt[i]]));
     const weeks = await Promise.all(weekIds.sort().map(async id => parseWeek(id, await file(`weeks/${id}.md`))));
@@ -284,7 +284,7 @@ async function load() {
     const setup = parseChecklists(T["me/recovery.md"])[0];
     S.plan = { v: 2, built: new Date().toISOString(), weeks, calendar: c.events, watching: c.watching, inbox: parseInbox(T["inbox.md"]), setup: setup ? setup.items : [], groceries, recipes,
       program: parseProgram(T["body/program.md"]), piano: parseMusic(T["music/piano.md"]), voice: parseMusic(T["music/voice.md"]), guitar: parseMusic(T["music/guitar.md"]),
-      freezer: parseFreezer(T["meals/freezer.md"]), recovery: parseRecovery(T["me/recovery.md"]), ideas: parseIdeas(T["social/ideas.md"]), trips: parseTrips(T["social/trips.md"]), profile: parseProfile(T["me/profile.md"]), profileMd: T["me/profile.md"], foodsMd: T["meals/foods.md"], moves: parseMoves(T["body/moves.md"]) };
+      freezer: parseFreezer(T["meals/freezer.md"]), recovery: parseRecovery(T["me/recovery.md"]), ideas: parseIdeas(T["social/ideas.md"]), trips: parseTrips(T["social/trips.md"]), profile: parseProfile(T["me/profile.md"]), profileMd: T["me/profile.md"], foodsMd: T["meals/foods.md"], kitchen: parseChecklists(T["meals/pantry.md"] || "").map(x => ({ ...x, items: x.items.map(i => ({ ...i, key: keyOf(i.text.split(" · ")[0]) })) })), moves: parseMoves(T["body/moves.md"]) };
     store.set("planlab-cache", JSON.stringify(S.plan));
     S.error = "";
     pullLog();
@@ -588,7 +588,16 @@ function macroBar(label, have, want, unit, tone) { const f = want ? Math.min(1, 
 function eatTotals(date) {
   const have = PlanFood.totals(foodOn(date)), want = foodTargets();
   return `<div class="eat-top"><div class="hero-ring eat-ring">${ring(have.kcal, want.kcal, 88)}<span class="ring-n">${fmtN(have.kcal)}<small>of ${fmtN(want.kcal)}</small></span></div>
-    <div class="macs">${macroBar("Protein", have.protein_g, want.protein_g, "g", "t-eat")}${macroBar("Carbs", have.carbs_g, want.carbs_g, "g", "t-acc")}${macroBar("Fat", have.fat_g, want.fat_g, "g", "t-fat")}</div></div>`;
+    <div class="macs">${macroBar("Protein", have.protein_g, want.protein_g, "g", "t-eat")}${macroBar("Carbs", have.carbs_g, want.carbs_g, "g", "t-acc")}${macroBar("Fat", have.fat_g, want.fat_g, "g", "t-fat")}</div></div>`
+    + nibbleLine(date);
+}
+function nibbleLine(date) { const nb = PlanFood.nibbles(foodOn(date)); return nb.n ? `<p class="nibline">🤏 ${nb.n} ${nb.n === 1 ? "nibble" : "nibbles"} · ${fmtN(nb.kcal)} kcal of it</p>` : ""; }
+// One tap per nibble: the bites, handfuls and tastes that don't feel like they count.
+function nibbleChips() { const list = (FOODDB && FOODDB.nibbles) || PlanFood.NIBBLES;
+  return `<div class="nibs" role="group" aria-label="Nibbles">${list.map(n => `<button class="nib" data-nib="${esc(n.id)}"><span class="nib-i">${n.icon}</span><span class="nib-n">${esc(n.name)}</span><span class="nib-k">${n.kcal}</span></button>`).join("")}</div>`; }
+function addNibble(id) {
+  const list = (FOODDB && FOODDB.nibbles) || PlanFood.NIBBLES, n = list.find(x => x.id === id) || list[0];
+  putFood(S.day, newId() + Math.floor(Math.random() * 10), PlanFood.nibbleEntry(n, nowAt())); eng("web_nibble"); render();
 }
 function viewEat(day, date) {
   const list = foodOn(date);
@@ -598,9 +607,12 @@ function viewEat(day, date) {
     const on = list.some(e => e.plan === x.key);
     return checkRow(`data-ate="${esc(x.key)}"`, on, `${cap(p.meal)} · ${esc(p.name)}`, `${p.protein_g} g protein · ${p.src === "plan-est" ? "~" : ""}${fmtN(p.kcal)} kcal${on ? " · logged" : " · tap when eaten"}`);
   }).join("");
-  const extra = list.filter(e => !e.plan).map(e => `<div class="row has-tail"><span class="dot eat"></span><span class="rt"><span class="rl">${esc(e.name)}${e.qty !== 1 ? ` ×${+(+e.qty).toFixed(2)}` : ""}</span><span class="rs">${esc(e.at)} · ${fmtN(e.kcal)} kcal · ${e.protein_g} g protein${e.src === "guess" ? " · not found, Claude checks it" : ""}</span></span><button class="tailbtn" data-delfood="${esc(e.id)}" aria-label="Remove">${IC.close}</button></div>`).join("");
+  const nibs = list.filter(e => e.src === "nibble");
+  const nibRow = nibs.length ? `<div class="row has-tail"><span class="nib-i">🤏</span><span class="rt"><span class="rl">${nibs.length} ${nibs.length === 1 ? "nibble" : "nibbles"}</span><span class="rs">${fmtN(nibs.reduce((a, e) => a + e.kcal, 0))} kcal · ${Object.entries(nibs.reduce((m, e) => (m[e.name] = (m[e.name] || 0) + 1, m), {})).map(([k, v]) => `${v} ${esc(k.toLowerCase())}`).join(", ")}</span></span><button class="tailbtn" data-delfood="${esc(nibs.at(-1).id)}" aria-label="Remove one">−</button></div>` : "";
+  const extra = list.filter(e => !e.plan && e.src !== "nibble").map(e => `<div class="row has-tail"><span class="dot eat"></span><span class="rt"><span class="rl">${esc(e.name)}${e.qty !== 1 ? ` ×${+(+e.qty).toFixed(2)}` : ""}</span><span class="rs">${esc(e.at)} · ${fmtN(e.kcal)} kcal · ${e.protein_g} g protein${e.src === "guess" ? " · not found, Claude checks it" : ""}</span></span><button class="tailbtn" data-delfood="${esc(e.id)}" aria-label="Remove">${IC.close}</button></div>`).join("");
   return `<section class="sec">${lab("Eat")}<div class="card eat">${eatTotals(date)}
-    ${planned || extra ? `<div class="list compact">${planned}${extra}</div>` : ""}
+    ${planned || extra || nibRow ? `<div class="list compact">${planned}${extra}${nibRow}</div>` : ""}
+    ${nibbleChips()}
     <form id="foodform" class="foodform"><input id="food-text" autocomplete="off" placeholder="What did you eat? e.g. skyline 3-way, 2 coneys" aria-label="What did you eat?"><div id="food-preview"></div></form></div></section>`;
 }
 let FOODROWS = [], foodTimer = null;
@@ -691,7 +703,7 @@ function viewSoon() {
 
 function viewFood() {
   const mode = S.food || "list";
-  let h = hero("Eat well, cook less", "Food") + `<div class="seg three" role="tablist">${[["list", "Kroger list"], ["recipes", "Recipes"], ["freezer", "Freezer"]].map(([k, l]) => `<button role="tab" aria-selected="${mode === k}" data-food="${k}">${l}</button>`).join("")}</div>`;
+  let h = hero("Eat well, cook less", "Food") + `<div class="seg four" role="tablist">${[["list", "Kroger"], ["kitchen", "Kitchen"], ["recipes", "Recipes"], ["freezer", "Freezer"]].map(([k, l]) => `<button role="tab" aria-selected="${mode === k}" data-food="${k}">${l}</button>`).join("")}</div>`;
   if (mode === "list") {
     const g = (S.plan?.groceries || []).at(-1);
     if (!g) return h + `<div class="empty">${IC.food}<p>${!S.plan ? "Loading…" : "No list this week."}</p></div>`;
@@ -703,6 +715,18 @@ function viewFood() {
       const left = s.items.filter(i => !tickGet(id, i)).length;
       const kr = i => `<a class="tailbtn" href="https://www.kroger.com/search?query=${encodeURIComponent(krogerQuery(i.text))}" target="_blank" rel="noopener" aria-label="Find ${esc(krogerQuery(i.text))} at Kroger">${IC.search}</a>`;
       h += `<section class="sec">${lab(`${esc(s.name)} <span class="cnt">${left ? left + " left" : "done"}</span>`)}<div class="card list compact">${[...s.items.filter(i => !tickGet(id, i)), ...s.items.filter(i => tickGet(id, i))].map(i => checkRow(`data-list="${id}" data-item="${i.key}"`, tickGet(id, i), esc(i.text), "", /^already/i.test(s.name) ? "" : kr(i))).join("")}</div></section>`;
+    }
+  } else if (mode === "kitchen") {
+    // What's on hand. Claude keeps it from the Kroger list, what's cooked and what's logged; Matt only says what ran out.
+    const secs = S.plan?.kitchen || [], all = secs.flatMap(x => x.items), outs = S.log.ticks["pantry-out"] || {};
+    const extra = Object.keys(outs).filter(k => outs[k] === true && !all.some(i => i.key === k));
+    h += `<form id="outform" class="foodform"><input id="out-text" autocomplete="off" placeholder="Ran out of… e.g. olive oil" aria-label="Ran out of"></form>`;
+    if (extra.length) h += `<p class="rs">Out: ${extra.map(k => esc(k.replace(/-/g, " "))).join(", ")}. On the next Kroger list.</p>`;
+    if (!secs.length) return h + `<div class="empty">${IC.food}<p>${!S.plan ? "Loading…" : "Claude fills this in from your Kroger list."}</p></div>`;
+    h += `<p class="rs">Tap what ran out. It goes on the next Kroger list.</p>`;
+    for (const x of secs) {
+      const out = x.items.filter(i => tickGet("pantry-out", i)).length;
+      h += `<section class="sec">${lab(`${esc(x.name)}${out ? ` <span class="cnt">${out} out</span>` : ""}`)}<div class="card list compact">${[...x.items.filter(i => !tickGet("pantry-out", i)), ...x.items.filter(i => tickGet("pantry-out", i))].map(i => checkRow(`data-list="pantry-out" data-item="${i.key}"`, tickGet("pantry-out", i), esc(i.text), "")).join("")}</div></section>`;
     }
   } else if (mode === "recipes") {
     const rs = S.plan?.recipes || [];
@@ -907,7 +931,7 @@ function goTarget(t) {
   if (["body", "pelvic", "piano", "voice", "meals"].includes(k)) { if (S.tab !== "today") goTab("today"); openKind(k); }
   else if ((k === "recipe" || k === "cook") && arg) show("recipe", () => drawRecipe(arg));
   else if (k === "move" && arg) show("move", () => drawMove(arg));
-  else if (k === "kroger" || k === "freezer" || k === "recipes") { S.food = k === "kroger" ? "list" : k; goTab("food"); }
+  else if (k === "kroger" || k === "freezer" || k === "recipes" || k === "kitchen") { S.food = k === "kroger" ? "list" : k; goTab("food"); }
   else if (k === "calendar" || k === "inbox" || k === "wish") { goTab("soon"); if (k === "wish") setTimeout(() => document.getElementById("capture-text")?.focus(), 50); }
   else if (k === "bugs") { const text = prompt("What bugs you? A mess, a chore, anything you keep walking past."); if (text?.trim()) gh("issues", { method: "POST", body: JSON.stringify({ title: `Bugs me: ${text.trim().slice(0, 80)}`, body: `Captured on planLAB web on ${nice(todayIso())}. Claude: turn it into steps.` }) }).catch(() => alert("Couldn't send it. Try again online.")); }
   else if (VALID.includes(k)) goTab(k);
@@ -950,6 +974,7 @@ document.addEventListener("click", async e => {
   if ((el = q("[data-food]"))) { S.food = el.dataset.food; render(); return; }
   if ((el = q("[data-go]"))) { S.day = addDays(S.day, +el.dataset.go); render(); return; }
   if ((el = q("[data-ate]"))) { try { navigator.vibrate && navigator.vibrate(8); } catch {} atePlanned(el.dataset.ate); return; }
+  if ((el = q("[data-nib]"))) { try { navigator.vibrate && navigator.vibrate(8); } catch {} addNibble(el.dataset.nib); return; }
   if ((el = q("[data-delfood]"))) { putFood(S.day, el.dataset.delfood, null); render(); return; }
   if ((el = q("[data-falt]"))) { const r = FOODROWS[+el.dataset.falt]; if (r?.alts.length > 1) { const j = (r.alts.indexOf(r.food) + 1) % r.alts.length; r.food = r.alts[j]; r.scale = r.qty; redrawRows(); } return; }
   if ((el = q("[data-fq]"))) { const r = FOODROWS[+el.dataset.fq]; if (r) { const s = r.scale; r.scale = +el.dataset.d > 0 ? (s < 1 ? s * 2 : s + 1) : (s > 1 ? s - 1 : Math.max(0.25, s / 2)); redrawRows(); } return; }
@@ -957,7 +982,7 @@ document.addEventListener("click", async e => {
   if ((el = q("[data-jump]"))) { S.day = el.dataset.jump; goTab("today"); return; }
   if ((el = q("[data-list]"))) {
     const list = el.dataset.list, key = el.dataset.item;
-    const pool = withSteps(list === "inbox" ? inboxItems() : list === "setup" ? S.plan.setup : list.startsWith("groceries-") ? (S.plan.groceries.find(g => `groceries-${g.week}` === list)?.sections.flatMap(s => s.items) || []) : (findDay(list)?.boxes || []));
+    const pool = withSteps(list === "inbox" ? inboxItems() : list === "setup" ? S.plan.setup : list === "pantry-out" ? (S.plan.kitchen || []).flatMap(x => x.items) : list.startsWith("groceries-") ? (S.plan.groceries.find(g => `groceries-${g.week}` === list)?.sections.flatMap(s => s.items) || []) : (findDay(list)?.boxes || []));
     const item = pool.find(x => x.key === key); if (!item) return;
     store.set("planlab-tip2", "1");
     try { navigator.vibrate && navigator.vibrate(8); } catch {}
@@ -971,6 +996,7 @@ document.addEventListener("submit", async e => {
     S.token = v; S.badKey = false; S.error = ""; setSync("unknown"); store.set("planlab-key", v); render(); load(); return;
   }
   if (e.target.id === "foodform") { logFood(); return; }
+  if (e.target.id === "outform") { const inp = document.getElementById("out-text"), k = keyOf(inp.value.trim()); if (k) { tickPut("pantry-out", k, true); eng("web_out"); render(); } return; }
   if (e.target.id !== "capture") return;
   const inp = document.getElementById("capture-text"), text = inp.value.trim(); if (!text) { inp.focus(); return; }
   const btn = document.getElementById("capture-btn"); btn.disabled = true;

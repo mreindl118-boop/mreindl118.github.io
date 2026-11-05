@@ -47,3 +47,12 @@ test("nothing found stays a guess", () => {
   assert.equal(r.food, null);
   assert.equal(F.entryOf(r).src, "guess");
 });
+test("nibbles: one tap each, counted apart (same as FoodTest.nibblesAreOneTapAndCounted)", () => {
+  assert.deepStrictEqual(db.nibbles, F.NIBBLES);
+  assert.deepStrictEqual(F.table({ foods: [] }).nibbles, F.NIBBLES);
+  const bite = db.nibbles.find(n => n.id === "bite"), e = F.nibbleEntry(bite, "21:05");
+  assert.deepStrictEqual([e.src, e.meal, e.kcal, e.name], ["nibble", "snack", 80, "A bite"]);
+  const meal = F.entryOf(F.lookup("2 coneys skyline", db)[0], { at: "12:00", meal: "lunch" });
+  assert.deepStrictEqual(F.nibbles([e, meal, e, null]), { n: 2, kcal: 160 });
+  assert.equal(F.totals([e, meal, e]).kcal, 720);
+});

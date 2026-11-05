@@ -1,4 +1,4 @@
-{"v":1,"updated":"2026-11-04","note":"planLAB's built-in food table. Chain numbers are approximate, from each chain's published nutrition where known; Claude refines them in Matt's private meals/foods.md, which wins over this table. Columns: brand, name, serving, kcal, protein g, carbs g, fat g, other names.","brands":{"Skyline":["skyline","skyline chili"],"Gold Star":["gold star","goldstar","gold star chili"],"LaRosa's":["larosas","larosa","la rosas"],"Graeter's":["graeters","graeter"],"Montgomery Inn":["montgomery inn","monty inn"],"Penn Station":["penn station"],"City Barbeque":["city bbq","city barbeque","city barbecue"],"Frisch's":["frischs","frisch","big boy"],"Dewey's":["deweys","dewey"],"Chipotle":["chipotle"],"Chick-fil-A":["chick fil a","chickfila","cfa","chik fil a"],"McDonald's":["mcdonalds","mcdonald","mcds","mickey ds"],"Wendy's":["wendys","wendy"],"Taco Bell":["taco bell"],"Raising Cane's":["canes","raising canes","cane"],"Five Guys":["five guys","5 guys"],"Jimmy John's":["jimmy johns","jj"],"Subway":["subway"],"Starbucks":["starbucks","sbux"],"Panera":["panera"],"Kroger":["kroger"]},"foods":[
+{"v":1,"updated":"2026-11-05","note":"planLAB's built-in food table. Chain numbers are approximate, from each chain's published nutrition where known; Claude refines them in Matt's private meals/foods.md, which wins over this table. Columns: brand, name, serving, kcal, protein g, carbs g, fat g, other names. Nibbles: id, icon, name, kcal, protein g, carbs g, fat g, one-tap numbers for the small bites that feel like they don't count.","brands":{"Skyline":["skyline","skyline chili"],"Gold Star":["gold star","goldstar","gold star chili"],"LaRosa's":["larosas","larosa","la rosas"],"Graeter's":["graeters","graeter"],"Montgomery Inn":["montgomery inn","monty inn"],"Penn Station":["penn station"],"City Barbeque":["city bbq","city barbeque","city barbecue"],"Frisch's":["frischs","frisch","big boy"],"Dewey's":["deweys","dewey"],"Chipotle":["chipotle"],"Chick-fil-A":["chick fil a","chickfila","cfa","chik fil a"],"McDonald's":["mcdonalds","mcdonald","mcds","mickey ds"],"Wendy's":["wendys","wendy"],"Taco Bell":["taco bell"],"Raising Cane's":["canes","raising canes","cane"],"Five Guys":["five guys","5 guys"],"Jimmy John's":["jimmy johns","jj"],"Subway":["subway"],"Starbucks":["starbucks","sbux"],"Panera":["panera"],"Kroger":["kroger"]},"foods":[
 ["Skyline","Cheese coney","1 coney",280,12,19,17,"coney|cheese coney|coneys"],
 ["Skyline","Coney, no cheese","1 coney",210,8,18,12,"plain coney"],
 ["Skyline","Regular 3-way","1 regular",710,32,66,36,"3way|three way|3 way"],
@@ -159,4 +159,11 @@
 ["","Liquor, a shot","1.5 oz",100,0,0,0,"shot|bourbon|whiskey|vodka|tequila"],
 ["","Soda","12 oz can",140,0,39,0,"soda|coke|pop|pepsi"],
 ["","Coffee, black","1 cup",5,0,0,0,"coffee"],
-["","Orange juice","1 cup",110,2,26,0,"orange juice|oj|juice"]]}
+["","Orange juice","1 cup",110,2,26,0,"orange juice|oj|juice"]],
+"nibbles":[
+["bite","🤏","A bite",80,2,9,4],
+["handful","✊","Handful",150,3,16,8],
+["sweet","🍪","Sweet",120,1,17,5],
+["cheese","🧀","Cheese",100,6,1,8],
+["spoon","🥄","Spoon of PB",95,4,3,8],
+["sip","🥤","Sweet drink",140,0,36,0]]}

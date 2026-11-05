@@ -43,7 +43,13 @@ data class Macros(val kcal: Int = 0, val protein: Int = 0, val carbs: Int = 0, v
 
 data class Planned(val meal: String, val name: String, val m: Macros, val src: String)
 
-class FoodDb(val brands: List<Pair<String, List<String>>>, val foods: List<Food>) {
+/** A nibble: the small bites that "don't count" but add up. One tap logs one, with a typical number. */
+data class Nibble(val id: String, val icon: String, val name: String, val m: Macros)
+
+class FoodDb(val brands: List<Pair<String, List<String>>>, val foods: List<Food>, nibbles: List<Nibble> = emptyList()) {
+    /** The table's nibble list, or the built-in one if the table has none. */
+    val nibbles: List<Nibble> = nibbles.ifEmpty { Foods.NIBBLES }
+
     companion object {
         val EMPTY = FoodDb(emptyList(), emptyList())
         fun parse(json: String?): FoodDb = runCatching {
@@ -55,7 +61,12 @@ class FoodDb(val brands: List<Pair<String, List<String>>>, val foods: List<Food>
                 val r = fa.getJSONArray(i)
                 Foods.food(r.getString(0), r.getString(1), r.getString(2), r.getDouble(3), r.getDouble(4), r.getDouble(5), r.getDouble(6), r.optString(7), if (r.getString(0).isEmpty()) "table" else "chain")
             }
-            FoodDb(brands.sortedByDescending { it.second.size }, foods)
+            val na = o.optJSONArray("nibbles")
+            val nibbles = if (na == null) emptyList() else (0 until na.length()).mapNotNull { i ->
+                val r = na.optJSONArray(i) ?: return@mapNotNull null
+                Nibble(r.getString(0), r.getString(1), r.getString(2), Macros(r.getInt(3), r.getInt(4), r.getInt(5), r.getInt(6)))
+            }
+            FoodDb(brands.sortedByDescending { it.second.size }, foods, nibbles)
         }.getOrDefault(EMPTY)
     }
 }
@@ -230,6 +241,22 @@ object Foods {
         val h = t.hour + t.minute / 60.0
         return when { h < 10.5 -> "breakfast"; h < 14.5 -> "lunch"; h < 17 -> "snack"; h < 21 -> "dinner"; else -> "snack" }
     }
+
+    /** Used when foods.json has no "nibbles" list. Keep in step with it and with NIBBLES in food.js. */
+    val NIBBLES = listOf(
+        Nibble("bite", "🤏", "A bite", Macros(80, 2, 9, 4)),
+        Nibble("handful", "✊", "Handful", Macros(150, 3, 16, 8)),
+        Nibble("sweet", "🍪", "Sweet", Macros(120, 1, 17, 5)),
+        Nibble("cheese", "🧀", "Cheese", Macros(100, 6, 1, 8)),
+        Nibble("spoon", "🥄", "Spoon of PB", Macros(95, 4, 3, 8)),
+        Nibble("sip", "🥤", "Sweet drink", Macros(140, 0, 36, 0)),
+    )
+
+    fun nibbleEntry(n: Nibble, id: String, at: String): FoodEntry =
+        FoodEntry(id, at, "nibble: ${n.id}", n.name, 1.0, n.m.kcal, n.m.protein, n.m.carbs, n.m.fat, "nibble", "snack")
+
+    /** Today's nibbles: how many, and their calories. */
+    fun nibbles(list: List<FoodEntry>): Pair<Int, Int> = list.filter { it.src == "nibble" }.let { it.size to it.sumOf { e -> e.kcal } }
 
     fun totals(list: List<FoodEntry>): Macros = list.fold(Macros()) { a, e -> a + Macros(e.kcal, e.protein, e.carbs, e.fat) }
 

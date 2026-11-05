@@ -36,7 +36,9 @@ enum class Slot(val label: String, val time: LocalTime, val notifId: Int) {
     // Mindful check-ins: times from the day's "### mind" steps ("Check-in 1 at 11:45, 1 min: …").
     MIND_1("Check-ins", LocalTime.of(11, 45), 24),
     MIND_2("Check-ins", LocalTime.of(16, 30), 25),
-    MIND_3("Check-ins", LocalTime.of(20, 30), 26);
+    MIND_3("Check-ins", LocalTime.of(20, 30), 26),
+    // Nibbles: the bites that don't feel like they count. A late recall, one tap each.
+    NIBBLES("Nibble check", LocalTime.of(21, 0), 27);
 
     /** The box whose timed steps this slot follows ("move" or "mind"), else null. */
     val group: String? get() = when { name.startsWith("MOVE_") -> "move"; name.startsWith("MIND_") -> "mind"; else -> null }
@@ -129,12 +131,13 @@ class ActionReceiver : BroadcastReceiver() {
             "pelvic" -> Store.pelvicSet(date)
             "elevate" -> Store.addCount(date, "elevate")
             "mind" -> Store.addCount(date, "mind")
+            "nibble" -> Store.addNibble(date, key.ifEmpty { "bite" })
             "ateplan" -> { val day = Store.state.value.plan.day(date); val step = Store.nextPlanned(date); if (day != null && step != null) Store.logPlanned(day, step) }
             "snooze" -> slot?.let { Alarms.snooze(ctx, it, if (min > 0) min else 60) }
         }
         if (notif != 0) Notifier.cancel(ctx, notif)
         // A step done from a banner brings the banner back with the next step.
-        if (act == "step" && slot != null && date == LocalDate.now()) Notifier.fire(ctx, slot)
+        if ((act == "step" || act == "nibble") && slot != null && date == LocalDate.now()) Notifier.fire(ctx, slot)
         val p = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try { Notifier.refreshPinned(ctx); runCatching { Widgets.updateAll(ctx) } } finally { p.finish() }

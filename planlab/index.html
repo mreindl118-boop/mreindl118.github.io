@@ -156,6 +156,13 @@ h1, h2, p { margin: 0; }
 .bar i.t-eat { background: var(--eat); } .bar i.t-acc { background: var(--accent); } .bar i.t-fat { background: var(--fat); }
 .dot.eat { background: var(--eat); }
 .card.eat .list { margin-top: 8px; }
+.nibs { display: flex; gap: 8px; overflow-x: auto; margin-top: 10px; padding-bottom: 2px; scrollbar-width: none; }
+.nib { flex: 0 0 auto; display: grid; justify-items: center; gap: 1px; min-width: 64px; min-height: 48px; padding: 8px 10px; border: 0; border-radius: 16px; background: var(--sunk); color: var(--fg); font: inherit; cursor: pointer; }
+.nib:active { transform: scale(.96); }
+.nib-i { font-size: 20px; line-height: 1.1; }
+.nib-n { font-size: 11px; font-weight: 600; white-space: nowrap; }
+.nib-k { font-size: 10px; color: var(--muted); }
+.nibline { margin: 8px 0 0; font-size: 13px; font-weight: 600; color: var(--muted); }
 .foodform { margin-top: 10px; display: grid; gap: 6px; }
 .foodform input { width: 100%; min-height: 48px; padding: 12px 14px; border-radius: var(--r-ctl); border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; }
 .foodform input:focus { outline: none; border-color: var(--eat); }
@@ -290,6 +297,7 @@ h1, h2, p { margin: 0; }
 .center { text-align: center; justify-self: center; }
 .pad { padding: 16px; }
 .seg.three { grid-template-columns: repeat(3, 1fr); }
+.seg.four { grid-template-columns: repeat(4, 1fr); }
 .seg.two .primary { background: var(--accent); color: var(--accent-ink); }
 .segbtn { min-height: 44px; box-shadow: var(--shadow); color: var(--accent); }
 .segbtn svg { width: 16px; height: 16px; }
