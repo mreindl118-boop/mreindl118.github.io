@@ -501,3 +501,20 @@ a:active { color: var(--clay); }
 .foot a:active, .foot-slim a:active { color: var(--moss); }
 .vbtn:active, .thumbbtn:active, .cmp-chips button:active { border-color: var(--clay); color: var(--clay); }
 .chip:active { color: var(--clay); }
+/* the controls also give a little under the finger: 0.97 on press, back in 160ms. Pointer presses
+   only (a Space-key press stays still), and none under reduced motion, where the colour stays */
+.btn, .btn-outline, .vbtn, .chip, .thumbbtn, .cmp-chips button { transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.btn:active:not(:focus-visible),
+.btn-outline:active:not(:focus-visible),
+.vbtn:active:not(:focus-visible),
+.chip:active:not(:focus-visible),
+.thumbbtn:active:not(:focus-visible),
+.cmp-chips button:active:not(:focus-visible) { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+  .btn:active:not(:focus-visible),
+  .btn-outline:active:not(:focus-visible),
+  .vbtn:active:not(:focus-visible),
+  .chip:active:not(:focus-visible),
+  .thumbbtn:active:not(:focus-visible),
+  .cmp-chips button:active:not(:focus-visible) { transform: none; }
+}

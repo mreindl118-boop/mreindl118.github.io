@@ -220,6 +220,9 @@ Diagonal hatching marks placeholders.
   an `:active` twin that shows the same colour only while a finger or button is down. The browser's
   tap flash is off (`-webkit-tap-highlight-color: transparent`). Viewer buttons, drawing tabs and
   chips have no hover; they press to clay (border and text), like the outline button.
+- **Press give:** buttons, viewer buttons, tabs and chips also scale to 0.97 while pressed and
+  return over 160ms on `cubic-bezier(0.23, 1, 0.32, 1)`; pointer presses only (`:not(:focus-visible)`,
+  so a Space-key press stays still), and none under reduced motion, where the colour remains.
 - **Mono link:** uppercase mono 12px pine link with an arrow ("View project →"). The arrow says
   where it goes: → opens a page, ↓ downloads a file ("Download PDF ↓", "vCard ↓"), ↗ leaves the site.
 
