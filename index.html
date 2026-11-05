@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F3F0E8">
 <title>Understory Design Studio — Matthew Reindl · Landscape Architecture</title>
 <meta name="description" content="Portfolio of Matthew Reindl, Cincinnati-based emerging landscape architect. Ecological public landscapes where flood resilience, recreation, planting systems, and clear visual storytelling work together.">
 <link rel="canonical" href="https://www.understorydesignstudio.com/">
@@ -27,7 +28,7 @@
       <span class="brand-lockup"><span class="brand-name">Understory</span><span class="brand-sub">Design Studio</span></span>
     </a>
     <div class="navlinks">
-      <a href="index.html" class="active"><span>Home</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
+      <a href="index.html" class="active" aria-current="page"><span>Home</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
       <a href="work.html"><span>Projects</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
       <a href="about.html"><span>About</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
       <a href="resume.html"><span>Experience</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
@@ -148,7 +149,7 @@
     if (visible.length >= 2) {
       document.getElementById('recent').innerHTML =
         visible.filter(function (p) { return p.slug !== FEATURED; }).slice(0, 3)
-          .map(function (p) { return US.projectCard(p, false); }).join('');
+          .map(function (p) { return US.projectCard(p, false, null, 3); }).join('');
       document.getElementById('recent-section').hidden = false;
     }
   }).catch(function (e) { console.warn('projects failed', e); });

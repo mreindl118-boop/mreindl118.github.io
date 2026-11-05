@@ -137,16 +137,20 @@
 
   /* Project card markup shared by home + work pages. Passing `lede` (a sentence) makes it
      the Projects page's lead card: the text is wrapped beside the cover and the sentence
-     added, shown only where the grid gives that card a full row (site.css .card-lead). */
-  function projectCard(p, withSoftware, lede) {
+     added, shown only where the grid gives that card a full row (site.css .card-lead).
+     `level` is the title's heading level: 2 on Projects, 3 under Home's "Recent Work" h2.
+     The cover is decorative beside the title (alt=""), so the link's name is the card's own
+     text, read once, in the order it is seen (WCAG 2.5.3: the name holds the visible text). */
+  function projectCard(p, withSoftware, lede, level) {
+    var h = 'h' + (level === 2 ? 2 : 3);
     var cover = p.cover
-      ? '<div class="cover"><img src="content/projects/' + esc(p.cover) + '" alt="' + esc(p.title) + ' — cover drawing" loading="lazy" onerror="this.parentNode.classList.add(\'ph\');this.parentNode.innerHTML=\'<span class=&quot;ph-label&quot;>cover — coming soon</span>\'"></div>'
+      ? '<div class="cover"><img src="content/projects/' + esc(p.cover) + '" alt="" loading="lazy" onerror="this.parentNode.classList.add(\'ph\');this.parentNode.innerHTML=\'<span class=&quot;ph-label&quot;>cover — coming soon</span>\'"></div>'
       : '<div class="cover ph"><span class="ph-label">cover — coming soon</span></div>';
     var lead = lede != null;
     return '<a class="card' + (lead ? ' card-lead' : '') + '" href="project.html?slug=' + esc(p.slug) + '">' +
       cover + (lead ? '<div class="card-text">' : '') +
       '<div class="card-type">' + [clean(p.type), clean(p.scale)].filter(Boolean).map(esc).join(' · ') + '</div>' +
-      '<div class="card-titlerow"><span class="card-title">' + esc(p.title) + '</span><span class="card-year">' + esc(yearOf(p)) + '</span></div>' +
+      '<div class="card-titlerow"><' + h + ' class="card-title">' + esc(p.title) + '</' + h + '><span class="card-year">' + esc(yearOf(p)) + '</span></div>' +
       '<div class="card-sub">' + [clean(p.location), roleShort(p)].filter(Boolean).map(esc).join(' · ') + '</div>' +
       (withSoftware ? '<div class="card-soft">' + esc((p.software || []).join(' · ')) + '</div>' : '') +
       (lead ? (lede ? '<p class="card-lede">' + esc(lede) + '</p>' : '') + '</div>' : '') +
@@ -155,7 +159,10 @@
 
   /* Generic zoom/pan controller for a .vstage / .vsurface pair. At fit (100% or less)
      the stage takes no drag, so a finger on it scrolls the page (site.css: touch-action
-     pan-y pinch-zoom); once zoomed in, the stage is .zoomed and one pointer pans it. */
+     pan-y pinch-zoom); once zoomed in, the stage is .zoomed and one pointer pans it.
+     The stage also takes focus: zoomed in, the arrow keys pan it a tenth of its size; at
+     fit, left and right call opts.prev / opts.next (the viewer's own pages); + (or =) and -
+     zoom, 0 fits. Keyboard actions land at once, never animated. */
   function panZoom(stage, surface, badge, opts) {
     opts = opts || {};
     var st = { zoom: 1, tx: 0, ty: 0, drag: null };
@@ -165,6 +172,38 @@
       if (badge) badge.textContent = Math.round(st.zoom * 100) + '%' + (st.zoom > 1 ? ' · drag to pan' : '');
       if (opts.onZoom) opts.onZoom(st.zoom);
     }
+    // apply a change with the surface's transition switched off for that one step
+    function instant(change) {
+      surface.classList.add('dragging');
+      change();
+      void surface.offsetWidth;
+      if (!st.drag) surface.classList.remove('dragging');
+    }
+    function zoomIn() { st.zoom = Math.min(st.zoom * 1.4, opts.max || 6); apply(); }
+    function zoomOut() { st.zoom = Math.max(st.zoom / 1.4, 0.4); apply(); }
+    stage.tabIndex = 0;
+    stage.setAttribute('role', 'group');
+    stage.setAttribute('aria-label', 'Drawing viewer. Arrow keys pan when zoomed, plus and minus zoom, 0 fits.');
+    stage.addEventListener('keydown', function (e) {
+      // only the stage itself (not a button inside it, like Open booklet or Retry), and never a
+      // browser shortcut (Ctrl/Cmd + zooms the page, Alt+arrow goes back)
+      if (e.target !== stage || e.altKey || e.ctrlKey || e.metaKey) return;
+      var k = e.key, zoomed = st.zoom > 1;
+      var pan = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[k];
+      if (pan && zoomed) {
+        instant(function () {
+          st.tx += pan[0] * stage.clientWidth * 0.1;
+          st.ty += pan[1] * stage.clientHeight * 0.1;
+          apply();
+        });
+      } else if (k === 'ArrowLeft' && opts.prev) opts.prev();
+      else if (k === 'ArrowRight' && opts.next) opts.next();
+      else if (k === '+' || k === '=') instant(zoomIn);
+      else if (k === '-') instant(zoomOut);
+      else if (k === '0') fit(true);
+      else return;
+      e.preventDefault();
+    });
     stage.addEventListener('pointerdown', function (e) {
       if (opts.enabled && !opts.enabled()) return;
       // nothing to pan at fit, and a second finger never takes over (or jumps) the drag
@@ -188,24 +227,22 @@
     stage.addEventListener('pointerleave', endDrag);
     stage.addEventListener('pointercancel', endDrag);
     stage.addEventListener('lostpointercapture', endDrag);
+    /* fit(true) lands at fit with no transition: a new page or drawing must appear at
+       fit, not shrink from the last one's zoom. The FIT button calls fit() and eases. */
+    function fit(now) {
+      st.zoom = 1; st.tx = 0; st.ty = 0; st.drag = null;
+      if (now === true) {
+        instant(apply);
+      } else {
+        surface.classList.remove('dragging');
+        apply();
+      }
+    }
     apply();
     return {
-      zoomIn: function () { st.zoom = Math.min(st.zoom * 1.4, opts.max || 6); apply(); },
-      zoomOut: function () { st.zoom = Math.max(st.zoom / 1.4, 0.4); apply(); },
-      /* fit(true) lands at fit with no transition: a new page or drawing must appear at
-         fit, not shrink from the last one's zoom. The FIT button calls fit() and eases. */
-      fit: function (instant) {
-        st.zoom = 1; st.tx = 0; st.ty = 0; st.drag = null;
-        if (instant === true) {
-          surface.classList.add('dragging');
-          apply();
-          void surface.offsetWidth;
-          surface.classList.remove('dragging');
-        } else {
-          surface.classList.remove('dragging');
-          apply();
-        }
-      },
+      zoomIn: zoomIn,
+      zoomOut: zoomOut,
+      fit: fit,
       set: function (z) { st.zoom = z; apply(); },
       state: st
     };

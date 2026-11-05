@@ -88,7 +88,8 @@ The award-recognised capstone (Proctor Landing Park) leads the work.
 
 WCAG 2.2 AA. The site passed an axe-core audit with zero violations in October 2026; keep it
 there (contrast tokens, skip link, landmarks, visible focus, keyboard-operable viewers and
-sliders, tap targets of at least 24 px on phones, `prefers-reduced-motion` respected).
+sliders, tap targets of at least 24 px on phones and touch tablets, `prefers-reduced-motion`
+respected, smooth scrolling included).
 
 ### Privacy (standing, non-negotiable)
 

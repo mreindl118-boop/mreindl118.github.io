@@ -120,7 +120,8 @@ A warm, low-chroma paper-and-ink palette with accents taken from landscape mater
   the footer's brand mark). Never on paper, where it fails contrast.
 
 ### Neutral
-- **Drafting Paper** (paper): the page ground.
+- **Drafting Paper** (paper): the page ground, and every page's `theme-color`, so a phone's browser
+  chrome matches the paper nav.
 - **Trace Panel** (panel): viewer and card surfaces, one tone step above paper.
 - **Drawing Ink** (ink): body text, headings, structural rules, the dark footer field.
 - **Graphite** (muted) and **Faded Graphite** (faint): secondary text and labels; faint is
@@ -188,7 +189,8 @@ above a header row (`.rowhead`: title left, a mono link right). The nav is stick
 paper bar with a light backdrop blur and a hairline underneath. It is the only sticky element.
 In-page anchors (`#contact`, `#skills`) land 18px below it: `html` takes `scroll-padding-top` from
 the nav's measured height (`--nav-h`, set by `site.js`; 66px, 53px at 476–640px, 96px on two rows
-at 474px and below), so sections carry no scroll margins of their own.
+at 474px and below), so sections carry no scroll margins of their own. The jump glides (`scroll-behavior:
+smooth`) only for visitors who haven't asked for reduced motion.
 
 On Home the featured project is the page's one full-width picture: its whole master plan at the
 container width (never cropped), with the title in the left third and its sentence in the right
@@ -256,6 +258,9 @@ Diagonal hatching marks placeholders.
   so a Space-key press stays still), and none under reduced motion, where the colour remains.
 - **Mono link:** uppercase mono 12px pine link with an arrow ("View project →"). The arrow says
   where it goes: → opens a page, ↓ downloads a file ("Download PDF ↓", "vCard ↓"), ↗ leaves the site.
+- **Tap targets:** on phones and on touch tablets (`pointer: coarse`), mono, footer and contact links
+  take a 24px tap height (5px above and below) and range inputs 28px. The nav tabs are already 45px
+  tall from 641px, so only the phone nav takes its compact form.
 
 ### Chips (filters)
 - **Status:** retired from the Projects page (November 2026). With one type per project, 8 of the
@@ -273,11 +278,15 @@ Diagonal hatching marks placeholders.
 - **Internal Padding:** 16px above the content.
 - **Year label:** mono, always on one line; the title beside it wraps instead. Empty fields are
   left out of the card's `·` lines rather than leaving a stray separator.
+- **Title:** a real heading (an h2 on Projects, an h3 under Home's "Recent Work" h2), styled by
+  `.card-title` alone. The cover is decorative beside the title (`alt=""`), so the card link's name
+  is its own text, read once in the order it is seen (it must hold the visible text, WCAG 2.5.3).
 
 ### Navigation
 - Wordmark left (brand mark + "Understory / Design Studio"), four mono links right; the current
   tab carries the square–line–circle indicator in the mark's colours (pine square, leaf line,
-  clay ring), which glides to the next tab on click (honours reduced motion).
+  clay ring), which glides to the next tab on click (honours reduced motion). The current tab is
+  `aria-current="page"` (on a project page and the portfolio book, that is Projects).
 
 ### Viewers (signature component)
 Drawing set, portfolio book, capstone booklet and lightbox share one viewer: an ink-bordered
@@ -294,6 +303,16 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
   transition, never shrinking from the last one's zoom.
 - **Controls are not content:** viewer buttons, tabs and chips take `touch-action: manipulation`
   (quick taps flip pages, not zoom the page) and `user-select: none`; page zoom stays enabled.
+- **Keyboard:** each stage is focusable (Tab reaches it after the toolbar; a 2px pine ring inset
+  3px) and is a group named "Drawing viewer. Arrow keys pan when zoomed, plus and minus zoom, 0
+  fits." Zoomed in, the arrow keys pan a tenth of the stage; at fit, ← and → turn the viewer's own
+  pages (drawing set, portfolio book, booklet); + or = and − zoom, 0 fits. None of it animates
+  (no motion on keyboard actions). The portfolio's page-wide ← and → skip form fields and a
+  zoomed book. In the full-screen lightbox, Tab cycles its buttons and its stage.
+- **Names and states:** the arrow buttons are named "Previous/Next drawing" or "Previous/Next
+  spread" (the glyph is `aria-hidden`), FIT is "Fit to view", Close is "Close"; the counters
+  ("DWG 01 / 08", "PP. 12–13 / 35") are polite live regions, and the drawing tabs carry
+  `aria-pressed` with their active state.
 - **Phones:** the drawing set's toolbar sits on one row from about 383px (10px padding, 6px gaps),
   and its stage takes the drawing's own shape (the image's aspect ratio, at most 70svh; a spread's
   3400 / 2310 until it loads) instead of a fixed-height letterbox. It re-shapes and lands at fit
@@ -328,7 +347,8 @@ Escape or Close hands focus back to the control that opened it.
 
 ### Compare slider
 Two registered images wiped by a draggable divider with a round ink-ringed handle; keyboard
-operable through a range input; mono tags name each side. Each view's `w`/`h` in the JSON gives
+operable through a range input (the arrows move the divider 5% a press, Shift+arrows 1%; Page
+Up/Down and Home/End are the browser's own); mono tags name each side. Each view's `w`/`h` in the JSON gives
 the stage its shape before the images arrive, and its width: the stage is as wide as the screen's
 height allows, `min(100%, (100svh − 150px) × w/h)`, centred, so both plans show whole under the
 nav (about 838×750 at 1440×900); the range input below takes the same width so its thumb tracks

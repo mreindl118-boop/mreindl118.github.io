@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F3F0E8">
 <title>Portfolio — Understory Design Studio</title>
 <meta name="description" content="Selected landscape architecture work 2022–2026 by Matthew Reindl — capstone, studio, and professional projects, viewable online or as a downloadable PDF.">
 <link rel="canonical" href="https://www.understorydesignstudio.com/portfolio.html">
@@ -24,7 +25,7 @@
     </a>
     <div class="navlinks">
       <a href="index.html"><span>Home</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
-      <a href="work.html" class="active"><span>Projects</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
+      <a href="work.html" class="active" aria-current="page"><span>Projects</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
       <a href="about.html"><span>About</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
       <a href="resume.html"><span>Experience</span><span class="ind"><i class="sq"></i><i class="ln"></i><i class="ci"></i></span></a>
     </div>
@@ -47,14 +48,14 @@
   <div class="viewer">
     <div class="vbar">
       <div class="vgroup">
-        <button class="vbtn" id="pf-prev" title="Previous spread">←</button>
-        <button class="vbtn" id="pf-next" title="Next spread">→</button>
-        <span class="vcount"><span id="pf-num">P. 01</span> / <span id="pf-count">35</span></span>
+        <button class="vbtn" id="pf-prev" title="Previous spread" aria-label="Previous spread"><span aria-hidden="true">←</span></button>
+        <button class="vbtn" id="pf-next" title="Next spread" aria-label="Next spread"><span aria-hidden="true">→</span></button>
+        <span class="vcount" aria-live="polite"><span id="pf-num">P. 01</span> / <span id="pf-count">35</span></span>
       </div>
       <div class="vgroup">
         <button class="vbtn" id="pf-zout" title="Zoom out"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line></svg></button>
         <button class="vbtn" id="pf-zin" title="Zoom in"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#26292B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.6"></circle><line x1="12.2" y1="12.2" x2="17" y2="17"></line><line x1="5.4" y1="8" x2="10.6" y2="8"></line><line x1="8" y1="5.4" x2="8" y2="10.6"></line></svg></button>
-        <button class="vbtn vbtn-wide" id="pf-fit">FIT</button>
+        <button class="vbtn vbtn-wide" id="pf-fit" aria-label="Fit to view">FIT</button>
       </div>
     </div>
     <div class="vstage tall" id="pf-stage">
@@ -97,7 +98,10 @@
 (function () {
   var idx = 0, PF = null, N = 0, retries = {};
   var $ = function (id) { return document.getElementById(id); };
-  var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));
+  var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'), {
+    prev: function () { show(idx - 1); },
+    next: function () { show(idx + 1); }
+  });
   /* The book's captions carry its project numbers ("08 Evans Park", then a dash and the spread's
      subject), so the jump row and the caption links come from spreads.json, with nothing
      hard-coded: the first spread of each number is that project's start (pages 3, 12, 14 and on,
@@ -204,8 +208,12 @@
     var b = e.target.closest('.thumbbtn');
     if (b) show(parseInt(b.getAttribute('data-k'), 10));
   });
+  // page-wide left/right flip the book, except in a form field (the scrubber has its own), on the
+  // focused stage (which handles its keys itself), with a browser shortcut, or while zoomed in
   document.addEventListener('keydown', function (e) {
-    if (e.target === $('pf-scrub')) return;
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (pz.state.zoom > 1) return;
     if (e.key === 'ArrowLeft') show(idx - 1);
     if (e.key === 'ArrowRight') show(idx + 1);
   });

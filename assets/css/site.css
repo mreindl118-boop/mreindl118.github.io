@@ -32,7 +32,9 @@
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+html { -webkit-tap-highlight-color: transparent; }
+/* in-page jumps glide only for visitors who haven't asked for reduced motion */
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 /* anchors land clear of the sticky nav; --nav-h is its measured height (set by site.js) */
 html { scroll-padding-top: calc(var(--nav-h, 66px) + 18px); }
 body {
@@ -156,7 +158,9 @@ main .rule-motif .ci { border-color: var(--clay); }
 }
 .card-type { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--pine); margin-top: 14px; }
 .card-titlerow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 6px; }
-.card-title { font-family: var(--sans); font-weight: 700; font-size: 20px; letter-spacing: -.015em; line-height: 1.25; }
+/* an h2 (Projects) or h3 (Home's Recent Work): the class sets every font property itself, so only
+   the UA margin needs resetting; the colour still inherits the card's clay hover */
+.card-title { font-family: var(--sans); font-weight: 700; font-size: 20px; letter-spacing: -.015em; line-height: 1.25; margin: 0; }
 .card-year { font-family: var(--mono); font-size: 12px; color: var(--muted); flex-shrink: 0; white-space: nowrap; }
 .card-sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
 .card-soft { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-top: 8px; }
@@ -232,6 +236,8 @@ main .rule-motif .ci { border-color: var(--clay); }
 #pf-caption { line-height: 24px; }
 #pf-caption a { display: inline-block; }
 .vstage:active { cursor: grabbing; }
+/* the stage takes focus (site.js panZoom): arrows pan when zoomed, + and - zoom, 0 fits */
+.vstage:focus-visible { outline: 2px solid var(--pine); outline-offset: -3px; }
 /* at fit a finger scrolls the page past the stage (site.js panZoom takes no drag there);
    zoomed, and always in the full-screen lightbox, the stage keeps every gesture */
 .vstage.zoomed, .lightbox .vstage { touch-action: none; }
@@ -523,14 +529,19 @@ main .rule-motif .ci { border-color: var(--clay); }
 main:focus { outline: none; }
 :focus-visible { outline: 2px solid var(--pine); outline-offset: 3px; }
 .foot :focus-visible, .foot-slim :focus-visible { outline-color: var(--moss); }
-@media (max-width: 640px) {
+/* 24px tap targets on phones and on touch tablets (an iPad's mono links are otherwise 15px tall) */
+@media (max-width: 640px), (pointer: coarse) {
   .link-mono, .img-caption, .foot a, .foot-slim a, .foot-links a,
   a[href^="mailto:"]:not(.btn):not(.btn-outline), a[href*="linkedin.com"]:not(.btn):not(.btn-outline),
-  .navlinks a, a[href="work.html"][style*="font-family:var(--mono)"] {
+  a[href="work.html"][style*="font-family:var(--mono)"] {
     display: inline-block; min-height: 24px; padding-top: 5px; padding-bottom: 5px;
   }
+  input[type="range"] { min-height: 28px; }
 }
-@media (max-width: 640px) { input[type="range"] { min-height: 28px; } }
+/* the nav tabs are 45px tall from 641px, so only the phone nav takes the compact form */
+@media (max-width: 640px) {
+  .navlinks a { display: inline-block; min-height: 24px; padding-top: 5px; padding-bottom: 5px; }
+}
 
 /* ---------- Portfolio band (Projects page, after the grid) ---------- */
 .pf-band { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 20px 40px; align-items: center; }
