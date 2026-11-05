@@ -281,9 +281,13 @@ main .rule-motif .ci { border-color: var(--clay); }
 .lightbox[hidden] { display: none; }
 .lightbox-panel {
   position: relative; background: var(--paper); border: 1px solid var(--ink);
-  width: min(1560px, 97vw); height: 93vh; display: flex; flex-direction: column;
+  width: min(1560px, 97vw); height: 93vh; height: 93dvh; display: flex; flex-direction: column;
 }
-.lightbox-title { font-family: var(--sans); font-weight: 700; font-size: 17px; letter-spacing: -.01em; }
+/* an h2 in the Projects blowout: the class sets the type, so only the UA margin needs resetting */
+.lightbox-title { font-family: var(--sans); font-weight: 700; font-size: 17px; letter-spacing: -.01em; margin: 0; }
+/* Projects blowout body: a keyboard-focusable scroller whose scroll never chains to the grid behind */
+#bo-body { overscroll-behavior: contain; }
+#bo-body:focus-visible { outline: 2px solid var(--pine); outline-offset: -3px; }
 .lightbox .vstage { height: auto; flex: 1; }
 .vbtn-close { border-color: var(--ink); background: var(--ink); color: var(--paper); font-size: 16px; }
 

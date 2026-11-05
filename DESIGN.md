@@ -109,9 +109,9 @@ A warm, low-chroma paper-and-ink palette with accents taken from landscape mater
   the outer arc of the brand mark on paper. The colour of the work's voice.
 
 ### Secondary
-- **Fired Clay** (clay): hover and active states, the active filter chip, the ring of the rule
-  motif and of the current-tab marker, and the inner arc of the brand mark. Apart from those
-  marks it signals "this is where you are / what you're touching", rarely anything else.
+- **Fired Clay** (clay): hover and active states, the ring of the rule motif and of the
+  current-tab marker, and the inner arc of the brand mark. Apart from those marks it signals
+  "this is where you are / what you're touching", rarely anything else.
 - **Leaf** (leaf): the brand mark's middle arc, and the line of the rule motif and of the
   current-tab marker on paper. Decorative marks only: at 2.8:1 on paper it never carries text.
 
@@ -213,8 +213,12 @@ Diagonal hatching marks placeholders.
   where it goes: → opens a page, ↓ downloads a file ("Download PDF ↓", "vCard ↓"), ↗ leaves the site.
 
 ### Chips (filters)
-- **Style:** uppercase mono 12px, no fill, 2px underline; the active chip is ink with a clay
-  underline.
+- **Status:** retired from the Projects page (November 2026). With one type per project, 8 of the
+  9 chips returned a single card, so the grid itself is the only choice; each card still names
+  its type. The code is dormant behind `SHOW_FILTERS = false` in `work.html` (and `.chip` stays in
+  `site.css`); bring it back only with 3–4 owner-defined groups that each hold several projects.
+- **Style (dormant):** uppercase mono 12px, no fill, 2px underline; the active chip is ink with a
+  clay underline.
 
 ### Cards / Containers
 - **Corner Style:** square.
@@ -234,6 +238,12 @@ Diagonal hatching marks placeholders.
 Drawing set, portfolio book, capstone booklet and lightbox share one viewer: an ink-bordered
 panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page counter
 ("PP. 12–13 / 35"), a scrubber and a caption footer.
+
+The Projects page's blowout is the lightbox panel without a stage: it opens on the project's
+first figure, then the mono meta line, a mono link to the full project page (named for what
+that page adds, e.g. "Project page: compare slider + drawings →"), the summary, a "What it
+shows" heading over the focus list, and the remaining figures. Its body is focusable and
+scrolls from the keyboard (the scroll keys also work from the toolbar buttons).
 
 ### Compare slider
 Two registered images wiped by a draggable divider with a round ink-ringed handle; keyboard
