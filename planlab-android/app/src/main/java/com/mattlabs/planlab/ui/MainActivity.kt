@@ -135,6 +135,7 @@ class MainActivity : ComponentActivity() {
                 GainOverlay()
                 MoveSheetHost()
                 MindSheetHost()
+                UndoBar()
             }
         }
     }

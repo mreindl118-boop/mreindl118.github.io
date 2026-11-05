@@ -98,14 +98,18 @@ fun TodayScreen(loading: Boolean, onSettings: () -> Unit, onOpen: (String) -> Un
             val tiles = TodayPick.order(day.boxes).map { box ->
                 val n = box.steps.size
                 val done = Store.isDone(day, box)
-                RingTile(box.key, if (done) 1f else if (n > 0) Store.stepsDone(day, box) / n.toFloat() else 0f, "", tk.kind(box.key)) {
-                    if (n > 0) flip(box.key) else Store.toggle(day, box)
+                val name = TodayData.label(box)
+                RingTile(box.key, if (done) 1f else if (n > 0) Store.stepsDone(day, box) / n.toFloat() else 0f, TodayPick.words(name, 2), tk.kind(box.key),
+                    onLong = if (n == 0 && done) ({ Store.toggle(day, box); Undo.offer("$name undone") { Store.toggle(day, box) } }) else null) {
+                    if (n > 0) flip(box.key) else { val was = done; Store.toggle(day, box); Undo.offer(if (was) "$name undone" else "✓ $name") { Store.toggle(day, box) } }
                 }
             }.toMutableList()
             val have = Store.eaten(date); val want = Store.foodTargets(date)
-            tiles += RingTile("eat", if (want.protein > 0) have.protein / want.protein.toFloat() else 0f, "", tk.eat) { flip("eat") }
+            tiles += RingTile("eat", if (want.protein > 0) have.protein / want.protein.toFloat() else 0f, "Eat", tk.eat) { flip("eat") }
             val pf = LogDoc.pelvic(st.log, date.toString())
-            tiles += RingTile("pelvic", pf / 2f, "", tk.ok) { Store.pelvicSet(date) }
+            tiles += RingTile("pelvic", pf / 2f, "Pelvic $pf/2", tk.ok, onLong = if (pf > 0) ({ Store.pelvicUndo(date); Undo.offer("Pelvic set removed") { Store.pelvicSet(date) } }) else null) {
+                if (pf >= 2) Undo.offer("Pelvic 2/2 · hold to undo", null) else { Store.pelvicSet(date); Undo.offer("✓ Pelvic floor set ${pf + 1}/2") { Store.pelvicUndo(date) } }
+            }
             RingGrid(tiles, openKey)
         }
         val opened = day.boxes.firstOrNull { it.key == openKey && it.steps.isNotEmpty() }

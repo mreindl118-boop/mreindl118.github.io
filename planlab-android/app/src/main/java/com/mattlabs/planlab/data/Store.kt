@@ -279,6 +279,7 @@ object Store {
     /** A plan file as last pulled (e.g. "mind/anywhere.md"). */
     fun file(path: String): String? = files[path]
     fun pelvicSet(date: LocalDate) = addOps(LogDoc.addOp("ticks", "pf-$date", "n", 1))
+    fun pelvicUndo(date: LocalDate) { if (LogDoc.pelvic(_state.value.log, date.toString()) > 0) addOps(LogDoc.addOp("ticks", "pf-$date", "n", -1)) }
     fun skip(date: LocalDate, key: String) = addOps(LogDoc.tickOp("skip-$date", key, true))
     fun addCount(date: LocalDate, name: String) = addOps(LogDoc.addOp("ticks", "$name-$date", "n", 1))
 
