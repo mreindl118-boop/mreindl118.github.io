@@ -225,6 +225,12 @@ main .rule-motif .ci { border-color: var(--clay); }
   cursor: grab; touch-action: pan-y pinch-zoom; background: var(--paper);
 }
 .vstage.tall { height: min(68vh, 640px); }
+/* the portfolio book never shrinks below that, and grows on tall screens (780px at 1920x1080,
+   1000px from 1300px of height), still inside the 1240 container; the booklet keeps its own */
+@media (min-width: 641px) { #pf-stage { height: max(min(68vh, 640px), min(calc(100svh - 300px), 1000px)); } }
+/* its caption links to the project page; a 24px line keeps the footer one height either way */
+#pf-caption { line-height: 24px; }
+#pf-caption a { display: inline-block; }
 .vstage:active { cursor: grabbing; }
 /* at fit a finger scrolls the page past the stage (site.js panZoom takes no drag there);
    zoomed, and always in the full-screen lightbox, the stage keeps every gesture */

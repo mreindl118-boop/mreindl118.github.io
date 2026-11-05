@@ -127,8 +127,11 @@ change). The script also writes `assets/portfolio/cover-thumb.webp` (the
 Portfolio Book band's cover, spread 0 at 560 px wide; work.html hard-codes
 560x761) but not the "(16 MB)" label beside that band's PDF link in work.html;
 fix that label by hand when the PDF size changes, along with its copies in the
-load-failure note (`loadNote` in `assets/js/site.js`) and the `<noscript>` notes
-in work.html, project.html and portfolio.html. Portfolio spreads also feed the project pages
+load-failure note (`loadNote` in `assets/js/site.js`), the `<noscript>` notes
+in work.html, project.html and portfolio.html, and portfolio.html's top Download
+button. The viewer's project jump row and caption links read the captions'
+"NN Title" form (first spread per number; titles matched by prefix against the
+listed projects), so keep that form when captions change. Portfolio spreads also feed the project pages
 (`content/projects/<slug>/pf-NN.webp`), and the individual figures cut from the
 boards (`content/projects/<slug>/g-*.webp`, `gallery` + `focus` in each JSON)
 fill both the Projects-page blowouts and each project page's "Drawings" section.

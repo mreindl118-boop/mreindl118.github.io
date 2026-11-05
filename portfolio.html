@@ -33,17 +33,16 @@
 
 <main id="main" tabindex="-1">
 
-<div class="wrap" style="padding-top:56px; padding-bottom:88px">
+<div class="wrap" style="padding-top:32px; padding-bottom:88px">
   <div style="display:flex; flex-wrap:wrap; gap:24px 48px; align-items:flex-end; justify-content:space-between">
     <div>
-      <div class="kicker" style="margin-bottom:14px">Selected Work · 2022–2026</div>
       <h1 class="h-head" style="font-size:clamp(38px,5.5vw,60px); line-height:1.05; margin:0 0 10px">Portfolio</h1>
-      <p class="mono-note" style="margin:0">Nine projects, capstone to professional work — 35 pages, or take the PDF.</p>
+      <p class="note-sans" style="margin:0">Nine projects, 2022–2026, capstone to professional work — 35 pages, or take the PDF.</p>
     </div>
-    <a class="btn" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf" style="min-height:44px; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; padding:0 20px; display:inline-flex; align-items:center">Download PDF ↓</a>
+    <a class="btn" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf" style="min-height:44px; display:inline-flex; align-items:center">Download PDF&nbsp;↓ (16&nbsp;MB)</a>
   </div>
 
-  <div class="rule-motif" style="margin:34px 0 26px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
+  <div class="rule-motif" style="margin:20px 0 18px"><i class="sq"></i><i class="ln"></i><i class="ci"></i></div>
 
   <div class="viewer">
     <div class="vbar">
@@ -70,12 +69,13 @@
     </div>
     <div class="vfoot">
       <span id="pf-caption">Cover</span>
-      <span class="vmeta">Selected Work · 2022–2026</span>
+      <a class="link-mono" id="pf-proj" hidden>Project page&nbsp;→</a>
     </div>
   </div>
+  <div class="thumbs" id="pf-jumps" role="group" aria-label="Jump to project"></div>
 
   <div style="display:flex; justify-content:center; margin-top:36px">
-    <a class="btn" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf" style="min-height:44px; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; padding:0 20px; display:inline-flex; align-items:center">Download PDF ↓</a>
+    <a class="btn" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf" style="min-height:44px; display:inline-flex; align-items:center">Download PDF&nbsp;↓</a>
   </div>
 </div>
 
@@ -98,6 +98,59 @@
   var idx = 0, PF = null, N = 0, retries = {};
   var $ = function (id) { return document.getElementById(id); };
   var pz = US.panZoom($('pf-stage'), $('pf-surface'), $('pf-badge'));
+  /* The book's captions carry its project numbers ("08 Evans Park", then a dash and the spread's
+     subject), so the jump row and the caption links come from spreads.json, with nothing
+     hard-coded: the first spread of each number is that project's start (pages 3, 12, 14 and on,
+     as on the Contents page). */
+  var NUM_RE = /(\d\d) ([^\u2014\u00b7]+?)(?: \u2014|$)/, CAP_RE = /^(?:Contents \u00b7 )?(\d\d) (.+?)(?: \u2014|$)/;
+  var nums = [], projects = null, projectsP = null;
+  function buildJumps() {
+    var seen = {}, html = '';
+    PF.spreads.forEach(function (s, k) {
+      var m = NUM_RE.exec(s.caption || '');
+      nums[k] = m ? m[1] : null;
+      if (m && !seen[m[1]]) {
+        seen[m[1]] = true;
+        html += '<button type="button" class="thumbbtn" data-k="' + k + '" data-n="' + m[1] + '">' + US.esc(m[2].trim()) + '</button>';
+      }
+    });
+    $('pf-jumps').innerHTML = html;
+    $('pf-jumps').hidden = !html;
+  }
+  // a project spread links to its page when a listed project's title starts with the caption's
+  function projectFor(caption) {
+    var m = CAP_RE.exec(caption || '');
+    if (!m || !projects) return null;
+    for (var i = 0; i < projects.length; i++) {
+      var p = projects[i];
+      if (!p.hidden && US.clean(p.title).indexOf(m[2]) === 0) return p;
+    }
+    return null;
+  }
+  // one link node, reused from spread to spread, so a focused caption link keeps focus on a flip
+  var capLink = document.createElement('a');
+  function renderCaption() {
+    var cap = PF.spreads[idx].caption || '', p = projectFor(cap), el = $('pf-caption'), pj = $('pf-proj');
+    if (p) {
+      var href = 'project.html?slug=' + encodeURIComponent(p.slug);
+      capLink.href = href;
+      capLink.textContent = cap;
+      if (capLink.parentNode !== el) { el.textContent = ''; el.appendChild(capLink); }
+      pj.href = href;
+      pj.setAttribute('aria-label', 'Project page: ' + US.clean(p.title));
+      pj.hidden = false;
+    } else {
+      el.textContent = cap;
+      pj.removeAttribute('href');
+      pj.hidden = true;
+    }
+  }
+  // the project list loads once the first spread is up, so it never shares that spread's bandwidth
+  function wantProjects() {
+    if (projectsP) return;
+    projectsP = US.loadProjects().then(function (list) { projects = list; renderCaption(); })
+      .catch(function () { /* the captions stay plain text */ });
+  }
   function show(k) {
     if (!PF) return;
     idx = Math.min(Math.max(k, 0), N - 1);
@@ -111,6 +164,7 @@
     sf.appendChild(img);
     var want = idx;
     img.onload = function () {
+      wantProjects();
       if (want !== idx) return;
       if (sf.firstChild && sf.firstChild.tagName === 'SPAN') sf.firstChild.remove();
       img.style.visibility = 'visible';
@@ -121,6 +175,7 @@
       });
     };
     img.onerror = function () {
+      wantProjects();
       if (want !== idx) return;
       sf.innerHTML = '<div class="voverlay"><span class="note">Couldn\u2019t load this spread</span>' +
         '<button type="button" class="btn" style="min-height:44px">Retry</button></div>';
@@ -131,8 +186,13 @@
     };
     pz.fit(true);
     $('pf-num').textContent = PF.label(idx);
-    $('pf-caption').textContent = PF.spreads[idx].caption;
+    renderCaption();
     $('pf-scrub').value = idx;
+    Array.prototype.forEach.call($('pf-jumps').children, function (b) {
+      var on = nums[idx] != null && b.getAttribute('data-n') === nums[idx];
+      b.classList.toggle('active', on);
+      if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+    });
   }
   $('pf-prev').onclick = function () { show(idx - 1); };
   $('pf-next').onclick = function () { show(idx + 1); };
@@ -140,6 +200,10 @@
   $('pf-zout').onclick = pz.zoomOut;
   $('pf-fit').onclick = pz.fit;
   $('pf-scrub').addEventListener('input', function (e) { show(parseInt(e.target.value, 10) || 0); });
+  $('pf-jumps').addEventListener('click', function (e) {
+    var b = e.target.closest('.thumbbtn');
+    if (b) show(parseInt(b.getAttribute('data-k'), 10));
+  });
   document.addEventListener('keydown', function (e) {
     if (e.target === $('pf-scrub')) return;
     if (e.key === 'ArrowLeft') show(idx - 1);
@@ -150,6 +214,7 @@
     $('pf-count').textContent = m.pages;
     $('pf-scrub').max = N - 1;
     document.querySelector('.vscrub .end:last-child').textContent = m.pages;
+    buildJumps();
     show(0);
   });
 })();

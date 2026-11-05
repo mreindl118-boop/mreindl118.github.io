@@ -293,6 +293,17 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
   within 200px of it or uses its arrows or scrubber; it then reads "Rendering…" until the spread
   is drawn, with "Loading part n / 11" in the toolbar. A part that fails twice shows the failed
   box and its Retry button.
+- **Portfolio book (portfolio.html):** the page opens on the book, not on furniture: no kicker,
+  the H1 at the shared page-title size, one `.note-sans` sentence that carries the years, and the
+  plain primary button "Download PDF ↓ (16 MB)" (the one under the book reads "Download PDF ↓").
+  From 641px the stage is `max(min(68vh, 640px), min(100svh − 300px, 1000px))`: never smaller
+  than the shared tall stage, and on tall screens it grows (780px at 1920×1080, 1000px from
+  1300px of height), still inside the 1240 container. Under the viewer, a row of the drawing
+  set's `.thumbbtn` jumps opens each project's first spread; the buttons come from spreads.json,
+  one per "NN Title" caption number (its first spread), so they follow the Contents page, and the
+  current project's is active (none on the cover, Other work or the colophon). A project spread's
+  caption links to its project page, with a mono "Project page →" at the right of the foot
+  (matched by title prefix against the listed projects); other captions stay plain text.
 
 The Projects page's blowout is the lightbox panel without a stage: it opens on the project's
 first figure, then the mono meta line, a mono link to the full project page (named for what
