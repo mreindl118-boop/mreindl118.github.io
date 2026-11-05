@@ -298,8 +298,9 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
 ("PP. 12–13 / 35"), a scrubber and a caption footer.
 
 - **At fit the stage is part of the page.** It takes no drag at 100% or less, so a finger on it
-  scrolls the page and the phone's own pinch works (`touch-action: pan-y pinch-zoom`); the badge
-  reads just "100%". Zoomed in, the stage is `.zoomed`, keeps every gesture and one pointer pans it
+  scrolls the page and the phone's own pinch works (`touch-action: pan-y pinch-zoom`), and no zoom
+  badge shows (at 100% or less there is nothing to pan, and on a phone the stage hugs the drawing).
+  Zoomed in, the stage is `.zoomed`, keeps every gesture, one pointer pans it and the badge appears
   ("140% · drag to pan"); a second finger never takes over the drag. The full-screen lightbox's
   stage always keeps its gestures, so the page behind it never scrolls.
 - **Motion:** the zoom buttons and FIT ease over 180ms on `cubic-bezier(0.23, 1, 0.32, 1)` (none

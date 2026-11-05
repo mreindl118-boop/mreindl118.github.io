@@ -243,6 +243,9 @@ main .rule-motif .ci { border-color: var(--clay); }
    zoomed, and always in the full-screen lightbox, the stage keeps every gesture */
 .vstage.zoomed, .lightbox .vstage { touch-action: none; }
 .vstage:not(.zoomed), .vstage:not(.zoomed):active { cursor: default; }
+/* the zoom badge only while zoomed: at fit (or below) there is nothing to pan, and where the stage
+   hugs the drawing (phones) a badge would sit on the drawing's corner */
+.vstage:not(.zoomed) .vbadge { display: none; }
 .vsurface {
   position: absolute; inset: 16px; display: flex; align-items: center; justify-content: center;
   transform-origin: center; transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
