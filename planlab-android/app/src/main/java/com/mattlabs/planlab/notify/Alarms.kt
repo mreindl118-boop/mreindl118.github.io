@@ -45,7 +45,19 @@ enum class Slot(val label: String, val time: LocalTime, val notifId: Int) {
     /** 0-based step number for MOVE_n / MIND_n, else -1. */
     val breakIndex: Int get() = if (group != null) name.substringAfter('_').toInt() - 1 else -1
 
-    fun enabled(): Boolean = Store.prefs().getBoolean("slot_$name", true)
+    /** Only these are on until switched on in Settings: other reminders got no taps (GeneralStorage #26). */
+    val onByDefault: Boolean get() = this == BRIEF || this == EVENING
+
+    fun enabled(): Boolean = Store.prefs().getBoolean("slot_$name", onByDefault)
+
+    companion object {
+        /** Once: drop saved reminder switches so the quieter defaults apply on phones that already had the app. */
+        fun quietDefaults() {
+            val p = Store.prefs()
+            if (p.getBoolean("quiet_defaults_v1", false)) return
+            p.edit().apply { entries.forEach { remove("slot_${it.name}") } }.putBoolean("quiet_defaults_v1", true).apply()
+        }
+    }
 }
 
 object Alarms {
@@ -73,6 +85,7 @@ object Alarms {
 
     fun scheduleAll(ctx: Context) {
         Store.init(ctx)
+        Slot.quietDefaults()
         for (s in Slot.entries) schedule(ctx, s)
     }
 
