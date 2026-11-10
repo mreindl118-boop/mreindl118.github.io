@@ -21,7 +21,7 @@
     "w": 1800,
     "h": 1288,
     "alt": "Screenshot of the Rec Finder map: Cincinnati's city limits with CRC's properties marked as icons, rec centers in red, beside a panel of search and amenity filters",
-    "caption": "Rec Finder: a citywide map of CRC's 131 properties that I conceived and directed for CRC, built with AI assistance from CRC's inventory and City GIS data. A prototype, not an official CRC product. [CONFIRM: CRC's written permission to show it] [CONFIRM: the role wording \"conceived and directed\", and first person here while the other captions avoid it] [CONFIRM: the map also draws U.S. Census TIGER/Line roads and water and TPL ParkServe park boundaries; name them too?]"
+    "caption": "Rec Finder: a citywide map of CRC's 131 properties that I conceived and directed for CRC, built with AI assistance from CRC's inventory and City GIS data. A prototype, not an official CRC product. [CONFIRM: the role wording \"conceived and directed\", and first person here while the other captions avoid it] [CONFIRM: the map also draws U.S. Census TIGER/Line roads and water and TPL ParkServe park boundaries; name them too?]"
    }
   }
  ],
@@ -118,13 +118,13 @@
    "file": "cincinnati-recreation-commission/g-ryan-plan.webp",
    "w": 2400,
    "h": 1553,
-   "caption": "Planting plan, Ryan Sports Complex (Hometown Huddle planting): the beds by the pool, around the shelter and in the mindfulness garden, with the plant key [CONFIRM: drew the sheets? If so, say so here] [CONFIRM: area names follow the owner's sheet names: pool, shelter, mindfulness garden]"
+   "caption": "Planting plan, Ryan Sports Complex (Hometown Huddle planting): the beds by the pool, around the shelter and in the mindfulness garden, with the plant key [CONFIRM: area names follow the owner's sheet names: pool, shelter, mindfulness garden]"
   },
   {
    "file": "cincinnati-recreation-commission/g-ryan-shelter.webp",
    "w": 2400,
    "h": 1553,
-   "caption": "Planting plan enlargement: the beds around the shelter and its entry walk, each plant with its code from the CAD; the installed bed in the next photo is one of them [CONFIRM: drew the sheets?] [CONFIRM: the photo shows the bed west of the shelter's entry walk] [CONFIRM: north arrow assumes CAD +Y is grid north; \"entry walk\" is Claude's name for the shelter's north walk]"
+   "caption": "Planting plan enlargement: the beds around the shelter and its entry walk, each plant with its code from the CAD; the installed bed in the next photo is one of them [CONFIRM: the photo shows the bed west of the shelter's entry walk] [CONFIRM: north arrow assumes CAD +Y is grid north; \"entry walk\" is Claude's name for the shelter's north walk]"
   },
   {
    "file": "cincinnati-recreation-commission/g-h19_p1.webp",

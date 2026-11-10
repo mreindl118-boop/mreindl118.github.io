@@ -229,17 +229,39 @@ sortKey). Captions follow plan-geometry.js's feature names, but call feature 7 "
 until the owner settles "Glizzy" against the L-1 sheet's "Glitzy". "About 15,000 sq ft" is the
 L-1 sheet's figure and matches the slab outline in plan-geometry.js (about 15,150 sq ft at
 `scaleFtPerPx`); it carries a `[CONFIRM]` marker in `model3d.subtitle` until the owner checks it.
-The L-1 sheet's other claims (first public skatepark in Cincinnati, the opening date, the Cincinnati Skatepark Project as co-builder) stay off the site until the owner confirms
-them; the role wording and the skatepark's tools wait in `[CONFIRM]` markers (`software` entries
-go through `US.clean()` like every other field, so a marker there renders nothing).
+The L-1 sheet's other claims (first public skatepark in Cincinnati, the opening date, the
+Cincinnati Skatepark Project as co-builder) stay off the site until the owner confirms them; the
+role wording and the skatepark's tools wait in `[CONFIRM]` markers (`software` entries go through
+`US.clean()` like every other field, so a marker there renders nothing). The model's credit line
+(`model3d.credit`) is the owner's choice of November 2026, over wordings that named the AI
+assistance: "Park design: Hunger Skateparks. Documentation for the Cincinnati Recreation
+Commission." The Projects blowout prints `model3d.note` under the summary. On stages under 900 px
+the viewer's exploded view lifts callout 6 on a 7 m longer pin (`liftPins()` in viewer.js) so it
+clears callout 4; the render scripts never call it, so the published stills don't change.
+
+The CRC gallery also carries the Ryan Sports Complex (Hometown Huddle) planting plan, which the
+owner drew in CAD and CRC allows on the site: `g-ryan-plan.webp` (whole plan + 22-kind key) and
+`g-ryan-shelter.webp` (shelter-beds enlargement), placed just before the installed-planting photo
+`g-h19_p1`. Both come from `python3 -I _drafts/tools/draw_ryan_planting.py --dxf <the owner's DXF>
+--web content/projects/cincinnati-recreation-commission --print <dir>` (needs ezdxf); it checks every
+count against its SCHEDULE and draws no prices. The DXF itself is never committed (it carries a priced
+nursery list). A written-section row can hold one figure (`sections[].figure` with `file`, `w`, `h`,
+`alt`, `caption`), kept out of `gallery`, so neither Drawings nor the blowout repeats it: CRC's
+"Tools and process" row uses it for `rec-finder.webp`, a still of the Rec Finder prototype's opening
+map that CRC allows (rebuilt by `_drafts/tools/render_rec_finder.py`, which keeps the masthead to the
+brand, the counts and the Present button; the site never links the tool).
+Hyundai's `g-massing-contours.webp` is the owner's Rhino capture (his own model), 1327x708 and
+never shown larger.
 
 Some served images are derivatives of sources kept in `_drafts/originals/`
 (same paths): Home's hero drawing (`assets/img/hero-central-planting.webp`)
 and the older feature image (`content/projects/proctor-landing-park/feature.webp`,
 1200x753) are flattened onto white (no alpha; the pages draw them with
 `mix-blend-mode: multiply`, so white drops into the paper), and
-`assets/logos/segd.png` is a 600 px cut of the 2400 px logo. After replacing a
-source there, run `python3 _drafts/tools/derive_images.py` from the repo root.
+`assets/logos/segd.png` is a 600 px cut of the 2400 px logo, and Hyundai's
+`g-massing-contours.webp` is the owner's Rhino JPG converted from Display P3 to sRGB with its top
+4 rows (a selection sliver) cut. After replacing a source there, run
+`python3 _drafts/tools/derive_images.py` from the repo root.
 
 Pages are static HTML + `content/site.json` and `content/projects/*.json`
 (`index.json` lists slugs). `hidden: true` unlists a project everywhere while
