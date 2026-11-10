@@ -298,7 +298,7 @@ def fix_specials(pages):
     ty = 1582
     for ln in wrap(text, 1000, F(30)):
         d.text((470, ty), ln, font=F(30), fill=INK); ty += 44
-    d.text((470, ty + 16), 'mreindl118@gmail.com  ·  understorydesignstudio.com', font=F(26), fill=(90, 95, 88))
+    d.text((470, ty + 16), 'understorydesignstudio@gmail.com  ·  understorydesignstudio.com', font=F(26), fill=(90, 95, 88))
     pages[31] = (np.asarray(img).copy(), prof, g)
 
 

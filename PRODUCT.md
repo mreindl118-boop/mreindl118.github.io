@@ -94,5 +94,6 @@ respected, smooth scrolling included).
 ### Privacy (standing, non-negotiable)
 
 No personal phone number, no @mail.uc.edu address, no street address on the HTML résumé, no
-family members or partners in the bio (the dog, Tabitha, is fine). The only contact email is
+family members or partners in the bio (the dog, Tabitha, is fine). The site's contact email is
+understorydesignstudio@gmail.com; only the résumé (its PDF and resume.html's header) keeps
 mreindl118@gmail.com.

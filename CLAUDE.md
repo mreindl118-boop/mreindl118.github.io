@@ -116,7 +116,11 @@ approval rule below still applies to every edit they suggest.
 - No university (@mail.uc.edu) email anywhere; redact from PDFs likewise.
 - No street address in the HTML résumé.
 - The bio names no family members or partners; the dog (Tabitha) is fine.
-- Contact email is mreindl118@gmail.com only.
+- The site's contact email is understorydesignstudio@gmail.com (the owner's Understory Gmail, November
+  2026), everywhere: pages, footers, `content/site.json` (so the vCard too). Only the résumé keeps
+  the personal mreindl118@gmail.com: its PDF and the header of resume.html. No other address.
+  The portfolio book's closing page (p. 37) prints the same Understory address
+  (`_drafts/tools/swap_book_email.py` re-set it in place; `rebuild_portfolio.py` draws it too).
 
 ## Content architecture
 
