@@ -66,7 +66,7 @@ export async function mount(stage, opts = {}) {
   const made = [];
   try { return await build(stage, opts, made); }
   catch (e) {
-    made.forEach(r => { try { r.dispose(); r.forceContextLoss(); r.domElement.remove(); } catch (_) { /* already gone */ } });
+    made.forEach(r => { try { r.dispose(); if (r.forceContextLoss) { r.forceContextLoss(); r.domElement.remove(); } } catch (_) { /* already gone */ } });
     throw e;
   }
 }
@@ -325,6 +325,7 @@ async function build(stage, opts, made) {
   }
   const ro = new ResizeObserver(resize);
   ro.observe(stage);
+  made.push({ dispose: () => ro.disconnect() });      // a failed mount stops watching the stage too
 
   // On a stage under 900 px wide, where the badges are at their smallest, the exploded axon would
   // draw badge 6 (street plaza) over 4 (hip bank): there 6, a layer higher, rides a longer pin. Wider
