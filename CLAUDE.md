@@ -18,6 +18,7 @@ in `main`'s own history. Deploys are fast-forwards, so these never disappear:
 
 | Point | What was live |
 | --- | --- |
+| `817f0e2` | Before pass 8 (Camp Washington Skatepark, Ryan planting plan, HHI massing, Rec Finder still, smaller Get in Touch) |
 | `e94522e` | Before the design-review pass 7 (Nov 2026; site files identical to `d00c5fe`) |
 | `1f66f99` | After Sam's feedback and the pass-6 fixes |
 | `aa4fd37` | Before Sam's feedback (serif headings, page-flipper on Projects) |
@@ -34,6 +35,11 @@ set 3 `54b9167 50ba932`; set 4 `3bb3832 2591708 71fa6a6`; set 5 `3e3a4f1 8057876
 acd1b32 ddfd52b 7f2099f`; set 6 `7da0632 1586b8d 100f576`; set 7 `59a35e9 2ae578f`; set 8
 `0148a6f 3c50be8`; set 9 `c7edd74 a149b34 56b2b82 e2a3d74`. Later sets build on earlier ones
 (6 on 4 and 5, 9a on 4a), so re-run the audit harness after any revert.
+Pass 8's commits, newest first: the pre-launch check fixes `05a49e3 658c217 101b993 6ba3495
+63693c9` (they touch several sets, so revert them before any set), the smaller Get in Touch
+`5cefe47`, the owner's answers `0de7f07`, 8f fix `98d5658`, 8h `3504fc1`, 8g `da8b6af`, 8f
+`097d0e3`, 8e `4dcd9ad`, 8d `3cdd646`, 8c `38e787d`, 8b `4cc11de`, 8a `f9c2f9d`. 8b-8e build on
+8a, so the clean full undo is restoring `817f0e2` as above.
 
 ## Drop box pipeline (design → implementation)
 
