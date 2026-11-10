@@ -12,13 +12,13 @@
  "software": [
   "ArcGIS Pro [CONFIRM: add the tools behind the skatepark set? e.g. three.js for the 3D model, and whatever drew the L-1 plan]"
  ],
- "summary": "For the Cincinnati Recreation Commission, Matthew Reindl documented the Camp Washington Skatepark on Stock Ave as built in August 2026: a site plan, a 3D massing model and an exploded axon. Hunger Skateparks designed the park. His CRC work also covers GIS inventory and analysis across city recreation sites, and planting installation in the field.",
+ "summary": "The Camp Washington Skatepark on Stock Ave, documented as built in August 2026 for the Cincinnati Recreation Commission: a site plan, a 3D massing model and an exploded axon. Hunger Skateparks designed the park. The CRC work also covers GIS inventory and analysis across city recreation sites, and planting installation in the field.",
  "hidden": false,
  "sortKey": 80,
  "cover": "cincinnati-recreation-commission/cover.webp",
  "model3d": {
   "title": "Camp Washington Skatepark",
-  "subtitle": "As built, August 2026 · about 15,000 sq ft · Stock Ave, Camp Washington, Cincinnati",
+  "subtitle": "As built, August 2026 · about 15,000 sq ft [CONFIRM: from the L-1 sheet; plan geometry gives ~15,150 sq ft] · Stock Ave, Camp Washington, Cincinnati",
   "sheet": "L-2 · 3D site massing",
   "credit": "Park design: Hunger Skateparks. Documentation for the Cincinnati Recreation Commission.",
   "note": "Massing from the L-1 plan geometry and Aug 2026 photos; heights and transitions estimated — not for construction.",

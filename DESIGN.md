@@ -357,7 +357,8 @@ dialog that behaves like the master-plan box below: the stage beside an HTML pla
 760px, where the panel scrolls), and a toolbar of "Exploded axon" (a pressed toggle, `aria-pressed`),
 "Reset view" and Close. The canvas is focusable (a 2px pine ring inside its edge), named, and
 described by the plan key; the arrow keys orbit, + and − zoom, 0 resets, all at once. Callouts are
-pine discs with paper mono numerals, the north arrow and scale bar sit in a panel box at the stage's
+pine discs with paper mono numerals (on a stage under 900px wide the exploded axon gives 6 a longer
+pin, so it clears 4), the north arrow and scale bar sit in a panel box at the stage's
 lower left, and the street name is mono ink with a paper halo. The model's own surface colours
 document the as-built park and stay as drawn. Motion: a 4.5s turn into the home view on first open
 and a 700ms exploded lift on the site's ease-out; neither under reduced motion, and a keyboard toggle
@@ -371,9 +372,9 @@ is left out of the page's Drawings (the blowout, which has no poster, keeps it).
 The Projects page's blowout is the lightbox panel without a stage: it opens on the project's
 first figure, then the mono meta line, a mono link to the full project page (named for what
 that page adds, e.g. "Project page: compare slider + drawings →" or "Project page: open the 3D
-model →"), the summary, a "What it
-shows" heading over the focus list, and the remaining figures. Its body is focusable and
-scrolls from the keyboard (the scroll keys also work from the toolbar buttons).
+model →"), the summary (and, for a 3D model, the model's note under it as `.note-sans`, since
+its renders follow), a "What it shows" heading over the focus list, and the remaining figures. Its
+body is focusable and scrolls from the keyboard (the scroll keys also work from the toolbar buttons).
 
 Both lightboxes (the blowout and Proctor's full-screen master plan) behave as modal dialogs: on
 open, focus moves to the close button, Tab cycles inside, the page behind stops scrolling, and

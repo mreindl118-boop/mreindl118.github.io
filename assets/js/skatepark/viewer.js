@@ -146,7 +146,7 @@ export async function mount(stage, opts = {}) {
     sp.position.set(X(c.x), gy + h, Z(c.y)); pinsGroup.add(sp);
     const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, h - 1.2, 8), pinMat);
     pin.position.set(X(c.x), gy + (h - 1.2) / 2, Z(c.y)); pinsGroup.add(pin);
-    pins.push({ sp, pin, y0: sp.position.y, py0: pin.position.y, layer: layerOfN[c.n] ?? 0 });
+    pins.push({ sp, pin, n: c.n, y0: sp.position.y, py0: pin.position.y, ph: h - 1.2, layer: layerOfN[c.n] ?? 0 });
   });
   if (opts.key) {
     opts.key.innerHTML = PLAN.callouts.map(c =>
@@ -175,7 +175,7 @@ export async function mount(stage, opts = {}) {
   function applyExplode(e) {
     explode = e;
     Object.values(features).forEach(f => { f.position.y = LAYER_Y[f.userData.layer] * e; });
-    pins.forEach(p => { const dy = LAYER_Y[p.layer] * e; p.sp.position.y = p.y0 + dy; p.pin.position.y = p.py0 + dy; });
+    pins.forEach(p => { const dy = LAYER_Y[p.layer] * e; p.sp.position.y = p.y0 + dy; p.pin.position.y = p.py0 + dy; p.pin.scale.y = 1; });
     leaders.visible = e > 0.02;
     ids.forEach(id => {
       const c = centres[id], pos = leaderOf[id].geometry.attributes.position;
@@ -305,8 +305,20 @@ export async function mount(stage, opts = {}) {
   const ro = new ResizeObserver(resize);
   ro.observe(stage);
 
+  // On a stage under 900 px wide, where the badges are at their smallest, the exploded axon would
+  // draw badge 6 (street plaza) over 4 (hip bank): there 6, a layer higher, rides a longer pin. Wider
+  // stages, still() at its usual sizes and the render scripts (which skip draw()) keep the plain pins.
+  const NARROW_LIFT = { 6: 7 };                        // extra pin (m) at full explode
+  function liftPins(narrow) {
+    pins.forEach(p => {
+      if (!NARROW_LIFT[p.n]) return;
+      const dy = LAYER_Y[p.layer] * explode, up = narrow ? NARROW_LIFT[p.n] * explode : 0;
+      p.sp.position.y = p.y0 + dy + up; p.pin.position.y = p.py0 + dy + up / 2; p.pin.scale.y = 1 + up / p.ph;
+    });
+  }
   function draw(w, h) {
     const s = badgeScale(w, h); pins.forEach(p => p.sp.scale.set(s, s, 1));
+    liftPins(w < 900);
     renderer.render(scene, cam);
   }
   function frame(now) {

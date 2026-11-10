@@ -182,6 +182,10 @@
     h += '<div style="margin-top:14px"><a class="link-mono" href="project.html?slug=' + encodeURIComponent(p.slug) + '" aria-label="' + esc(label + ' — ' + p.title) + '">' + esc(label) + ' &rarr;</a></div>';
     var blurb = clean(p.summary);
     if (blurb) h += '<p style="font-size:16px; line-height:1.65; max-width:64ch; margin:12px 0 0; text-wrap:pretty">' + esc(blurb) + '</p>';
+    // a 3D model's note (how the massing was made, what is estimated) qualifies its renders
+    // below, as it does in the model panel's foot on the project page
+    var mnote = p.model3d ? clean(p.model3d.note) : '';
+    if (mnote) h += '<p class="note-sans" style="max-width:64ch; margin:10px 0 0; text-wrap:pretty">' + esc(mnote) + '</p>';
     if (p.focus && p.focus.length) {
       h += '<h3 class="h-head" style="font-size:17px; margin:22px 0 0; border-top:1px solid var(--ink); padding-top:10px">What it shows</h3>';
       h += '<ul style="margin:10px 0 0; padding-left:18px; max-width:64ch">' + p.focus.map(function (f) {

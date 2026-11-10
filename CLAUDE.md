@@ -227,9 +227,9 @@ exploded axon; `g-cw-axon` is in `ON_PAGE` because the poster above is the same 
 cover is the render set's `cover.webp` (CRC isn't among Home's three Recent Work cards at its
 sortKey). Captions follow plan-geometry.js's feature names, but call feature 7 "the Coney gap"
 until the owner settles "Glizzy" against the L-1 sheet's "Glitzy". "About 15,000 sq ft" is the
-L-1 sheet's figure and matches the slab outline in plan-geometry.js (about 15,200 sq ft at
-`scaleFtPerPx`). The L-1 sheet's other claims (first public skatepark in Cincinnati, the opening
-date, the Cincinnati Skatepark Project as co-builder) stay off the site until the owner confirms
+L-1 sheet's figure and matches the slab outline in plan-geometry.js (about 15,150 sq ft at
+`scaleFtPerPx`); it carries a `[CONFIRM]` marker in `model3d.subtitle` until the owner checks it.
+The L-1 sheet's other claims (first public skatepark in Cincinnati, the opening date, the Cincinnati Skatepark Project as co-builder) stay off the site until the owner confirms
 them; the role wording and the skatepark's tools wait in `[CONFIRM]` markers (`software` entries
 go through `US.clean()` like every other field, so a marker there renders nothing).
 
