@@ -6,21 +6,21 @@
  "year": 2025,
  "yearLabel": "2025 · ongoing",
  "type": "Professional",
- "scale": "Citywide public sites",
- "role": "Public-space design support",
+ "scale": "Skatepark + citywide sites",
+ "role": "Public-space design support — skatepark documentation, GIS inventory, planting [CONFIRM: role wording for the skatepark documentation, and the exact job title]",
  "collaborators": "Cincinnati Recreation Commission",
  "software": [
-  "ArcGIS Pro"
+  "ArcGIS Pro [CONFIRM: add the tools behind the skatepark set? e.g. three.js for the 3D model, and whatever drew the L-1 plan]"
  ],
- "summary": "Professional public-space design support — GIS inventory and analysis across city recreation sites, and planting installation in the field.",
+ "summary": "For the Cincinnati Recreation Commission, Matthew Reindl documented the Camp Washington Skatepark on Stock Ave as built in August 2026: a site plan, a 3D massing model and an exploded axon. Hunger Skateparks designed the park. His CRC work also covers GIS inventory and analysis across city recreation sites, and planting installation in the field.",
  "hidden": false,
  "sortKey": 80,
  "cover": "cincinnati-recreation-commission/cover.webp",
  "model3d": {
-  "title": "Camp Washington Skatepark: 3D site massing",
-  "subtitle": "As built, August 2026 · Stock Ave, Camp Washington, Cincinnati",
+  "title": "Camp Washington Skatepark",
+  "subtitle": "As built, August 2026 · about 15,000 sq ft · Stock Ave, Camp Washington, Cincinnati",
   "sheet": "L-2 · 3D site massing",
-  "credit": "Designed by Hunger Skateparks. Documented for the Cincinnati Recreation Commission: L-1 site plan, L-2 3D massing model, L-3 exploded axon.",
+  "credit": "Park design: Hunger Skateparks. Documentation for the Cincinnati Recreation Commission.",
   "note": "Massing from the L-1 plan geometry and Aug 2026 photos; heights and transitions estimated — not for construction.",
   "label": "3D model of Camp Washington Skatepark on Stock Ave, as built in August 2026. Arrow keys orbit, plus and minus zoom, 0 resets the view.",
   "poster": {
@@ -38,6 +38,15 @@
  },
  "images": [
   {
+   "file": "cincinnati-recreation-commission/g-cw-plan.webp",
+   "w": 2400,
+   "h": 1600,
+   "caption": "Site plan (L-1), as built August 2026, with the plan key; north is to the left",
+   "drawing_type": "Site plan",
+   "scale": "Graphic scale",
+   "software": ""
+  },
+  {
    "file": "cincinnati-recreation-commission/pf-10.webp",
    "w": 3400,
    "h": 2310,
@@ -48,6 +57,42 @@
   }
  ],
  "gallery": [
+  {
+   "file": "cincinnati-recreation-commission/g-cw-plan.webp",
+   "w": 2400,
+   "h": 1600,
+   "caption": "Site plan (L-1), as built August 2026, with the plan key; north is to the left"
+  },
+  {
+   "file": "cincinnati-recreation-commission/g-cw-exploded.webp",
+   "w": 2400,
+   "h": 1600,
+   "caption": "Exploded axon (L-3): the massing model lifted in five layers — site, concrete slab, bowls and banks (1–5), street features and entry (6–8), mosaic seating (9)"
+  },
+  {
+   "file": "cincinnati-recreation-commission/g-cw-axon.webp",
+   "w": 2400,
+   "h": 1500,
+   "caption": "3D massing model (L-2) with the nine features numbered; Stock Ave behind"
+  },
+  {
+   "file": "cincinnati-recreation-commission/g-cw-eye-1.webp",
+   "w": 2400,
+   "h": 1500,
+   "caption": "Massing model view: the flow bowl (1), its mound and stepped ledges"
+  },
+  {
+   "file": "cincinnati-recreation-commission/g-cw-eye-2.webp",
+   "w": 2400,
+   "h": 1500,
+   "caption": "Massing model view: the peanut bowl (2), with the fish-scale mosaic seating (9) at right"
+  },
+  {
+   "file": "cincinnati-recreation-commission/g-cw-eye-3.webp",
+   "w": 2400,
+   "h": 1500,
+   "caption": "Massing model view: the entry, with the Coney gap (7) in front and the mural wall-ride (8) beyond"
+  },
   {
    "file": "cincinnati-recreation-commission/g-h19_p1.webp",
    "w": 1458,
@@ -81,6 +126,7 @@
  ],
  "focus": [
   "Professional work with a public client",
+  "A built skatepark documented in three sheets from one plan geometry: site plan, 3D massing model and exploded axon",
   "Citywide GIS inventory of tree cover and impervious surface",
   "From analysis to shovel — planting designed and installed in the field"
  ]

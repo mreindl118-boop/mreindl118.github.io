@@ -57,7 +57,7 @@
     $('dw-num').textContent = String(dw.idx + 1).padStart(2, '0');
     $('dw-caption').textContent = clean(im.caption);
     var scale = clean(im.scale);
-    $('dw-meta').textContent = [im.drawing_type, scale, im.software].filter(Boolean).join(' · ');
+    $('dw-meta').textContent = [im.drawing_type, scale, clean(im.software)].filter(Boolean).join(' · ');
     dw.pz.fit(true);
     Array.prototype.forEach.call($('dw-thumbs').children, function (b, i) {
       b.classList.toggle('active', i === dw.idx);
@@ -615,12 +615,14 @@
   }
 
   /* ---------------- Page assembly ---------------- */
-  // shown elsewhere on its page: Proctor's master plan is the inline #mp-section sheet, and
-  // Evans's two concept plans are the compare slider's views (the same drawings, cut wider)
+  // shown elsewhere on its page: Proctor's master plan is the inline #mp-section sheet,
+  // Evans's two concept plans are the compare slider's views (the same drawings, cut wider), and
+  // CRC's numbered skatepark axon is the 3D panel's poster view (the blowout, with no poster, keeps it)
   var ON_PAGE = {
     'proctor-landing-park/master-plan.webp': 1,
     'evans-park/g-h23_f1.webp': 1,
-    'evans-park/g-h25_f1.webp': 1
+    'evans-park/g-h25_f1.webp': 1,
+    'cincinnati-recreation-commission/g-cw-axon.webp': 1
   };
   function projectFigures(p) {
     var seen = {};
@@ -716,7 +718,7 @@
       metaCell('Role', clean(p.role)) +
       metaCell('Scope / scale', clean(p.scale)) +
       (clean(p.collaborators) ? metaCell('Collaborators', clean(p.collaborators)) : '') +
-      metaCell('Software', (p.software || []).join(' · '), true);
+      metaCell('Software', (p.software || []).map(clean).filter(Boolean).join(' · '), true);
     $('p-summary').textContent = clean(p.summary);
 
     var logos = '<div class="p-row-logos" style="display:flex; gap:34px; align-items:center; flex-wrap:wrap; margin-top:12px; border-top:1px solid var(--line); padding-top:18px">' +

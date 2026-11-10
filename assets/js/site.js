@@ -153,7 +153,7 @@
       '<div class="card-type">' + [clean(p.type), clean(p.scale)].filter(Boolean).map(esc).join(' · ') + '</div>' +
       '<div class="card-titlerow"><' + h + ' class="card-title">' + esc(p.title) + '</' + h + '><span class="card-year">' + esc(yearOf(p)) + '</span></div>' +
       '<div class="card-sub">' + [clean(p.location), roleShort(p)].filter(Boolean).map(esc).join(' · ') + '</div>' +
-      (withSoftware ? '<div class="card-soft">' + esc((p.software || []).join(' · ')) + '</div>' : '') +
+      (withSoftware ? '<div class="card-soft">' + esc((p.software || []).map(clean).filter(Boolean).join(' · ')) + '</div>' : '') +
       (lead ? (lede ? '<p class="card-lede">' + esc(lede) + '</p>' : '') + '</div>' : '') +
       '</a>';
   }

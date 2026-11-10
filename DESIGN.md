@@ -211,7 +211,8 @@ from the boards (the blowout's gallery) follow under "Drawings", one column at t
 moves as they arrive), each with its caption; a figure whose drawing is already on the
 page is left out. They come straight after the meta grid when the drawing set is empty or a
 single portfolio spread (which then follows them as "Portfolio spread", without its one tab),
-and after the drawing set otherwise. Proctor's master plan appears once, as the inline sheet
+and after the drawing set otherwise. A 3D model (CRC's skatepark) comes straight after the meta
+grid and stays first; on CRC the drawing set follows it, opening on the site plan. Proctor's master plan appears once, as the inline sheet
 under the meta grid. The written sections are rows: the heading (22px) in the left third, the
 text (64ch) in the right two-thirds, each under a 1px line (one column on phones).
 
@@ -361,11 +362,16 @@ lower left, and the street name is mono ink with a paper halo. The model's own s
 document the as-built park and stay as drawn. Motion: a 4.5s turn into the home view on first open
 and a 700ms exploded lift on the site's ease-out; neither under reduced motion, and a keyboard toggle
 changes the view at once. Without WebGL 2 the poster stays and a status line says the 3D view isn't
-available on this device; a failed load offers Retry.
+available on this device; a failed load offers Retry. The panel's heading is the work's own name
+("Camp Washington Skatepark"), with one muted line under it for the as-built date, size and place;
+the credit names the park's designer before the client ("Park design: Hunger Skateparks.
+Documentation for the Cincinnati Recreation Commission."). A gallery still of the poster's own view
+is left out of the page's Drawings (the blowout, which has no poster, keeps it).
 
 The Projects page's blowout is the lightbox panel without a stage: it opens on the project's
 first figure, then the mono meta line, a mono link to the full project page (named for what
-that page adds, e.g. "Project page: compare slider + drawings →"), the summary, a "What it
+that page adds, e.g. "Project page: compare slider + drawings →" or "Project page: open the 3D
+model →"), the summary, a "What it
 shows" heading over the focus list, and the remaining figures. Its body is focusable and
 scrolls from the keyboard (the scroll keys also work from the toolbar buttons).
 

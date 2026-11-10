@@ -165,7 +165,8 @@ image arrives; set them (Pillow's `Image.open(f).size`) when adding or replacing
 a file. An entry without them still shows, it just moves the page as it loads.
 That section leaves out any gallery file already on the page (`images`, `models`,
 compare views, plus the `ON_PAGE` list in `assets/js/project.js`: Proctor's
-inline master plan and Evans's two concept plans). Proctor's master plan is not
+inline master plan, Evans's two concept plans and CRC's numbered skatepark axon,
+which is the 3D panel's poster view). Proctor's master plan is not
 in its `images` (it shows once, inline).
 
 The Proctor capstone booklet on its project page is 11 PDF parts
@@ -195,7 +196,24 @@ cw-l1-plan.svg`, north to the left) with the viewer's callouts placed by the SVG
 Re-run both after changing the model, the callouts or their labels. Credit, from the
 owner: Hunger Skateparks designed the park; Matthew documented it for the Cincinnati Recreation
 Commission (L-1 site plan, L-2 3D massing, L-3 exploded axon), so never say or imply he designed it.
-Hunger's concept rendering and the aerial photo in the owner's artifact are never published.
+Hunger's concept rendering and the aerial photo in the owner's artifact are never published, and
+its August 2026 site photos aren't approved for the site.
+
+The skatepark is the lead work of the CRC project (one project, not a separate one): its summary
+and focus open with the documentation, then the GIS and planting work. `gallery` starts with the
+skatepark (`g-cw-plan`, `g-cw-exploded`, `g-cw-axon`, `g-cw-eye-1..3`), so the Projects blowout
+opens on the plan; its link reads "Project page: open the 3D model" (`PAGE_LINK` in work.html).
+`g-cw-plan` is also the first `images` entry, so on the page the plan gets the zoomable drawing set
+(the GIS/planting spread `pf-10` is its second drawing) and the Drawings section starts at the
+exploded axon; `g-cw-axon` is in `ON_PAGE` because the poster above is the same view. The card
+cover is the render set's `cover.webp` (CRC isn't among Home's three Recent Work cards at its
+sortKey). Captions follow plan-geometry.js's feature names, but call feature 7 "the Coney gap"
+until the owner settles "Glizzy" against the L-1 sheet's "Glitzy". "About 15,000 sq ft" is the
+L-1 sheet's figure and matches the slab outline in plan-geometry.js (about 15,200 sq ft at
+`scaleFtPerPx`). The L-1 sheet's other claims (first public skatepark in Cincinnati, the opening
+date, the Cincinnati Skatepark Project as co-builder) stay off the site until the owner confirms
+them; the role wording and the skatepark's tools wait in `[CONFIRM]` markers (`software` entries
+go through `US.clean()` like every other field, so a marker there renders nothing).
 
 Some served images are derivatives of sources kept in `_drafts/originals/`
 (same paths): Home's hero drawing (`assets/img/hero-central-planting.webp`)
