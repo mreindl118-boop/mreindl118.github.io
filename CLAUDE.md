@@ -183,9 +183,16 @@ shows the poster and imports `assets/js/skatepark/viewer.js` only when "Open the
 pressed (it fetches the module graph first, so Retry works after a network failure);
 `plan-geometry.js` and `skatepark-builder.js` beside it are the owner's artifact modules, unchanged
 but for an import path. three.js r184 is self-hosted in `assets/vendor/three-0.184.0/` (npm
-three@0.184.0; the one edit is OrbitControls' import path). Render stills of the model with
-`python3 _drafts/tools/render_skatepark.py OUT.webp` (options in its docstring; it made
-`content/projects/cincinnati-recreation-commission/skatepark-model-poster.webp`). Credit, from the
+three@0.184.0; the one edit is OrbitControls' import path). One-off stills of the model:
+`python3 _drafts/tools/render_skatepark.py OUT.webp` (options in its docstring). The published
+stills (the poster, the card cover, `g-cw-axon`, `g-cw-exploded`, `g-cw-eye-1..3`, and the book's PNG
+masters plus nine per-feature details) all come from `python3 -B _drafts/tools/render_skatepark_set.py
+--web content/projects/cincinnati-recreation-commission --print <dir>`, whose SHOTS table records
+every camera; they are drawn by the viewer itself (2x supersampled). The site plan `g-cw-plan.webp`
+(plan + key) and its print masters come from `python3 -B _drafts/tools/draw_skatepark_plan.py`, which
+draws the L-1 sheet's vector plan (`_drafts/originals/content/projects/cincinnati-recreation-commission/
+cw-l1-plan.svg`, north to the left) with the viewer's callouts placed by the SVG's own transforms.
+Re-run both after changing the model, the callouts or their labels. Credit, from the
 owner: Hunger Skateparks designed the park; Matthew documented it for the Cincinnati Recreation
 Commission (L-1 site plan, L-2 3D massing, L-3 exploded axon), so never say or imply he designed it.
 Hunger's concept rendering and the aerial photo in the owner's artifact are never published.

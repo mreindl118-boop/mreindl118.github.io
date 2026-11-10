@@ -14,9 +14,11 @@ Usage (serve the repo first, e.g. python3 -m http.server 8340):
 --width/--height are CSS pixels and --scale the pixel ratio, so the defaults give a 2000x1125
 image with callout badges at their on-screen size. Output: .webp (Pillow), .png or .jpg. The
 camera used is printed as JSON, so a view found in the live viewer (viewer.state()) can be
-passed back in with --camera. The poster on the CRC page came from:
+passed back in with --camera. The first poster (set 8a) came from:
   python3 _drafts/tools/render_skatepark.py \\
     content/projects/cincinnati-recreation-commission/skatepark-model-poster.webp
+The published stills (poster, card cover, gallery renders, book masters) now come from
+render_skatepark_set.py, which records each camera in its SHOTS table.
 Needs Python Playwright with a Chromium that has WebGL 2 (headless SwiftShader works).
 """
 import argparse, asyncio, base64, io, json, os, sys
