@@ -235,8 +235,9 @@ sortKey). Captions follow plan-geometry.js's feature names; feature 7 is "Coney 
 in the viewer's plan key and the redrawn `g-cw-plan.webp`) and "the Coney gap" in captions, until
 the owner settles "Glizzy" against the L-1 sheet's "Glitzy". The card's scale reads "Skatepark
 documentation": `roleShort()` cuts the role at its em dash, so without it the card would set "design
-support" under the skatepark cover with no credit; at 23 characters the type line stays on one line
-from 390 px up. "About 15,000 sq ft" is the
+support" under the skatepark cover with no credit. At 23 characters the type line is one line at
+360-1440 px except in the narrow two- and three-column bands (about 624-677 and 960-997 px) and at
+320 px, where it wraps to two, as Lunkenheimer's does. "About 15,000 sq ft" is the
 L-1 sheet's figure and matches the slab outline in plan-geometry.js (about 15,150 sq ft at
 `scaleFtPerPx`); it carries a `[CONFIRM]` marker in `model3d.subtitle` until the owner checks it.
 The L-1 sheet's other claims (first public skatepark in Cincinnati, the opening date, the

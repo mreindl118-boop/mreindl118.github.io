@@ -102,6 +102,7 @@ async function build(stage, opts, made) {
   const cam = new THREE.PerspectiveCamera(45, 1, 0.01, 500);
   cam.position.set(3, 2.2, 4);
   const controls = new OrbitControls(cam, canvas);
+  made.push(controls);                                // its document key listener goes too if the mount fails
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
 

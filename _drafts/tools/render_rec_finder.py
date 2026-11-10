@@ -47,8 +47,9 @@ async def capture(index_html, png):
           mode: document.body.dataset.mode,
           hint: document.getElementById('hint').hidden,
           card: document.getElementById('card').hidden,
-          tip: document.getElementById('tip').hidden })''')
-        if errors or state != {'mode': mode0, 'hint': True, 'card': True, 'tip': True}:
+          tip: document.getElementById('tip').hidden,
+          tag: document.querySelector('.brand-title .tag').textContent.trim() })''')
+        if errors or state != {'mode': mode0, 'hint': True, 'card': True, 'tip': True, 'tag': 'Prototype'}:
             sys.exit(f'not a clean opening view: {state} {errors[:3]}')
         # the masthead keeps only the brand, the counts and the Present button
         await pg.add_style_tag(content='header.mast > *:not(.brand-plate):not(.brand):not(#mastStats):not(#presBtn)'
