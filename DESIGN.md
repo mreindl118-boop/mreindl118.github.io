@@ -195,7 +195,7 @@ smooth`) only for visitors who haven't asked for reduced motion.
 On Home the featured project sits under the hero: its title (an h2), one ink sentence and
 "View project →" on the left, its plan on the right (one column on phones).
 Home ends on contact, not a list: on the panel ground under the rule motif, "Get in Touch" sets the
-email address as a Headline-weight link (700, clamp(28px, 4.4vw, 56px)) in the left two-thirds, with
+email address as a plain link (600, clamp(19px, 1.9vw, 24px)) at the top of the left two-thirds, with
 one ink line and the Résumé and Portfolio book links in the right third (one column on phones).
 
 On Projects the grid is the only control. From 960px it is three even columns and the first card
