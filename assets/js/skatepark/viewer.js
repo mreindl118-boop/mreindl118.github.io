@@ -315,8 +315,12 @@ async function build(stage, opts, made) {
     renderer.setSize(w, h);
     cam.aspect = w / h; cam.updateProjectionMatrix();
     // a camera still on its home view is reframed for the new shape (a phone turned on its side);
-    // one the reader has moved stays where they left it
-    if (atHome && !spin) homeView();
+    // one the reader has moved stays where they left it. The opening turn runs on the assembled home
+    // view (offset HOME x fit()), so mid-turn only its offset is rescaled and it lands on the new framing
+    if (atHome) {
+      if (spin) { spin.offset.copy(HOME).multiplyScalar(fit()); limits(); }
+      else homeView();
+    }
     dirty = true;
   }
   const ro = new ResizeObserver(resize);
@@ -376,7 +380,7 @@ async function build(stage, opts, made) {
     const w = +o.width || 1600, h = +o.height || 900, scale = +o.scale || 1;   // the image is floor(w * scale) x floor(h * scale)
     const saved = {
       exploded, explode, pr: renderer.getPixelRatio(), pos: cam.position.clone(), tgt: controls.target.clone(), fov: cam.fov,
-      near: cam.near, far: cam.far, pins: pinsGroup.visible, badgePx, clear: renderer.getClearAlpha()
+      near: cam.near, far: cam.far, pins: pinsGroup.visible, badgePx, clear: renderer.getClearAlpha(), atHome
     };
     cam.aspect = w / h; cam.updateProjectionMatrix();
     if (o.view === 'exploded' || o.view === 'assembled') {
@@ -405,6 +409,7 @@ async function build(stage, opts, made) {
     cam.fov = saved.fov; cam.near = saved.near; cam.far = saved.far;
     cam.position.copy(saved.pos); controls.target.copy(saved.tgt);
     renderer.setPixelRatio(saved.pr);
+    atHome = saved.atHome;                             // so the resize below keeps a moved camera where it was
     W = H = 0; resize(); limits();
     controls.update();
     dirty = true;

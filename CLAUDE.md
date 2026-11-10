@@ -227,9 +227,10 @@ exploded axon; `g-cw-axon` is in `ON_PAGE` because the poster above is the same 
 cover is the render set's `cover.webp` (CRC isn't among Home's three Recent Work cards at its
 sortKey). Captions follow plan-geometry.js's feature names; feature 7 is "Coney gap jump" there (so
 in the viewer's plan key and the redrawn `g-cw-plan.webp`) and "the Coney gap" in captions, until
-the owner settles "Glizzy" against the L-1 sheet's "Glitzy". The card's scale reads "Skatepark
-documentation + citywide sites" because `roleShort()` cuts the role at its em dash, and the card
-must not set "design support" beside a skatepark with no credit. "About 15,000 sq ft" is the
+the owner settles "Glizzy" against the L-1 sheet's "Glitzy". The card's scale reads "Site
+documentation + GIS": `roleShort()` cuts the role at its em dash, so the card must not set "design
+support" beside a skatepark with no credit, and at 23 characters or so the type line stays on one
+line from 390 px up. "About 15,000 sq ft" is the
 L-1 sheet's figure and matches the slab outline in plan-geometry.js (about 15,150 sq ft at
 `scaleFtPerPx`); it carries a `[CONFIRM]` marker in `model3d.subtitle` until the owner checks it.
 The L-1 sheet's other claims (first public skatepark in Cincinnati, the opening date, the

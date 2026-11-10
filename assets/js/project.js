@@ -745,7 +745,7 @@
         '<h2 class="h-head">' + esc(clean(s.heading)) + '</h2>' +
         (body ? '<p>' + esc(body) + '</p>' : '') +
         (fig ? rowFigure(fig) : '') +
-        (/recognition/i.test(s.heading) ? logos : '') +
+        (/recognition/i.test(clean(s.heading)) ? logos : '') +
         '</div>';
     }).join('');
 
