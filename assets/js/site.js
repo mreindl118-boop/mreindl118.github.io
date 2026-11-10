@@ -53,7 +53,7 @@
     return '<div class="load-note">' + (noLead ? '' : '<p class="mono-note">Projects didn\u2019t load.</p>') + '<div class="load-note-links">' +
       '<a class="link-mono" href="portfolio.html">Flip through the portfolio book\u00a0\u2192</a>' +
       '<a class="link-mono" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf">Download PDF\u00a0\u2193 ' +
-      '<span style="color:var(--faint); white-space:nowrap">(16\u00a0MB)</span></a></div></div>';
+      '<span style="color:var(--faint); white-space:nowrap">(17\u00a0MB)</span></a></div></div>';
   }
 
   /* A figure or model photo that fails to load takes the covers' hatched placeholder and says so
@@ -113,8 +113,8 @@
     if (portfolioP) return portfolioP;
     portfolioP = getJSON('assets/portfolio/spreads.json').catch(function () {
       var spreads = [{ src: 'spread-00.webp', pages: [1], caption: 'Cover' }];
-      for (var k = 1; k <= 17; k++) spreads.push({ src: 'spread-' + pad2(k) + '.webp', pages: [2 * k, 2 * k + 1], caption: '' });
-      return { pages: 35, spreads: spreads };
+      for (var k = 1; k <= 18; k++) spreads.push({ src: 'spread-' + pad2(k) + '.webp', pages: [2 * k, 2 * k + 1], caption: '' });
+      return { pages: 37, spreads: spreads };
     }).then(function (m) {
       m.src = function (k) { return 'assets/portfolio/' + m.spreads[k].src; };
       m.range = function (k) { var p = m.spreads[k].pages; return [p[0], p[p.length - 1]]; };

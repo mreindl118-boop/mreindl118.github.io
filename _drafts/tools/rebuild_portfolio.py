@@ -3,6 +3,11 @@ spine-shading removal, tight caption re-typesetting, contents renumbering, proje
 pagination with blank pages, Hyundai side swap, Weaver model spread, closer,
 spreads (a page facing a blank is shown alone) + spreads.json manifest + PDF.
 
+This writes the 35-page book. Then run insert_crc_skatepark_pages.py --pages $PF_OUT (set 8d): it adds the
+Camp Washington Skatepark as pp. 21-22 (37 pages, blanks 25 and 28, Contents numbers 24/26/29/32) and
+re-writes the PDF, the spreads, spreads.json and CRC's pf-10/pf-11. The tables below stay in 35-page
+numbering. FONT and MONO are IBM Plex Sans Text and IBM Plex Mono Regular (copies in _drafts/tools/fonts/).
+
 Env: PF_REPO (site checkout to write into), PF_OUT (page PNG dir), PF_DESHADE=0 to keep
 the export's baked gutter shading (regression check against older builds)."""
 import io, os, glob, json, shutil, sys
@@ -372,6 +377,8 @@ def model_spread(pages):
     return a[:, :W].copy(), a[:, W:].copy()
 
 
+# 35-page numbering; insert_crc_skatepark_pages.py re-captions spreads 10-11 (both "05 Cincinnati Recreation
+# Commission — ...") and moves the rest up by one. Other projects' pf-NN copies keep these numbers.
 SPREAD_CAPTIONS = ['Cover', 'Contents · 01 Proctor Landing Park', '01 Proctor Landing Park — master plan',
     '01 Proctor Landing Park — design features', '01 Proctor Landing Park — systems + planting',
     '01 Proctor Landing Park — crossings + recognition', '02 Parc des Buttes-Chaumont',
@@ -430,6 +437,7 @@ def main():
         print(r)
     print('pages', len(order), 'spreads', len(glob.glob(f'{REPO}/assets/portfolio/spread-*.webp')),
           'pdf', len(doc), round(os.path.getsize(f'{REPO}/assets/Matthew_Reindl_Portfolio.pdf') / 1048576, 1), 'MB')
+    print('next: python3 -B _drafts/tools/insert_crc_skatepark_pages.py --pages', OUT)
 
 
 if __name__ == '__main__':

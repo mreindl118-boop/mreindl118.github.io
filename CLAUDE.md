@@ -120,20 +120,20 @@ About (carries contact at `#contact`; contact.html redirects), Experience
 
 `portfolio.html` is a booklet-style spread viewer (like the capstone
 booklet) over `assets/portfolio/spread-NN.webp`, with
-`assets/Matthew_Reindl_Portfolio.pdf` built from the same 35 pages as the
+`assets/Matthew_Reindl_Portfolio.pdf` built from the same 37 pages as the
 download. Spread 0 is the cover; spread k shows pages 2k and 2k+1, and the
-viewer counts book pages ("PP. 12-13 / 35"). A page facing a blank page is
-published alone and centred ("P. 22"); the viewer reads
+viewer counts book pages ("PP. 12-13 / 37"). A page facing a blank page is
+published alone and centred ("P. 24"); the viewer reads
 `assets/portfolio/spreads.json` (written by the pipeline) for the spread list,
 page labels and captions. The export's false page-curl bevel (an 80 px shadow
 at every page's spine edge) is divided out at load; the PDF keeps its blank
 pages. Every project opens on a spread
-of its own: blank pages 23 and 26 separate Lunkenheimer, Hyundai and Evans,
+of its own: blank pages 25 and 28 separate Lunkenheimer, Hyundai and Evans,
 and Hyundai's two pages were moved across the spine (gutter shading mirrored,
 running-header labels swapped). Pages 18-19 are the Weaver laser-cut model
-spread. The Contents page numbers are re-set to match (Proctor 03,
-Buttes-Chaumont 12, West End 14, Weaver 16, CRC 20, Lunkenheimer 22,
-Hyundai 24, Evans 27, Green Roof 30). The Projects page no longer embeds the
+spread. Pages 21-22 are the Camp Washington Skatepark (below). The Contents page numbers are
+re-set to match (Proctor 03, Buttes-Chaumont 12, West End 14, Weaver 16, CRC 20, Lunkenheimer 24,
+Hyundai 26, Evans 29, Green Roof 32). The Projects page no longer embeds the
 book or its per-project tags (removed November 2026, Sam Kremer's feedback); it
 links to portfolio.html from its header and from the Portfolio Book band after
 the grid.
@@ -149,13 +149,31 @@ on the export's half pages rendered at 200 dpi. A re-export goes through the
 privacy pass first, then this script (update its transcriptions if captions
 change). The script also writes `assets/portfolio/cover-thumb.webp` (the
 Portfolio Book band's cover, spread 0 at 560 px wide; work.html hard-codes
-560x761) but not the "(16 MB)" label beside that band's PDF link in work.html;
+560x761) but not the "(17 MB)" label beside that band's PDF link in work.html;
 fix that label by hand when the PDF size changes, along with its copies in the
 load-failure note (`loadNote` in `assets/js/site.js`), the `<noscript>` notes
 in work.html, project.html and portfolio.html, and portfolio.html's top Download
 button. The viewer's project jump row and caption links read the captions'
 "NN Title" form (first spread per number; titles matched by prefix against the
-listed projects), so keep that form when captions change. Portfolio spreads also feed the project pages
+listed projects), so keep that form when captions change.
+
+The pipeline writes the 35-page book; `_drafts/tools/insert_crc_skatepark_pages.py` (set 8d) then puts
+the Camp Washington Skatepark at the head of the CRC section: new p. 21, the L-1 site plan (5.4) with a
+plan key, and new p. 22, the exploded axon, the assembled axon and an eye-level model view (5.5-5.7)
+with a credit and note row; the installation photos move to p. 23 (now 5.8, 5.9), CRC's title-page
+subtitle and Contents sub-line lead with the skatepark, and the later Contents numbers move by two.
+Everything is set in the book's measured style (its docstring has the numbers; the running heads and
+meta rows copy p. 20's) with the IBM Plex TTFs in `_drafts/tools/fonts/`, which reproduce the
+pipeline's own captions within JPEG noise (`plex-text.ttf` is IBM Plex Sans Text, `plex-mono.ttf` IBM
+Plex Mono Regular). The two new pages are kept as masters in `_drafts/originals/portfolio/`; `--compose
+<print dir>` re-draws them from render_skatepark_set.py's print masters and a fresh plan drawing. Run it
+with no options on the repo's 35-page book (untouched pages keep their JPEG streams and untouched spreads
+their files), or with `--pages <PF_OUT>` right after the pipeline; it refuses a book that already has
+the pages. It writes the PDF, spreads 00-18, spreads.json (spreads 10 and 11 are both "05 Cincinnati
+Recreation Commission — ...") and CRC's `pf-10`/`pf-11`; the other projects' `pf-NN` files keep the
+35-page numbers (Lunkenheimer's `pf-11` is now spread 12, and so on), so their JSON stays as it is.
+
+Portfolio spreads also feed the project pages
 (`content/projects/<slug>/pf-NN.webp`), and the individual figures cut from the
 boards (`content/projects/<slug>/g-*.webp`, `gallery` + `focus` in each JSON)
 fill both the Projects-page blowouts and each project page's "Drawings" section.
@@ -204,7 +222,7 @@ and focus open with the documentation, then the GIS and planting work. `gallery`
 skatepark (`g-cw-plan`, `g-cw-exploded`, `g-cw-axon`, `g-cw-eye-1..3`), so the Projects blowout
 opens on the plan; its link reads "Project page: open the 3D model" (`PAGE_LINK` in work.html).
 `g-cw-plan` is also the first `images` entry, so on the page the plan gets the zoomable drawing set
-(the GIS/planting spread `pf-10` is its second drawing) and the Drawings section starts at the
+(the book's two CRC spreads, `pf-10` and `pf-11`, are its second and third) and the Drawings section starts at the
 exploded axon; `g-cw-axon` is in `ON_PAGE` because the poster above is the same view. The card
 cover is the render set's `cover.webp` (CRC isn't among Home's three Recent Work cards at its
 sortKey). Captions follow plan-geometry.js's feature names, but call feature 7 "the Coney gap"

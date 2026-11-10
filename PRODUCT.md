@@ -41,7 +41,7 @@ The award-recognised capstone (Proctor Landing Park) leads the work.
 - Reviewers arrive from a résumé, LinkedIn, an email or a job application, on a laptop or a
   phone, often with several candidates open in tabs.
 - The work is presented the way the profession presents it: drawing sets, boards, a capstone
-  booklet, a 35-page portfolio book (web spread viewer + PDF), project pages with spreads,
+  booklet, a 37-page portfolio book (web spread viewer + PDF), project pages with spreads,
   zoomable drawings, models and a compare slider.
 - The site is static HTML + CSS + vanilla JS on GitHub Pages; content lives in JSON. No build
   step, no framework, no analytics.

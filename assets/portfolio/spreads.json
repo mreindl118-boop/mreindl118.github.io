@@ -1,5 +1,5 @@
 {
- "pages": 35,
+ "pages": 37,
  "spreads": [
   {
    "src": "spread-00.webp",
@@ -86,37 +86,37 @@
     20,
     21
    ],
-   "caption": "05 Cincinnati Recreation Commission"
+   "caption": "05 Cincinnati Recreation Commission \u2014 Camp Washington Skatepark site plan"
   },
   {
    "src": "spread-11.webp",
    "pages": [
-    22
+    22,
+    23
    ],
-   "caption": "06 Lunkenheimer Lot"
+   "caption": "05 Cincinnati Recreation Commission \u2014 skatepark massing model + planting installation"
   },
   {
    "src": "spread-12.webp",
    "pages": [
-    24,
-    25
+    24
    ],
-   "caption": "07 Hyundai Heavy Industries Campus"
+   "caption": "06 Lunkenheimer Lot"
   },
   {
    "src": "spread-13.webp",
    "pages": [
+    26,
     27
    ],
-   "caption": "08 Evans Park"
+   "caption": "07 Hyundai Heavy Industries Campus"
   },
   {
    "src": "spread-14.webp",
    "pages": [
-    28,
     29
    ],
-   "caption": "08 Evans Park \u2014 two concepts"
+   "caption": "08 Evans Park"
   },
   {
    "src": "spread-15.webp",
@@ -124,7 +124,7 @@
     30,
     31
    ],
-   "caption": "09 Green Roof Studies"
+   "caption": "08 Evans Park \u2014 two concepts"
   },
   {
    "src": "spread-16.webp",
@@ -132,13 +132,21 @@
     32,
     33
    ],
-   "caption": "Other work and process"
+   "caption": "09 Green Roof Studies"
   },
   {
    "src": "spread-17.webp",
    "pages": [
     34,
     35
+   ],
+   "caption": "Other work and process"
+  },
+  {
+   "src": "spread-18.webp",
+   "pages": [
+    36,
+    37
    ],
    "caption": "Colophon"
   }

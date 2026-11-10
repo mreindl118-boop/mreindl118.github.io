@@ -295,7 +295,7 @@ Diagonal hatching marks placeholders.
 ### Viewers (signature component)
 Drawing set, portfolio book, capstone booklet and lightbox share one viewer: an ink-bordered
 panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page counter
-("PP. 12–13 / 35"), a scrubber and a caption footer.
+("PP. 12–13 / 37"), a scrubber and a caption footer.
 
 - **At fit the stage is part of the page.** It takes no drag at 100% or less, so a finger on it
   scrolls the page and the phone's own pinch works (`touch-action: pan-y pinch-zoom`), and no zoom
@@ -318,7 +318,7 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
   zoomed book. In the full-screen lightbox, Tab cycles its buttons and its stage.
 - **Names and states:** the arrow buttons are named "Previous/Next drawing" or "Previous/Next
   spread" (the glyph is `aria-hidden`), FIT is "Fit to view", Close is "Close"; the counters
-  ("DWG 01 / 08", "PP. 12–13 / 35") are polite live regions, and the drawing tabs carry
+  ("DWG 01 / 08", "PP. 12–13 / 37") are polite live regions, and the drawing tabs carry
   `aria-pressed` with their active state.
 - **Phones:** the drawing set's toolbar sits on one row from about 383px (10px padding, 6px gaps),
   and its stage takes the drawing's own shape (the `w`/`h` of its JSON entry, at most 70svh, set
@@ -333,7 +333,7 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
   box and its Retry button.
 - **Portfolio book (portfolio.html):** the page opens on the book, not on furniture: no kicker,
   the H1 at the shared page-title size, one `.note-sans` sentence that carries the years, and the
-  plain primary button "Download PDF ↓ (16 MB)" (the one under the book reads "Download PDF ↓").
+  plain primary button "Download PDF ↓ (17 MB)" (the one under the book reads "Download PDF ↓").
   From 641px the stage is `max(min(68vh, 640px), min(100svh − 455px, 1000px))` (`− 395px` from
   960px, where the header is one row): never smaller than the shared tall stage, and on taller
   screens it grows only as far as keeps the scrubber and caption bar in the first view (725px at
@@ -400,7 +400,7 @@ the divider.
 - **Content that can't load:** one bad project file costs only that project. With nothing to
   show, the Projects grid (and a project page, under an h1 "Projects didn’t load") gives the mono
   note "Projects didn’t load." and two mono links, "Flip through the portfolio book →" and
-  "Download PDF ↓ (16 MB)". The same note is the `<noscript>` fallback on the Projects and
+  "Download PDF ↓ (17 MB)". The same note is the `<noscript>` fallback on the Projects and
   project pages; the portfolio's stage offers just the PDF link.
 - **Unknown project:** h1 "Project not found" and "All projects →"; the page is `noindex`.
 - **A missing image:** a portfolio spread shows "Couldn’t load this spread" and a Retry button

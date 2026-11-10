@@ -184,4 +184,5 @@ def main():
         print(json.dumps({'out': f, 'size': sz, 'bytes': os.path.getsize(f)}))
 
 
-main()
+if __name__ == '__main__':
+    main()
