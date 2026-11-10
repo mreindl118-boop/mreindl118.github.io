@@ -14,7 +14,7 @@ No prices or cost totals appear anywhere. North is the CAD's +Y (the CAGIS base 
 
 Sheets (17 x 11 in at 72 css px per inch, 1224 x 792):
   plan      the whole planting plan, the plant key in a band under it, and the title block
-  shelter   enlargement of the beds round the shelter and its entry walk; a plant cut by the frame is drawn in grey
+  shelter   enlargement of the beds around the shelter and its entry walk; a plant cut by the frame is drawn in grey
             and not counted in that sheet's key
 Outputs: <web>/g-ryan-plan.webp, g-ryan-shelter.webp (2400 x 1553); <print>/ryan-planting-plan.png,
 ryan-planting-shelter.png (5100 x 3300, 300 dpi at 17 x 11).
@@ -335,7 +335,9 @@ def overall(D):
     ep = Plot(enlargement_window(D), SHELTER_PW, H)       # the enlargement's own frame, exactly
     a, b = pl.P(ep.mx0, ep.my1), pl.P(ep.mx1, ep.my0)
     o.append('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="none" stroke="%s" stroke-width="1" stroke-dasharray="5 3"/>' % (a[0], a[1], b[0] - a[0], b[1] - a[1], INK))
-    o.append('<text x="%.1f" y="%.1f" class="ctx">ENLARGEMENT \u00b7 SHELTER BEDS</text>' % (a[0], a[1] - 6))
+    # two short lines, so the label stays within the box's width and clear of the trees beside it
+    o.append('<text x="%.1f" y="%.1f" class="ctx">ENLARGEMENT</text>' % (a[0], a[1] - 18))
+    o.append('<text x="%.1f" y="%.1f" class="ctx">SHELTER BEDS</text>' % (a[0], a[1] - 6))
     for t, x, y, anchor in AREAS:
         X, Y = pl.P(x, y)
         for i, line in enumerate(t.split('/')):
