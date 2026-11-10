@@ -196,12 +196,14 @@
   function m3Load() {
     if (m3.loading || m3.viewer) return;
     m3.loading = true;
+    // Retry is about to hide: keep focus inside the dialog rather than let it fall to the page
+    if (document.activeElement === $('m3-retry')) $('m3-close').focus();
     m3Status('Loading the 3D model…');
     // the poster holds the stage while the model loads (the page already has it)
     $('m3-stage-poster').src = $('m3-poster-img').currentSrc || $('m3-poster-img').src;
     $('m3-stage-poster').hidden = false;
     var url = new URL(m3.cfg.module, location.href).href;
-    if (m3.tries) url += '?retry=' + m3.tries;   // in case an import() itself failed
+    if (m3.tries) url += '?retry=' + m3.tries;   // a fresh URL for viewer.js; the preflight has fetched its dependencies
     m3Preflight(url, {}).then(function () {
       return import(url);
     }).then(function (mod) {
@@ -223,7 +225,8 @@
       console.warn('3D model failed', e && (e.message || e));
       Array.prototype.forEach.call($('m3-stage').querySelectorAll('.m3-canvas, .m3-hud, .m3-road'), function (n) { n.remove(); });
       $('m3-key').innerHTML = '';
-      m3Status('The 3D model didn’t load.', true);
+      // the browser keeps a failed module for the page's life, so after a second failure say how to get past it
+      m3Status(m3.tries > 1 ? 'The 3D model still didn’t load. Reloading the page may help.' : 'The 3D model didn’t load.', true);
     });
   }
 
@@ -739,7 +742,7 @@
       if (!body && !fig) return '';
       // a row: the heading in the left third, the text (and a figure) in the right two-thirds (site.css .p-row)
       return '<div class="p-row">' +
-        '<h2 class="h-head">' + esc(s.heading) + '</h2>' +
+        '<h2 class="h-head">' + esc(clean(s.heading)) + '</h2>' +
         (body ? '<p>' + esc(body) + '</p>' : '') +
         (fig ? rowFigure(fig) : '') +
         (/recognition/i.test(s.heading) ? logos : '') +

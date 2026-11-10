@@ -182,9 +182,9 @@
     h += '<div style="margin-top:14px"><a class="link-mono" href="project.html?slug=' + encodeURIComponent(p.slug) + '" aria-label="' + esc(label + ' — ' + p.title) + '">' + esc(label) + ' &rarr;</a></div>';
     var blurb = clean(p.summary);
     if (blurb) h += '<p style="font-size:16px; line-height:1.65; max-width:64ch; margin:12px 0 0; text-wrap:pretty">' + esc(blurb) + '</p>';
-    // a 3D model's note (how the massing was made, what is estimated) qualifies its renders
-    // below, as it does in the model panel's foot on the project page
-    var mnote = p.model3d ? clean(p.model3d.note) : '';
+    // a 3D model's credit and note (who designed what is modelled, how the massing was made,
+    // what is estimated) qualify its renders below, as they do in the model panel's foot
+    var mnote = p.model3d ? [clean(p.model3d.credit), clean(p.model3d.note)].filter(Boolean).join(' ') : '';
     if (mnote) h += '<p class="note-sans" style="max-width:64ch; margin:10px 0 0; text-wrap:pretty">' + esc(mnote) + '</p>';
     if (p.focus && p.focus.length) {
       h += '<h3 class="h-head" style="font-size:17px; margin:22px 0 0; border-top:1px solid var(--ink); padding-top:10px">What it shows</h3>';
@@ -210,11 +210,13 @@
     // dialog when the body is rebuilt, so hand it to the scrollable body
     var body = $('bo-body'), inBody = body.contains(document.activeElement) && document.activeElement !== body;
     body.innerHTML = bodyHtml(p);
-    body.scrollTop = 0;
     if (inBody) body.focus();
     var wasOpen = !$('bo-box').hidden;
     if (!wasOpen) $('bo-box').toggleAttribute('data-instant', instant === true);
     $('bo-box').hidden = false;
+    // back to the top only once the box shows: a hidden (display:none) body ignores scrollTop,
+    // so a box reopened after scrolling would otherwise start where the last one was left
+    body.scrollTop = 0;
     document.body.style.overflow = 'hidden';
     if (!wasOpen) { opener = document.activeElement; $('bo-close').focus(); }
     if (push !== false) { try { history.replaceState(null, '', '#' + slug); } catch (e) {} }

@@ -62,6 +62,16 @@ function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.
 function escHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
 export async function mount(stage, opts = {}) {
+  // a mount that fails part-way gives back the WebGL context it took, so a Retry doesn't stack them
+  const made = [];
+  try { return await build(stage, opts, made); }
+  catch (e) {
+    made.forEach(r => { try { r.dispose(); r.forceContextLoss(); r.domElement.remove(); } catch (_) { /* already gone */ } });
+    throw e;
+  }
+}
+
+async function build(stage, opts, made) {
   // the badges draw their numerals in Plex Mono; give the face a moment to arrive (it is on the page)
   try {
     if (document.fonts && document.fonts.load) {
@@ -74,6 +84,7 @@ export async function mount(stage, opts = {}) {
     logarithmicDepthBuffer: true, antialias: true, alpha: true,
     preserveDrawingBuffer: !!opts.preserveDrawingBuffer
   });
+  made.push(renderer);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;       // PCFSoftShadowMap is deprecated in r184 and falls back to this
@@ -227,7 +238,7 @@ export async function mount(stage, opts = {}) {
   }
 
   /* ---------- views ---------- */
-  let exploded = false, anim = null, spin = null, dirty = true, running = false, last = 0;
+  let exploded = false, anim = null, spin = null, dirty = true, running = false, last = 0, atHome = false;
   function limits() {
     controls.minDistance = exploded ? 120 : 12;
     controls.maxDistance = (exploded ? 900 : 240) * fit();
@@ -238,12 +249,15 @@ export async function mount(stage, opts = {}) {
   const fit = () => cam.aspect >= 1.6 ? 1 : Math.pow(1.6 / cam.aspect, 0.8);
   function homeView() {
     spin = null;
+    // drop any drag momentum still coasting, or the camera would drift off the home view
+    const damp = controls.enableDamping; controls.enableDamping = false; controls.update(); controls.enableDamping = damp;
     const k = fit();
     if (exploded) { cam.fov = 9; controls.target.copy(PC).setY(9); cam.position.copy(controls.target).addScaledVector(AXON, 330 * k); }
     else { cam.fov = baseFov; controls.target.copy(PC); cam.position.copy(PC).addScaledVector(HOME, k); }
     cam.near = 0.5; cam.far = 1200; cam.updateProjectionMatrix();
     limits();
     controls.update();
+    atHome = true;
     dirty = true;
   }
   function setExploded(on, o = {}) {
@@ -261,7 +275,7 @@ export async function mount(stage, opts = {}) {
   // keyboard and buttons move the camera at once (no motion on keyboard actions): orbit about the target
   const _off = new THREE.Vector3(), _sph = new THREE.Spherical();
   function orbit(dTheta, dPhi) {
-    spin = null;
+    spin = null; atHome = false;
     _off.copy(cam.position).sub(controls.target); _sph.setFromVector3(_off);
     _sph.theta += dTheta;
     _sph.phi = Math.min(controls.maxPolarAngle, Math.max(0.05, _sph.phi + dPhi));
@@ -269,7 +283,7 @@ export async function mount(stage, opts = {}) {
     controls.update(); dirty = true;
   }
   function zoom(f) {
-    spin = null;
+    spin = null; atHome = false;
     _off.copy(cam.position).sub(controls.target);
     const d = Math.min(controls.maxDistance, Math.max(controls.minDistance, _off.length() * f));
     cam.position.copy(controls.target).add(_off.setLength(d));
@@ -288,7 +302,7 @@ export async function mount(stage, opts = {}) {
     else return;
     e.preventDefault();
   });
-  controls.addEventListener('start', () => { spin = null; });
+  controls.addEventListener('start', () => { spin = null; atHome = false; });
   controls.addEventListener('change', () => { dirty = true; });
 
   /* ---------- size and the render loop (draws only when something changed) ---------- */
@@ -300,6 +314,9 @@ export async function mount(stage, opts = {}) {
     W = w; H = h;
     renderer.setSize(w, h);
     cam.aspect = w / h; cam.updateProjectionMatrix();
+    // a camera still on its home view is reframed for the new shape (a phone turned on its side);
+    // one the reader has moved stays where they left it
+    if (atHome && !spin) homeView();
     dirty = true;
   }
   const ro = new ResizeObserver(resize);
