@@ -225,8 +225,11 @@ opens on the plan; its link reads "Project page: open the 3D model" (`PAGE_LINK`
 (the book's two CRC spreads, `pf-10` and `pf-11`, are its second and third) and the Drawings section starts at the
 exploded axon; `g-cw-axon` is in `ON_PAGE` because the poster above is the same view. The card
 cover is the render set's `cover.webp` (CRC isn't among Home's three Recent Work cards at its
-sortKey). Captions follow plan-geometry.js's feature names, but call feature 7 "the Coney gap"
-until the owner settles "Glizzy" against the L-1 sheet's "Glitzy". "About 15,000 sq ft" is the
+sortKey). Captions follow plan-geometry.js's feature names; feature 7 is "Coney gap jump" there (so
+in the viewer's plan key and the redrawn `g-cw-plan.webp`) and "the Coney gap" in captions, until
+the owner settles "Glizzy" against the L-1 sheet's "Glitzy". The card's scale reads "Skatepark
+documentation + citywide sites" because `roleShort()` cuts the role at its em dash, and the card
+must not set "design support" beside a skatepark with no credit. "About 15,000 sq ft" is the
 L-1 sheet's figure and matches the slab outline in plan-geometry.js (about 15,150 sq ft at
 `scaleFtPerPx`); it carries a `[CONFIRM]` marker in `model3d.subtitle` until the owner checks it.
 The L-1 sheet's other claims (first public skatepark in Cincinnati, the opening date, the
@@ -235,7 +238,8 @@ role wording and the skatepark's tools wait in `[CONFIRM]` markers (`software` e
 `US.clean()` like every other field, so a marker there renders nothing). The model's credit line
 (`model3d.credit`) is the owner's choice of November 2026, over wordings that named the AI
 assistance: "Park design: Hunger Skateparks. Documentation for the Cincinnati Recreation
-Commission." The Projects blowout prints `model3d.note` under the summary. On stages under 900 px
+Commission." The Projects blowout prints `model3d.credit` and `model3d.note` under the summary, and
+the site plan's caption names Hunger Skateparks as well. On stages under 900 px
 the viewer's exploded view lifts callout 6 on a 7 m longer pin (`liftPins()` in viewer.js) so it
 clears callout 4; the render scripts never call it, so the published stills don't change.
 

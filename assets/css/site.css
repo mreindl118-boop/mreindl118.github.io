@@ -489,10 +489,10 @@ main .rule-motif .ci { border-color: var(--clay); }
 .feature-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 14px; flex-wrap: wrap; }
 /* an h2 on Home: the class sets every font property itself, so only the UA margin needs resetting */
 .feature-title { font-family: var(--sans); font-weight: 700; font-size: 20px; letter-spacing: -.02em; margin: 0; }
-/* Home ends on contact: the address set as a headline (two-thirds), a line and two links beside it */
+/* Home ends on contact: the address as a plain link at the top of the left two-thirds, a line and two links beside it */
 .contact-close { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px 48px; align-items: start; }
 /* a class, not inline styles, so the clay hover applies; sized to its text (not the column) so the
-   link and its focus ring are the address itself; on a 320px screen it breaks before the @ */
+   link and its focus ring are the address itself; overflow-wrap stays as a guard for a longer address */
 .contact-mail { justify-self: start; font-weight: 600; font-size: clamp(19px, 1.9vw, 24px); line-height: 1.3; letter-spacing: -.01em; color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: 4px; overflow-wrap: anywhere; }
 @media (max-width: 640px) { .contact-close { grid-template-columns: minmax(0, 1fr); } }
 
