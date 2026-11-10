@@ -1,5 +1,5 @@
-/* Project detail page: content, drawing-set viewer, master-plan lightbox,
-   and the pdf.js capstone-booklet viewer (Proctor Landing Park). */
+/* Project detail page: content, drawing-set viewer, master-plan lightbox, the on-demand 3D model
+   dialog (CRC's skatepark), and the pdf.js capstone-booklet viewer (Proctor Landing Park). */
 (function () {
   'use strict';
 
@@ -137,6 +137,167 @@
     $('mp-zin').onclick = pz.zoomIn;
     $('mp-zout').onclick = pz.zoomOut;
     $('mp-fit').onclick = pz.fit;
+  }
+
+  /* ---------------- 3D model (on demand) ----------------
+     A project whose JSON has a "model3d" entry shows its poster still and an "Open the 3D model"
+     button. Nothing of three.js or the model loads until that click: the module the entry names
+     is imported then and mounted in the #m3-box dialog, which behaves like the master-plan box
+     (focus moves in, Tab cycles, Escape or Close hands focus back, the page behind stops
+     scrolling), so the canvas can keep every gesture without trapping the page's scroll. While
+     the dialog is closed the viewer stops drawing. Without WebGL 2 the poster stays and says so. */
+  var m3 = { cfg: null, viewer: null, loading: false, opener: null, gl: null, tries: 0 };
+
+  function m3HasWebGL() {
+    if (m3.gl !== null) return m3.gl;
+    var ok = false;
+    try {
+      var gl = document.createElement('canvas').getContext('webgl2');   // three.js r163+ needs WebGL 2
+      if (gl) {
+        ok = true;
+        var lose = gl.getExtension('WEBGL_lose_context');
+        if (lose) lose.loseContext();
+      }
+    } catch (e) { ok = false; }
+    m3.gl = ok;
+    return ok;
+  }
+
+  function m3Status(msg, retry) {
+    $('m3-status').hidden = !msg;
+    $('m3-retry').hidden = !retry;
+    // set the text a frame after the overlay shows, so the status is announced
+    requestAnimationFrame(function () { $('m3-status-text').textContent = msg || ''; });
+  }
+
+  function m3Sync() {
+    var on = !!(m3.viewer && m3.viewer.exploded);
+    $('m3-axon').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('m3-axon').classList.toggle('active', on);
+    $('m3-axon').disabled = $('m3-reset').disabled = !m3.viewer;
+  }
+
+  /* A failed import() is remembered for the page's life, for every file in the module's graph, so
+     the files are fetched first (which also fills the HTTP cache the import then reads): a network
+     failure stops here, where Retry can try again, and import() only runs once they all arrived. */
+  function m3Preflight(url, seen) {
+    if (seen[url]) return Promise.resolve();
+    seen[url] = 1;
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('missing ' + url);
+      return r.text();
+    }).then(function (src) {
+      var deps = [], re = /(?:\bfrom\s*|\bimport\s*)["'](\.{0,2}\/[^"']+)["']/g, m;
+      while ((m = re.exec(src))) deps.push(new URL(m[1], url).href);
+      return Promise.all(deps.map(function (d) { return m3Preflight(d, seen); }));
+    });
+  }
+
+  function m3Load() {
+    if (m3.loading || m3.viewer) return;
+    m3.loading = true;
+    m3Status('Loading the 3D model…');
+    // the poster holds the stage while the model loads (the page already has it)
+    $('m3-stage-poster').src = $('m3-poster-img').currentSrc || $('m3-poster-img').src;
+    $('m3-stage-poster').hidden = false;
+    var url = new URL(m3.cfg.module, location.href).href;
+    if (m3.tries) url += '?retry=' + m3.tries;   // in case an import() itself failed
+    m3Preflight(url, {}).then(function () {
+      return import(url);
+    }).then(function (mod) {
+      return mod.mount($('m3-stage'), {
+        key: $('m3-key'),
+        label: clean(m3.cfg.label) || undefined,
+        describedBy: 'm3-key-title m3-key'
+      });
+    }).then(function (v) {
+      m3.viewer = v;
+      m3.loading = false;
+      $('m3-stage-poster').hidden = true;
+      m3Status('');
+      m3Sync();
+      if ($('m3-box').hidden) v.pause();
+    }, function (e) {
+      m3.loading = false;
+      m3.tries++;
+      console.warn('3D model failed', e && (e.message || e));
+      Array.prototype.forEach.call($('m3-stage').querySelectorAll('.m3-canvas, .m3-hud, .m3-road'), function (n) { n.remove(); });
+      $('m3-key').innerHTML = '';
+      m3Status('The 3D model didn’t load.', true);
+    });
+  }
+
+  function m3Open(e) {
+    if (!m3.viewer && !m3HasWebGL()) {
+      $('m3-msg').textContent = 'The 3D view isn’t available on this device. The still below shows the model.';
+      return;
+    }
+    // the poster is a mouse shortcut; focus comes back to the button, its keyboard twin
+    m3.opener = e && e.currentTarget === $('m3-poster') ? $('m3-open') : document.activeElement;
+    $('m3-box').toggleAttribute('data-instant', !!(e && e.detail === 0));
+    $('m3-box').hidden = false;
+    document.body.style.overflow = 'hidden';
+    $('m3-close').focus();
+    if (m3.viewer) m3.viewer.resume();
+    else m3Load();
+  }
+
+  function m3Close() {
+    if ($('m3-box').hidden) return;
+    $('m3-box').hidden = true;
+    document.body.style.overflow = '';
+    if (m3.viewer) m3.viewer.pause();
+    if (m3.opener && m3.opener.focus) m3.opener.focus();
+  }
+
+  function m3Init(c) {
+    m3.cfg = c;
+    var title = clean(c.title), poster = c.poster || {}, logo = c.logo || {};
+    $('m3-section').hidden = false;
+    $('m3-title').textContent = title;
+    $('m3-sub').textContent = clean(c.subtitle);
+    $('m3-sheet').textContent = clean(c.sheet);
+    $('m3-box-sheet').textContent = clean(c.sheet);
+    $('m3-box-title').textContent = title;
+    var img = $('m3-poster-img');
+    if (+poster.w > 0 && +poster.h > 0) { img.width = +poster.w; img.height = +poster.h; }   // holds its box before it arrives
+    img.alt = clean(poster.alt);
+    img.onerror = function () { US.imgPh(img, 'poster'); };
+    img.src = 'content/projects/' + poster.file;
+    if (logo.file) {
+      $('m3-logo').src = logo.file;
+      if (+logo.w > 0 && +logo.h > 0) { $('m3-logo').width = +logo.w; $('m3-logo').height = +logo.h; }
+      $('m3-logo').hidden = false;
+    }
+    $('m3-credit').textContent = clean(c.credit);
+    $('m3-note').textContent = clean(c.note);
+    $('m3-box-credit').textContent = [clean(c.credit), clean(c.note)].filter(Boolean).join(' ');
+    $('m3-open').onclick = m3Open;
+    $('m3-poster').onclick = m3Open;
+    $('m3-close').onclick = m3Close;
+    $('m3-retry').onclick = m3Load;
+    $('m3-axon').onclick = function (e) {
+      if (!m3.viewer) return;
+      // a keyboard press (click detail 0) changes the view at once, without the lift
+      m3.viewer.setExploded(!m3.viewer.exploded, { instant: e.detail === 0 });
+      m3Sync();
+    };
+    $('m3-reset').onclick = function () { if (m3.viewer) m3.viewer.reset(); };
+    $('m3-box').addEventListener('click', function (e) { if (e.target === $('m3-box')) m3Close(); });
+    document.addEventListener('keydown', function (e) {
+      if ($('m3-box').hidden) return;
+      if (e.key === 'Escape') { m3Close(); return; }
+      if (e.key === 'Tab') {   // Tab cycles the dialog's buttons and the model's canvas
+        var f = Array.prototype.filter.call($('m3-box').querySelectorAll('button, [tabindex="0"]'), function (n) {
+          return !n.disabled && n.getClientRects().length;
+        });
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        else if (!$('m3-box').contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+      }
+    });
   }
 
   /* ---------------- Capstone booklet (pdf.js) ----------------
@@ -591,6 +752,9 @@
       $('p-nav').hidden = false;
     }
 
+    // the 3D model leads the page when the project has one (CRC: the skatepark)
+    if (p.model3d && p.model3d.module && p.model3d.poster) m3Init(p.model3d);
+
     if (p.compare && (p.compare.views || []).length >= 2) cmpInit(p.compare);
 
     if (p.images && p.images.length) {   // the section stays hidden for model-only projects
@@ -601,7 +765,7 @@
     // The figures cut from the boards (the Projects-page blowout's gallery), each at its own size.
     // A file already on this page (drawing set, models, compare views, Proctor's inline master
     // plan) is left out. They lead when the drawing set is one spread or none; otherwise they
-    // follow it, and a lone spread below them is titled for what it is.
+    // follow it, and a lone spread below them is titled for what it is. A 3D model stays first.
     var figs = projectFigures(p);
     if (figs.length) {
       var sec = document.createElement('section');
@@ -621,7 +785,8 @@
             '<figcaption class="fig-cap">' + esc(cap) + '</figcaption></figure>';
         }).join('') + '</div>';
       var nImages = (p.images || []).length;
-      var after = nImages <= 1 ? $('p-meta') : $('dw-section');
+      var lead = $('m3-section').hidden ? $('p-meta') : $('m3-section');
+      var after = nImages <= 1 ? lead : $('dw-section');
       after.parentNode.insertBefore(sec, after.nextSibling);
       if (nImages === 1) {
         $('dw-title').textContent = 'Portfolio spread';

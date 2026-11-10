@@ -370,6 +370,67 @@ main .rule-motif .ci { border-color: var(--clay); }
 .lightbox .vstage { height: auto; flex: 1; }
 .vbtn-close { border-color: var(--ink); background: var(--ink); color: var(--paper); font-size: 16px; }
 
+/* ---------- 3D model (project JSON "model3d"; CRC's skatepark) ---------- */
+/* On the page: the viewer panel holds the poster still; "Open the 3D model" loads the viewer
+   module into the #m3-box dialog (assets/js/skatepark/viewer.js), nothing before. */
+.m3-poster { background: var(--paper); cursor: pointer; }
+.m3-poster img { display: block; width: 100%; height: auto; }
+/* the no-WebGL / failure note: an always-present status line that takes no room while empty */
+.m3-msg { margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.5; }
+.m3-msg:empty { padding: 0; border: 0; }
+.m3-foot { font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.m3-credit { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; }
+.m3-credit img { height: 18px; width: auto; display: block; }
+.m3-note { max-width: 62ch; }
+/* In the dialog: the stage beside the plan key (the key goes under it below 760px) */
+.m3-body { flex: 1; min-height: 0; display: flex; }
+.m3-stage { position: relative; flex: 1; min-width: 0; overflow: hidden; background: var(--paper); }
+.m3-canvas { position: absolute; inset: 0; display: block; touch-action: none; cursor: grab; }
+.m3-canvas:active { cursor: grabbing; }
+.m3-canvas:focus-visible { outline: 2px solid var(--pine); outline-offset: -3px; }
+.m3-stage .voverlay { z-index: 3; }
+.m3-stage-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.m3-key { width: 300px; flex-shrink: 0; overflow-y: auto; padding: 16px 18px; border-left: 1px solid var(--line); background: var(--panel); }
+.m3-key .meta-label { margin: 0; }
+.m3-keylist { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; font-size: 14px; line-height: 1.4; }
+.m3-keylist li { display: flex; gap: 10px; align-items: flex-start; }
+/* the callout badge, as drawn in the model: a pine disc with a paper numeral */
+.m3-badge {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--pine); color: var(--paper);
+  font: 500 11px/22px var(--mono); text-align: center; margin-top: -1px;
+}
+.m3-hint { margin: 18px 0 0; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.5; color: var(--muted); }
+/* north arrow + scale bar (viewer.js keeps them true to the camera), and the street label */
+.m3-hud {
+  position: absolute; left: 12px; bottom: 12px; z-index: 2; display: flex; align-items: flex-end; gap: 14px;
+  padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); pointer-events: none;
+  font: 500 11px/1 var(--mono); letter-spacing: .08em; color: var(--ink);
+}
+.m3-north { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.m3-north svg { display: block; }
+.m3-scale { display: flex; flex-direction: column; gap: 5px; }
+.m3-bar { display: flex; height: 6px; width: 100px; border: 1px solid var(--ink); }
+.m3-bar i { flex: 1; background: var(--ink); }
+.m3-bar i:nth-child(2) { background: var(--paper); }
+.m3-bar i:nth-child(3) { flex: 2; }
+.m3-scale-lab { display: flex; justify-content: space-between; }
+.m3-road {
+  position: absolute; left: 0; top: 0; z-index: 1; display: none; pointer-events: none; white-space: nowrap;
+  font: 500 11px/1 var(--mono); letter-spacing: .24em; text-transform: uppercase; color: var(--ink);
+  /* a paper halo (a stroke under the fill, not a glow) keeps the name legible over trees and roofs */
+  -webkit-text-stroke: 3px var(--paper); paint-order: stroke fill;
+}
+.thumbbtn:disabled, .vbtn:disabled { opacity: .45; cursor: default; }
+@media (max-width: 759px) {
+  /* phones: the panel scrolls (the canvas keeps its gestures; the key and foot scroll it) */
+  .m3-panel { overflow-y: auto; overscroll-behavior: contain; }
+  .m3-panel .vbar { padding: 10px; gap: 8px 6px; }
+  .m3-panel .vgroup { gap: 6px; }
+  .m3-body { flex: none; flex-direction: column; }
+  .m3-stage { flex: none; height: min(60svh, 560px); }
+  .m3-key { width: auto; overflow: visible; border-left: 0; border-top: 1px solid var(--line); }
+}
+
 /* ---------- Footers ---------- */
 .foot { background: var(--ink); color: var(--paper); padding: 44px 32px 28px; }
 .foot-top { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; align-items: flex-end; }

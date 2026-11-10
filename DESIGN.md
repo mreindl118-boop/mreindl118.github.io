@@ -347,6 +347,22 @@ panel, a toolbar of 40px square buttons, a pan-and-zoom stage, a mono page count
   caption links to its project page, with a mono "Project page →" at the right of the foot
   (matched by title prefix against the listed projects); other captions stay plain text.
 
+The 3D model (a project JSON's `model3d`; the CRC page's Camp Washington Skatepark) is the same
+panel on the page: a toolbar with the mono sheet label ("L-2 · 3D site massing") and the primary
+"Open the 3D model" button, the poster still (its `w`/`h` hold the box), and a foot with the credit
+line (the client's logo at 18px) and the model's note. Nothing of three.js (self-hosted,
+`assets/vendor/three-0.184.0/`) or the model loads before that click. The viewer opens in a lightbox
+dialog that behaves like the master-plan box below: the stage beside an HTML plan key (under it below
+760px, where the panel scrolls), and a toolbar of "Exploded axon" (a pressed toggle, `aria-pressed`),
+"Reset view" and Close. The canvas is focusable (a 2px pine ring inside its edge), named, and
+described by the plan key; the arrow keys orbit, + and − zoom, 0 resets, all at once. Callouts are
+pine discs with paper mono numerals, the north arrow and scale bar sit in a panel box at the stage's
+lower left, and the street name is mono ink with a paper halo. The model's own surface colours
+document the as-built park and stay as drawn. Motion: a 4.5s turn into the home view on first open
+and a 700ms exploded lift on the site's ease-out; neither under reduced motion, and a keyboard toggle
+changes the view at once. Without WebGL 2 the poster stays and a status line says the 3D view isn't
+available on this device; a failed load offers Retry.
+
 The Projects page's blowout is the lightbox panel without a stage: it opens on the project's
 first figure, then the mono meta line, a mono link to the full project page (named for what
 that page adds, e.g. "Project page: compare slider + drawings →"), the summary, a "What it

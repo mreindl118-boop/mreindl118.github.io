@@ -45,6 +45,25 @@
   <noscript><div class="load-note" style="margin-top:30px; border-top:1px solid var(--ink); padding-top:16px"><p class="mono-note">Projects didn’t load.</p><div class="load-note-links"><a class="link-mono" href="portfolio.html">Flip through the portfolio book&nbsp;&rarr;</a><a class="link-mono" href="assets/Matthew_Reindl_Portfolio.pdf" download="Matthew_Reindl_Portfolio.pdf">Download PDF&nbsp;&darr; <span style="color:var(--faint); white-space:nowrap">(16&nbsp;MB)</span></a></div></div></noscript>
   <div class="meta-grid" id="p-meta"></div>
 
+  <!-- 3D model: a poster still and an on-demand three.js viewer (project JSON "model3d"; CRC: the skatepark).
+       Nothing of the model loads until "Open the 3D model"; it opens in the #m3-box dialog below. -->
+  <section id="m3-section" hidden aria-labelledby="m3-title">
+    <h2 class="h-head" id="m3-title" style="font-size:26px; margin:48px 0 6px"></h2>
+    <p class="note-sans" id="m3-sub" style="margin:0 0 14px; max-width:70ch"></p>
+    <div class="viewer">
+      <div class="vbar">
+        <span class="vmeta" id="m3-sheet"></span>
+        <button class="btn" id="m3-open" type="button" aria-haspopup="dialog">Open the 3D model</button>
+      </div>
+      <p class="m3-msg" id="m3-msg" role="status"></p>
+      <div class="m3-poster" id="m3-poster" title="Open the 3D model"><img id="m3-poster-img" alt="" decoding="async"></div>
+      <div class="vfoot m3-foot">
+        <span class="m3-credit"><img id="m3-logo" alt="" hidden><span id="m3-credit"></span></span>
+        <span class="m3-note" id="m3-note"></span>
+      </div>
+    </div>
+  </section>
+
   <!-- Compare slider: same-frame views (existing site, concepts) declared as "compare" in the project JSON -->
   <section id="cmp-section" hidden aria-labelledby="cmp-title">
     <h2 class="h-head" id="cmp-title" style="font-size:26px; margin:48px 0 6px"></h2>
@@ -194,6 +213,38 @@
     <div class="vfoot" style="padding:10px 14px">
       <span style="font-size:13.5px">Stitched from booklet pp. 24–25 · overlap aligned automatically</span>
       <span class="vmeta">Composite · 1&quot; = 300'-0&quot;</span>
+    </div>
+  </div>
+</div>
+
+<!-- 3D model dialog (project JSON "model3d"): the viewer module mounts its canvas in #m3-stage -->
+<div class="lightbox" id="m3-box" role="dialog" aria-modal="true" aria-labelledby="m3-box-title" hidden>
+  <div class="lightbox-panel m3-panel">
+    <div class="vbar">
+      <h2 class="lightbox-title" id="m3-box-title"></h2>
+      <div class="vgroup">
+        <button class="thumbbtn" id="m3-axon" type="button" aria-pressed="false" disabled>Exploded axon</button>
+        <button class="thumbbtn" id="m3-reset" type="button" disabled>Reset view</button>
+        <button class="vbtn vbtn-close" id="m3-close" type="button" title="Close" aria-label="Close 3D model"><span aria-hidden="true">✕</span></button>
+      </div>
+    </div>
+    <div class="m3-body">
+      <div class="m3-stage" id="m3-stage">
+        <img class="m3-stage-poster" id="m3-stage-poster" alt="" hidden>
+        <div class="voverlay" id="m3-status" hidden>
+          <span class="note" id="m3-status-text" role="status"></span>
+          <button class="btn" id="m3-retry" type="button" hidden style="min-height:44px">Retry</button>
+        </div>
+      </div>
+      <div class="m3-key">
+        <p class="meta-label" id="m3-key-title">Plan key</p>
+        <ol class="m3-keylist" id="m3-key" role="list"></ol>
+        <p class="m3-hint">Drag to orbit, scroll or pinch to zoom, right-drag or two fingers to pan. On the keyboard, from the model: arrow keys orbit, + and − zoom, 0 resets.</p>
+      </div>
+    </div>
+    <div class="vfoot m3-foot">
+      <span id="m3-box-credit"></span>
+      <span class="vmeta" id="m3-box-sheet"></span>
     </div>
   </div>
 </div>

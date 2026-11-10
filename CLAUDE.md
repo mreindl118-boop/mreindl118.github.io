@@ -177,6 +177,19 @@ and prefetches the next part once that spread is drawn. Update parts.json
 whenever the booklet is re-exported (`pdfinfo` gives the counts); the console
 warns when a part disagrees with it.
 
+The CRC project page leads with the Camp Washington Skatepark 3D model (`model3d` in its JSON:
+title, subtitle, sheet, credit, note, canvas label, poster with `w`/`h`, logo, `module`). project.js
+shows the poster and imports `assets/js/skatepark/viewer.js` only when "Open the 3D model" is
+pressed (it fetches the module graph first, so Retry works after a network failure);
+`plan-geometry.js` and `skatepark-builder.js` beside it are the owner's artifact modules, unchanged
+but for an import path. three.js r184 is self-hosted in `assets/vendor/three-0.184.0/` (npm
+three@0.184.0; the one edit is OrbitControls' import path). Render stills of the model with
+`python3 _drafts/tools/render_skatepark.py OUT.webp` (options in its docstring; it made
+`content/projects/cincinnati-recreation-commission/skatepark-model-poster.webp`). Credit, from the
+owner: Hunger Skateparks designed the park; Matthew documented it for the Cincinnati Recreation
+Commission (L-1 site plan, L-2 3D massing, L-3 exploded axon), so never say or imply he designed it.
+Hunger's concept rendering and the aerial photo in the owner's artifact are never published.
+
 Some served images are derivatives of sources kept in `_drafts/originals/`
 (same paths): Home's hero drawing (`assets/img/hero-central-planting.webp`)
 and the older feature image (`content/projects/proctor-landing-park/feature.webp`,

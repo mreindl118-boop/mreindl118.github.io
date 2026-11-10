@@ -16,6 +16,26 @@
  "hidden": false,
  "sortKey": 80,
  "cover": "cincinnati-recreation-commission/cover.webp",
+ "model3d": {
+  "title": "Camp Washington Skatepark: 3D site massing",
+  "subtitle": "As built, August 2026 · Stock Ave, Camp Washington, Cincinnati",
+  "sheet": "L-2 · 3D site massing",
+  "credit": "Designed by Hunger Skateparks. Documented for the Cincinnati Recreation Commission: L-1 site plan, L-2 3D massing model, L-3 exploded axon.",
+  "note": "Massing from the L-1 plan geometry and Aug 2026 photos; heights and transitions estimated — not for construction.",
+  "label": "3D model of Camp Washington Skatepark on Stock Ave, as built in August 2026. Arrow keys orbit, plus and minus zoom, 0 resets the view.",
+  "poster": {
+   "file": "cincinnati-recreation-commission/skatepark-model-poster.webp",
+   "w": 2000,
+   "h": 1125,
+   "alt": "Still of the 3D massing model: Camp Washington Skatepark's bowls, banks, ledges and street plaza on their block beside Stock Ave, as built in August 2026."
+  },
+  "logo": {
+   "file": "assets/logos/crc-horizontal.png",
+   "w": 549,
+   "h": 54
+  },
+  "module": "assets/js/skatepark/viewer.js"
+ },
  "images": [
   {
    "file": "cincinnati-recreation-commission/pf-10.webp",
