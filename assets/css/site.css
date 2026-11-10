@@ -540,9 +540,17 @@ main .rule-motif .ci { border-color: var(--clay); }
 .p-row > .h-head { font-size: 22px; margin: 0; grid-column: 1; }
 .p-row > p { grid-column: 2; max-width: 64ch; font-size: 16px; line-height: 1.65; margin: 0; text-wrap: pretty; }
 .p-row > .p-row-logos { grid-column: 2; }
+/* a row's figure (a screenshot or drawing, not a board): the right two-thirds, top-aligned with the heading */
+.p-row > .p-row-fig { grid-column: 2; align-self: start; margin: 0; }
+.p-row > p + .p-row-fig { margin-top: 14px; }
+.p-row-fig img {
+  display: block; box-sizing: content-box; max-width: calc(100% - 2px); height: auto;
+  border: 1px solid var(--line); background: #FFF;
+}
+.p-row-fig .fig-cap { max-width: 64ch; text-wrap: pretty; }
 @media (max-width: 640px) {
   .p-row { grid-template-columns: minmax(0, 1fr); }
-  .p-row > .h-head, .p-row > p, .p-row > .p-row-logos { grid-column: 1; }
+  .p-row > .h-head, .p-row > p, .p-row > .p-row-logos, .p-row > .p-row-fig { grid-column: 1; }
 }
 
 /* ---------- Info-list sections (about, skills, contact) ---------- */

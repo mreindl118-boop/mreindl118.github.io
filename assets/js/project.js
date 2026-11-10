@@ -726,13 +726,22 @@
       '<img src="assets/logos/segd.png" alt="SEGD" title="SEGD" style="height:150px; width:auto; display:block; mix-blend-mode:multiply">' +
       '<img src="assets/logos/design-museum-chicago.png" alt="Design Museum of Chicago" title="Design Museum of Chicago" style="height:150px; width:auto; display:block; mix-blend-mode:multiply">' +
       '</div>';
+    // a row's one figure (CRC's Rec Finder still): its w/h hold the box, the caption sits under it
+    function rowFigure(f) {
+      var cap = clean(f.caption), fw = +f.w, fh = +f.h, sized = fw > 0 && fh > 0;
+      return '<figure class="p-row-fig">' +
+        '<img src="content/projects/' + esc(f.file) + '"' + (sized ? ' width="' + fw + '" height="' + fh + '"' : '') +
+        ' alt="' + esc(clean(f.alt) || cap) + '" loading="lazy" decoding="async" onerror="US.imgPh(this,\'figure\')">' +
+        (cap ? '<figcaption class="fig-cap">' + esc(cap) + '</figcaption>' : '') + '</figure>';
+    }
     $('p-sections').innerHTML = (p.sections || []).map(function (s) {
-      var body = clean(s.body);
-      if (!body) return '';
-      // a row: the heading in the left third, the text in the right two-thirds (site.css .p-row)
+      var body = clean(s.body), fig = s.figure && s.figure.file ? s.figure : null;
+      if (!body && !fig) return '';
+      // a row: the heading in the left third, the text (and a figure) in the right two-thirds (site.css .p-row)
       return '<div class="p-row">' +
         '<h2 class="h-head">' + esc(s.heading) + '</h2>' +
-        '<p>' + esc(body) + '</p>' +
+        (body ? '<p>' + esc(body) + '</p>' : '') +
+        (fig ? rowFigure(fig) : '') +
         (/recognition/i.test(s.heading) ? logos : '') +
         '</div>';
     }).join('');

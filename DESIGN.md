@@ -214,7 +214,10 @@ single portfolio spread (which then follows them as "Portfolio spread", without 
 and after the drawing set otherwise. A 3D model (CRC's skatepark) comes straight after the meta
 grid and stays first; on CRC the drawing set follows it, opening on the site plan. Proctor's master plan appears once, as the inline sheet
 under the meta grid. The written sections are rows: the heading (22px) in the left third, the
-text (64ch) in the right two-thirds, each under a 1px line (one column on phones).
+text (64ch) in the right two-thirds, each under a 1px line (one column on phones). A row may carry
+one figure (`sections[].figure`: file, `w`/`h`, alt, caption) in that right column, top-aligned with
+the heading, under the text when there is any: CRC's "Tools and process" row is the Rec Finder still
+alone. Such a figure is not in `gallery`, so it stays out of Drawings and the Projects blowout.
 
 About opens on the name (no kicker) and one 18px ink sentence that says what he is, where, and
 the degree. Its top row and its body share one grid (`auto-fit`, 320px minimum, 56px gap), so

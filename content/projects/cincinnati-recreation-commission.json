@@ -13,6 +13,18 @@
   "ArcGIS Pro [CONFIRM: add the tools behind the skatepark set? e.g. three.js for the 3D model, and whatever drew the L-1 plan]"
  ],
  "summary": "The Camp Washington Skatepark on Stock Ave, documented as built in August 2026 for the Cincinnati Recreation Commission: a site plan, a 3D massing model and an exploded axon. Hunger Skateparks designed the park. The CRC work also covers GIS inventory and analysis across city recreation sites, and planting installation in the field.",
+ "sections": [
+  {
+   "heading": "Tools and process",
+   "figure": {
+    "file": "cincinnati-recreation-commission/rec-finder.webp",
+    "w": 1800,
+    "h": 1288,
+    "alt": "Screenshot of the Rec Finder map: Cincinnati's city limits with CRC's properties marked as icons, rec centers in red, beside a panel of search and amenity filters",
+    "caption": "Rec Finder: a citywide map of CRC's 131 properties that I conceived and directed for CRC, built with AI assistance from CRC's inventory and City GIS data. A prototype, not an official CRC product. [CONFIRM: CRC's written permission to show it] [CONFIRM: the role wording \"conceived and directed\", and first person here while the other captions avoid it] [CONFIRM: the map also draws U.S. Census TIGER/Line roads and water and TPL ParkServe park boundaries; name them too?]"
+   }
+  }
+ ],
  "hidden": false,
  "sortKey": 80,
  "cover": "cincinnati-recreation-commission/cover.webp",
