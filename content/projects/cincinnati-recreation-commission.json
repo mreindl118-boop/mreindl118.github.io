@@ -6,7 +6,7 @@
  "year": 2025,
  "yearLabel": "2025 · ongoing",
  "type": "Professional",
- "scale": "Skatepark + citywide sites",
+ "scale": "Skatepark documentation + citywide sites",
  "role": "Public-space design support — skatepark documentation, GIS inventory, planting [CONFIRM: role wording for the skatepark documentation, and the exact job title]",
  "collaborators": "Cincinnati Recreation Commission",
  "software": [
@@ -53,7 +53,7 @@
    "file": "cincinnati-recreation-commission/g-cw-plan.webp",
    "w": 2400,
    "h": 1600,
-   "caption": "Site plan (L-1), as built August 2026, with the plan key; north is to the left",
+   "caption": "Site plan (L-1), as built August 2026, with the plan key; park design by Hunger Skateparks; north is to the left",
    "drawing_type": "Site plan",
    "scale": "Graphic scale",
    "software": ""
@@ -82,7 +82,7 @@
    "file": "cincinnati-recreation-commission/g-cw-plan.webp",
    "w": 2400,
    "h": 1600,
-   "caption": "Site plan (L-1), as built August 2026, with the plan key; north is to the left"
+   "caption": "Site plan (L-1), as built August 2026, with the plan key; park design by Hunger Skateparks; north is to the left"
   },
   {
    "file": "cincinnati-recreation-commission/g-cw-exploded.webp",
@@ -124,7 +124,7 @@
    "file": "cincinnati-recreation-commission/g-ryan-shelter.webp",
    "w": 2400,
    "h": 1553,
-   "caption": "Planting plan enlargement: the beds around the shelter and its entry walk, each plant with its code from the CAD; the installed bed in the next photo is one of them [CONFIRM: the photo shows the bed west of the shelter's entry walk] [CONFIRM: north arrow assumes CAD +Y is grid north; \"entry walk\" is Claude's name for the shelter's north walk]"
+   "caption": "Planting plan enlargement: the beds around the shelter and its entry walk, each plant with its code from the CAD [CONFIRM: if the installed bed in the next photo is the bed west of the shelter's entry walk, add back: '; the installed bed in the next photo is one of them'] [CONFIRM: north arrow assumes CAD +Y is grid north; \"entry walk\" is Claude's name for the shelter's north walk]"
   },
   {
    "file": "cincinnati-recreation-commission/g-h19_p1.webp",

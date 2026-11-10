@@ -25,7 +25,7 @@ extension below 2200.
 
 Credit, from the owner: Hunger Skateparks designed the park; Matthew documented it for the Cincinnati
 Recreation Commission (L-1 site plan, L-2 3D massing, L-3 exploded axon). Nothing here says or implies
-he designed it. Feature 7 is "Coney gap" (the nickname is unsettled: "Glizzy" in the viewer, "Glitzy"
+he designed it. Feature 7 is "Coney gap" everywhere (the nickname is unsettled: "Glizzy" in the owner's notes, "Glitzy"
 on the L-1 sheet). Hunger's rendering, the aerial photo and the August 2026 site photos are never used.
 
 Inputs

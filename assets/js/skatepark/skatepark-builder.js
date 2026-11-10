@@ -470,7 +470,7 @@ export function buildSkatepark(THREE) {
     [.1, .5, .9].forEach((t, j) => { const p = curve.getPoint(t); add(new THREE.CylinderGeometry(.022, .022, .45, 12), M.steel, 'snake_rail_post_' + (j + 1), [p.x, TOP + .225, p.z]); }); }
   { const [x1, y1, x2, y2] = PLAN.log; bar(x1, y1, x2, y2, TOP + .18, .18, M.wood, 'log_ledge'); }
 
-  // 7 — Coney "Glizzy Gap" spine: launch kicker, coney, landing bank
+  // 7 — Coney gap spine: launch kicker, coney, landing bank
   feat('F7', 7, labelOf(7), 3);
   { const sp = PLAN.spine; const g7 = new THREE.Group(); g7.name = 'coney_glizzy_gap'; g7.position.set(X(sp.cx), 0, Z(sp.cy)); g7.rotation.y = -sp.rot * Math.PI / 180; cur.add(g7);
     const lx = x => (x - sp.cx) * S, lz = y => (y - sp.cy) * S;
